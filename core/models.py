@@ -56,3 +56,26 @@ class Product(models.Model):
                 counter += 1
             self.slug = slug
         super().save(*args, **kwargs)
+
+class TeamMember(models.Model):
+    name = models.CharField(max_length=100)
+    role = models.CharField(max_length=100)
+    image = models.ImageField(upload_to='team/')
+    facebook = models.URLField(blank=True)
+    twitter = models.URLField(blank=True)
+    instagram = models.URLField(blank=True)
+    youtube = models.URLField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Testimonial(models.Model):
+    author_name = models.CharField(max_length=100)
+    author_location = models.CharField(max_length=100)
+    author_image = models.ImageField(upload_to='testimonial/')
+    rating = models.FloatField(default=5)  # e.g. 1 to 5 stars
+    comment = models.TextField()
+
+    def __str__(self):
+        return f"{self.author_name} from {self.author_location}"

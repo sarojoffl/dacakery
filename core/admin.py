@@ -1,8 +1,10 @@
 from django.contrib import admin
-from .models import Slider, Category, Product, AboutSection
+from .models import Slider, Category, Product, AboutSection, TeamMember, Testimonial
 
 # Register your models here.
 admin.site.register(Slider)
 admin.site.register(Category)
 admin.site.register(Product)
 admin.site.register(AboutSection)
+admin.site.register(TeamMember)
+admin.site.register(Testimonial)
