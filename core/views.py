@@ -20,3 +20,13 @@ def home(request):
         'instagram_section': instagram_section,
         'map_location': map_location,
     })
+
+def about(request):
+    about = AboutSection.objects.first()
+    team_members = TeamMember.objects.all()
+    testimonials = Testimonial.objects.all()
+    return render(request, 'about.html', {
+        'about': about,
+        'team_members': team_members,
+        'testimonials': testimonials,
+    })
