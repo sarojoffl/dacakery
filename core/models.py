@@ -79,3 +79,28 @@ class Testimonial(models.Model):
 
     def __str__(self):
         return f"{self.author_name} from {self.author_location}"
+    
+class InstagramSection(models.Model):
+    heading = models.CharField(max_length=100)
+    subheading = models.CharField(max_length=255)
+    instagram_handle = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.instagram_handle
+
+class InstagramImage(models.Model):
+    section = models.ForeignKey(InstagramSection, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='instagram/')
+
+    def __str__(self):
+        return f"Image for {self.section.instagram_handle}"
+
+class MapLocation(models.Model):
+    title = models.CharField(max_length=100)
+    address = models.TextField()
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    map_iframe = models.TextField()
+
+    def __str__(self):
+        return self.title
