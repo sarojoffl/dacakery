@@ -1,10 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Da Cakery</title>
-</head>
-<body>
-    <h1>Welcome to Da Cakery 🎂</h1>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Da Cakery - Home{% endblock %}
+
+{% block content %}
+  <!-- Hero Section Begin -->
+<section class="hero">
+    <div class="hero__slider owl-carousel">
+        {% for slider in sliders %}
+        <div class="hero__item set-bg" data-setbg="{{ slider.image.url }}">
+            <div class="container">
+                <div class="row d-flex justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="hero__text">
+                            <h2>{{ slider.title }}</h2>
+                            <a href="#" class="primary-btn">{{ slider.button_text }}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+<!-- Hero Section End -->
+
+<!-- About Section Begin -->
+<section class="about spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 col-md-6">
+                <div class="about__text">
+                    <div class="section-title">
+                        <span>{{ about.title }}</span>
+                        <h2>{{ about.heading }}</h2>
+                    </div>
+                    <p>{{ about.description }}</p>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6">
+                <!-- You can optionally add an image or leave this area empty -->
+            </div>
+        </div>
+    </div>
+</section>
+<!-- About Section End -->
+
+<!-- Categories Section Begin -->
+<div class="categories">
+    <div class="container">
+        <div class="row">
+            <div class="categories__slider owl-carousel">
+                {% for category in categories %}
+                <div class="categories__item">
+                    <div class="categories__item__icon">
+                        <span class="{{ category.icon_class }}"></span>
+                        <h5>{{ category.name }}</h5>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Categories Section End -->
+
+<!-- Product Section Begin -->
+<section class="product spad">
+    <div class="container">
+        <div class="row">
+            {% for product in products %}
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="product__item">
+                    <div class="product__item__pic set-bg" data-setbg="{{ product.image.url }}">
+                        <div class="product__label">
+                            <span>{{ product.category.name }}</span>
+                        </div>
+                    </div>
+                    <div class="product__item__text">
+                        <h6><a href="#">{{ product.name }}</a></h6>
+                        <div class="product__item__price">रु {{ product.price }}</div>
+                        <div class="cart_add">
+                            <a href="#">Add to cart</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<!-- Product Section End -->
+{% endblock %}
