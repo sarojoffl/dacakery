@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Da Cakery - Shop{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb Begin -->
+<div class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                <div class="breadcrumb__text">
+                    <h2>Shop</h2>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                <div class="breadcrumb__links">
+                    <a href="{% url 'home' %}">Home</a>
+                    <span>Shop</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Breadcrumb End -->
+
+<!-- Shop Section Begin -->
+<section class="shop spad">
+    <div class="container">
+
+        <!-- FILTERS -->
+        <div class="shop__option">
+            <div class="row">
+                <div class="col-lg-7 col-md-7">
+                    <div class="shop__option__search">
+                        <form method="get" id="filterForm">
+                            <select name="category" onchange="document.getElementById('filterForm').submit()">
+                                <option value="">Categories</option>
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <input type="text" name="search" placeholder="Search" value="{{ request.GET.search }}">
+                            <button type="submit"><i class="fa fa-search"></i></button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-5 col-md-5">
+                    <div class="shop__option__right">
+                        <select name="sort" form="filterForm" onchange="document.getElementById('filterForm').submit()">
+                            <option value="">Default sorting</option>
+                            <option value="a_to_z" {% if request.GET.sort == "a_to_z" %}selected{% endif %}>A to Z</option>
+                            <option value="price_low_high" {% if request.GET.sort == "price_low_high" %}selected{% endif %}>Price: Low to High</option>
+                            <option value="price_high_low" {% if request.GET.sort == "price_high_low" %}selected{% endif %}>Price: High to Low</option>
+                        </select>
+                        <a href="#"><i class="fa fa-list"></i></a>
+                        <a href="#"><i class="fa fa-reorder"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRODUCT GRID -->
+        <div class="row mt-4">
+            {% for product in products %}
+                <div class="col-lg-3 col-md-6 col-sm-6">
+                    <div class="product__item">
+                        <div class="product__item__pic set-bg" data-setbg="{{ product.image.url }}">
+                            <div class="product__label">
+                                <span>{{ product.category.name }}</span>
+                            </div>
+                        </div>
+                        <div class="product__item__text">
+                            <h6><a href="{% url 'product_detail' product.slug %}">{{ product.name }}</a></h6>
+                            <div class="product__item__price">रु {{ product.price }}</div>
+                            <div class="cart_add">
+                                <a href="#">Add to cart</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p>No products found.</p>
+            {% endfor %}
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="shop__last__option mt-5">
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <div class="shop__pagination">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">&lt;</a>
+                        {% endif %}
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <a class="active" href="?page={{ num }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">{{ num }}</a>
+                            {% else %}
+                                <a href="?page={{ num }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">&gt;</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <div class="shop__last__text">
+                        <p>Showing {{ products.start_index }} - {{ products.end_index }} of {{ total_results }} results</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
