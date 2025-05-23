@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.utils.text import slugify
 
 class Slider(models.Model):
@@ -46,6 +47,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=255)
     description = models.TextField()
+    in_stock = models.BooleanField(default=True)
     tags = models.CharField(max_length=255, blank=True)
     price = models.DecimalField(max_digits=8, decimal_places=2)
     image = models.ImageField(upload_to='products/')
@@ -131,3 +133,8 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f"Message from {self.name}"
+
+class WishlistItem(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    added_at = models.DateTimeField(auto_now_add=True)

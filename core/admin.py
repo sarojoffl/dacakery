@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import (
     Slider, Category, Product, AboutSection, TeamMember, Testimonial,
-    InstagramSection, InstagramImage, MapLocation, ContactDetail, ContactMessage
+    InstagramSection, InstagramImage, MapLocation, ContactDetail, ContactMessage,
+    WishlistItem
 )
 
 # Register your models here.
@@ -24,3 +25,4 @@ admin.site.register(InstagramSection, InstagramSectionAdmin)
 admin.site.register(MapLocation)
 admin.site.register(ContactDetail)
 admin.site.register(ContactMessage)
+admin.site.register(WishlistItem)

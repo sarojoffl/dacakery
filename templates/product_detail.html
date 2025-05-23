@@ -53,7 +53,16 @@
                             </div>
                         </div>
                         <a href="#" class="primary-btn">Add to cart</a>
-                        <a href="#" class="heart__btn"><span class="icon_heart_alt"></span></a>
+                        {% if user.is_authenticated %}
+                    <a href="{% url 'add_to_wishlist' product.slug %}" class="heart__btn" title="Add to Wishlist">
+                        <span class="icon_heart_alt"></span>
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="heart__btn" title="Login to use Wishlist">
+                        <span class="icon_heart_alt"></span>
+                    </a>
+                {% endif %}
+
                     </div>
                 </div>
             </div>

@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import (
     Slider, Category, Product, AboutSection, TeamMember, Testimonial,
-    InstagramSection, MapLocation, ContactDetail
+    InstagramSection, MapLocation, ContactDetail, WishlistItem
 )
 from .forms import ContactForm
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 def home(request):
     sliders = Slider.objects.all()
@@ -95,3 +96,29 @@ def product_detail(request, slug):
         'product': product,
         'related_products': related_products
     })
+
+@login_required
+def wishlist(request):
+    wishlist_items = WishlistItem.objects.filter(user=request.user)
+    return render(request, 'wishlist.html', {'wishlist_items': wishlist_items})
+
+@login_required
+def add_to_wishlist(request, slug):
+    product = get_object_or_404(Product, slug=slug)
+    wishlist_item, created = WishlistItem.objects.get_or_create(user=request.user, product=product)
+    if created:
+        messages.success(request, f'{product.name} has been added to your wishlist.')
+    else:
+        messages.info(request, f'{product.name} is already in your wishlist.')
+    return redirect('wishlist')
+
+@login_required
+def remove_from_wishlist(request, slug):
+    product = get_object_or_404(Product, slug=slug)
+    try:
+        wishlist_item = WishlistItem.objects.get(user=request.user, product=product)
+        wishlist_item.delete()
+        messages.success(request, f'{product.name} has been removed from your wishlist.')
+    except WishlistItem.DoesNotExist:
+        messages.error(request, f'{product.name} is not in your wishlist.')
+    return redirect('wishlist')
