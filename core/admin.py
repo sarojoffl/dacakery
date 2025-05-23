@@ -1,5 +1,8 @@
 from django.contrib import admin
-from .models import Slider, Category, Product, AboutSection, TeamMember, Testimonial, InstagramSection, InstagramImage, MapLocation
+from .models import (
+    Slider, Category, Product, AboutSection, TeamMember, Testimonial,
+    InstagramSection, InstagramImage, MapLocation, ContactDetail, ContactMessage
+)
 
 # Register your models here.
 admin.site.register(Slider)
@@ -8,6 +11,7 @@ admin.site.register(Product)
 admin.site.register(AboutSection)
 admin.site.register(TeamMember)
 admin.site.register(Testimonial)
+
 
 class InstagramImageInline(admin.TabularInline):
     model = InstagramImage
@@ -18,3 +22,5 @@ class InstagramSectionAdmin(admin.ModelAdmin):
 
 admin.site.register(InstagramSection, InstagramSectionAdmin)
 admin.site.register(MapLocation)
+admin.site.register(ContactDetail)
+admin.site.register(ContactMessage)

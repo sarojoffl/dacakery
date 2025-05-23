@@ -2,6 +2,7 @@
 <section class="about spad">
   <div class="container">
     <div class="row">
+      <!-- Text Content -->
       <div class="col-lg-6 col-md-6">
         <div class="about__text">
           <div class="section-title">
@@ -11,8 +12,27 @@
           <p>{{ about.description }}</p>
         </div>
       </div>
+
+      <!-- Animated Counters -->
       <div class="col-lg-6 col-md-6">
-        <!-- Optional image section -->
+        <div class="row text-center">
+          <div class="col-6 mb-4">
+            <h2 class="counter" data-target="{{ about.cakes_baked }}"><span class="count-num">0</span>+</h2>
+            <p>Cakes Baked</p>
+          </div>
+          <div class="col-6 mb-4">
+            <h2 class="counter" data-target="{{ about.happy_customers }}"><span class="count-num">0</span>+</h2>
+            <p>Happy Clients</p>
+          </div>
+          <div class="col-6">
+            <h2 class="counter" data-target="{{ about.years_of_baking }}"><span class="count-num">0</span>+</h2>
+            <p>Years of Experience</p>
+          </div>
+          <div class="col-6">
+            <h2 class="counter" data-target="{{ about.cakes_delivered }}"><span class="count-num">0</span>+</h2>
+            <p>Cakes Delivered</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>

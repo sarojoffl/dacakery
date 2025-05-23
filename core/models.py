@@ -10,12 +10,18 @@ class Slider(models.Model):
         return self.title
     
 class AboutSection(models.Model):
-    title = models.CharField(max_length=255, default="About Cake shop")
+    title = models.CharField(max_length=255, default="About Cake Shop")
     heading = models.CharField(max_length=255, default="Cakes and bakes from the house of Queens!")
     description = models.TextField()
 
+    cakes_baked = models.PositiveIntegerField(default=0)
+    cakes_delivered = models.PositiveIntegerField(default=0)
+    happy_customers = models.PositiveIntegerField(default=0)
+    years_of_baking = models.PositiveIntegerField(default=0)
+
     def __str__(self):
         return self.title
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -104,3 +110,22 @@ class MapLocation(models.Model):
 
     def __str__(self):
         return self.title
+    
+class ContactDetail(models.Model):
+    title = models.CharField(max_length=100, default="Contact With us")
+    availability_note = models.CharField(max_length=255, default="Representatives or Advisors are available:")
+    weekday_hours = models.CharField(max_length=100, default="Mon-Fri: 5:00am to 9:00pm")
+    weekend_hours = models.CharField(max_length=100, default="Sat-Sun: 6:00am to 9:00pm")
+    image = models.ImageField(upload_to='contact/', null=True, blank=True)
+
+    def __str__(self):
+        return self.title
+
+class ContactMessage(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    message = models.TextField()
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Message from {self.name}"
