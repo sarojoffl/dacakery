@@ -45,6 +45,15 @@
                         <li>SKU: <span>{{ product.id }}</span></li>
                         <li>Category: <span>{{ product.category.name }}</span></li>
                         <li>Tags: <span>{{ product.tags }}</span></li>
+                        <li>Stock: 
+                            <span>
+                                {% if product.in_stock %}
+                                    In stock
+                                {% else %}
+                                    Out of stock
+                                {% endif %}
+                            </span>
+                        </li>
                     </ul>
                     <div class="product__details__option">
                         <div class="quantity">
