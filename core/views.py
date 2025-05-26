@@ -7,7 +7,31 @@ from .forms import ContactForm
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib import messages
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
+
+def user_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('home')
+        else:
+            messages.error(request, 'Invalid username or password.')
+
+    return render(request, 'login.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('home')
+
+@login_required
+def profile(request):
+    return render(request, 'profile.html')
 
 def home(request):
     sliders = Slider.objects.all()
@@ -122,3 +146,79 @@ def remove_from_wishlist(request, slug):
     except WishlistItem.DoesNotExist:
         messages.error(request, f'{product.name} is not in your wishlist.')
     return redirect('wishlist')
+
+def cart(request):
+    cart = request.session.get('cart', {})
+    products = Product.objects.filter(id__in=cart.keys())
+    
+    cart_items = []
+    total = 0
+
+    for product in products:
+        quantity = cart[str(product.id)]
+        subtotal = product.price * quantity
+        total += subtotal
+        cart_items.append({
+            'product': product,
+            'quantity': quantity,
+            'subtotal': subtotal
+        })
+
+    return render(request, 'shoping_cart.html', {
+        'cart_items': cart_items,
+        'total': total,
+    })
+
+def add_to_cart(request, slug):
+    if request.method == "POST":
+        product = get_object_or_404(Product, slug=slug)
+        cart = request.session.get('cart', {})
+
+        product_id = str(product.id)
+        quantity = int(request.POST.get('quantity', 1))
+
+        if product_id in cart:
+            cart[product_id] += quantity
+        else:
+            cart[product_id] = quantity
+
+        request.session['cart'] = cart
+        messages.success(request, f"{product.name} added to cart!")
+        return redirect('cart')
+    else:
+        return redirect('product_detail', slug=slug)
+
+def update_cart(request):
+    if request.method == 'POST':
+        cart = request.session.get('cart', {})
+
+        # Loop through POST data and update quantities
+        for key, value in request.POST.items():
+            if key.startswith('quantity_'):
+                try:
+                    product_id = key.split('_')[1]
+                    quantity = int(value)
+                    if quantity < 1:
+                        continue
+                    if product_id in cart:
+                        cart[product_id] = quantity
+                except (ValueError, IndexError):
+                    continue
+
+        request.session['cart'] = cart
+        messages.success(request, 'Cart updated successfully.')
+
+    return redirect('cart')
+
+def remove_from_cart(request, product_id):
+    cart = request.session.get('cart', {})
+    cart.pop(str(product_id), None)
+    request.session['cart'] = cart
+    return redirect('cart')
+
+def apply_coupon(request):
+    if request.method == 'POST':
+        code = request.POST.get('coupon_code')
+        # You can implement real coupon logic here
+        messages.info(request, f'Coupon "{code}" applied!')
+    return redirect('cart')

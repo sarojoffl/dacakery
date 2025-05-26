@@ -72,7 +72,10 @@
                             <h6><a href="{% url 'product_detail' product.slug %}">{{ product.name }}</a></h6>
                             <div class="product__item__price">रु {{ product.price }}</div>
                             <div class="cart_add">
-                                <a href="#">Add to cart</a>
+                                <form method="post" action="{% url 'add_to_cart' product.slug %}">
+                                    {% csrf_token %}
+                                    <button type="submit">Add to Cart</button>
+                                </form>
                             </div>
                         </div>
                     </div>

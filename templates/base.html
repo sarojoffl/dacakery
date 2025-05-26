@@ -44,7 +44,7 @@
                 <a href="#"><img src="{% static 'img/icon/heart.png' %}" alt=""></a>
             </div>
             <div class="offcanvas__cart__item">
-                <a href="#"><img src="{% static 'img/icon/cart.png' %}" alt=""> <span>0</span></a>
+                <a href="#"><img src="{% static 'img/icon/cart.png' %}" alt=""> <span>{{ request.session.cart|length|default:0 }}</span></a>
                 <div class="cart__price">Cart: <span>$0.00</span></div>
             </div>
         </div>
@@ -54,7 +54,12 @@
         <div id="mobile-menu-wrap"></div>
         <div class="offcanvas__option">
             <ul>
-                <li><a href="#">Sign in</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'logout' %}">Logout</a></li>
+                    <li><a href="{% url 'profile' %}">Profile</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Sign in</a></li>
+                {% endif %}
             </ul>
         </div>
     </div>
@@ -69,7 +74,12 @@
                         <div class="header__top__inner">
                             <div class="header__top__left">
                                 <ul>
-                                    <li><a href="#">Sign in</a> <span class="arrow_carrot-down"></span></li>
+                                    {% if user.is_authenticated %}
+                                        <li><a href="{% url 'logout' %}">Logout</a></li>
+                                        <li><a href="{% url 'profile' %}">Profile</a></li>
+                                    {% else %}
+                                        <li><a href="{% url 'login' %}">Sign in</a></li>
+                                    {% endif %}
                                 </ul>
                             </div>
                             <div class="header__logo">
@@ -81,7 +91,7 @@
                                     <a href="{% url 'wishlist' %}"><img src="{% static 'img/icon/heart.png' %}" alt=""></a>
                                 </div>
                                 <div class="header__top__right__cart">
-                                    <a href="#"><img src="{% static 'img/icon/cart.png' %}" alt=""> <span>0</span></a>
+                                    <a href="{% url 'cart' %}"><img src="{% static 'img/icon/cart.png' %}" alt=""> <span>{{ request.session.cart|length|default:0 }}</span></a>
                                     <div class="cart__price">Cart: <span>$0.00</span></div>
                                 </div>
                             </div>
