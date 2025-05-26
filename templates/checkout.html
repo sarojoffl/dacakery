@@ -148,8 +148,8 @@
                             <ul class="checkout__total__all">
                                 <li>Subtotal <span>रु {{ total|floatformat:2 }}</span></li>
 
-                                {% if discount_amount > 0 %}
-                                    <li>Discount ({{ coupon_code }}) <span>- रु {{ discount_amount|floatformat:2 }}</span></li>
+                                {% if discount_percent %}
+                                    <li><strong>Discount ({{ discount_percent }}%) <span>- रु {{ discount_amount|floatformat:2 }}</span></li>
                                 {% endif %}
 
                                 <li><strong>Total</strong> <span><strong>रु {{ final_total|floatformat:2 }}</strong></span></li>

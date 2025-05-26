@@ -109,8 +109,8 @@
                     <h6>Cart total</h6>
                     <ul>
                         <li>Subtotal <span>रु {{ total }}</span></li>
-                        {% if discount %}
-                            <li>Discount ({{ coupon_code }}) <span>-रु {{ discount }}</span></li>
+                        {% if discount_percent %}
+                            <li><strong>Discount ({{ discount_percent }}%) <span>-रु {{ discount }}</span></li>
                         {% endif %}
                         <li>Total <span>रु {{ discounted_total }}</span></li>
                     </ul>

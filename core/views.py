@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
-from decimal import Decimal
+from decimal import Decimal, ROUND_DOWN
 
 def user_login(request):
     if request.method == 'POST':
@@ -168,13 +168,17 @@ def cart(request):
         })
 
     coupon_data = request.session.get('coupon')
-    discount = coupon_data['discount'] if coupon_data else 0
-    discounted_total = total - Decimal(str(discount))
+    discount_percent = Decimal(str(coupon_data['discount'])) if coupon_data else Decimal('0.0')
+    discount_percent = min(discount_percent, Decimal('100.0'))  # Cap at 100%
+
+    discount = (total * discount_percent) / Decimal('100.0')
+    discounted_total = total - discount
 
     return render(request, 'shoping_cart.html', {
         'cart_items': cart_items,
         'total': total,
         'discount': discount,
+        'discount_percent': discount_percent,
         'discounted_total': discounted_total,
         'coupon_code': coupon_data['code'] if coupon_data else '',
     })
@@ -251,11 +255,11 @@ def apply_coupon(request):
 def checkout(request):
     cart = request.session.get('cart', {})
 
-    # Get discount data from session (if any)
-    discount_data = request.session.get('coupon')
-    discount_amount = discount_data['discount'] if discount_data else 0
-    coupon_code = discount_data['code'] if discount_data else ''
-    
+    coupon_data = request.session.get('coupon', None)
+    discount_percent = Decimal(str(coupon_data['discount'])) if coupon_data else Decimal('0.0')
+    discount_percent = min(discount_percent, Decimal('100.0'))
+    coupon_code = coupon_data['code'] if coupon_data else ''
+
     if request.method == 'POST':
         if not cart:
             messages.error(request, "Your cart is empty. Please add items before checking out.")
@@ -302,6 +306,7 @@ def checkout(request):
             product = Product.objects.get(id=product_id)
             total += product.price * quantity
 
+        discount_amount = (total * discount_percent) / Decimal('100.0')
         final_total = total - discount_amount
 
         # Create Order
@@ -336,7 +341,7 @@ def checkout(request):
 
         # Clear cart and discount session
         request.session['cart'] = {}
-        request.session.pop('discount', None)
+        request.session.pop('coupon', None)  # fixed from 'discount' to 'coupon'
 
         return redirect('order_success', order_id=order.id)
 
@@ -353,13 +358,15 @@ def checkout(request):
         })
         total += subtotal
 
-        discount_amount = Decimal(str(discount_amount))
-        final_total = total - discount_amount
+    discount_amount = (total * discount_percent) / Decimal('100.0')
+    final_total = total - discount_amount
 
     return render(request, 'checkout.html', {
         'cart_items': cart_items,
+        'total': total,
         'final_total': final_total,
         'discount_amount': discount_amount,
+        'discount_percent': discount_percent,
         'coupon_code': coupon_code,
     })
 
