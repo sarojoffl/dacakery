@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Order Successful - Da Cakery{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-lg p-4 border-0 rounded-4 text-center">
+        <div class="card-body">
+            <img src="{% static 'img/success.svg' %}" alt="Success" style="width: 100px; margin-bottom: 20px;">
+            <h2 class="text-success fw-bold mb-3">Thank You for Your Order!</h2>
+            <p class="lead text-muted">Your delicious delights are on their way!</p>
+
+            {% if order %}
+            <div class="mt-4">
+                <h4 class="text-primary">Order Summary</h4>
+                <ul class="list-group list-group-flush my-3 text-start mx-auto" style="max-width: 400px;">
+                    <li class="list-group-item d-flex justify-content-between"><strong>Order ID:</strong> <span>#{{ order.id }}</span></li>
+                    <li class="list-group-item d-flex justify-content-between"><strong>Name:</strong> <span>{{ order.first_name }} {{ order.last_name }}</span></li>
+                    <li class="list-group-item d-flex justify-content-between"><strong>Total:</strong> <span>रु {{ order.total_amount }}</span></li>
+                    <li class="list-group-item d-flex justify-content-between"><strong>Payment Method:</strong> <span>{{ order.payment_method|default:"Cash on Delivery" }}</span></li>
+                </ul>
+            </div>
+            {% endif %}
+
+            <a href="{% url 'home' %}" class="btn btn-primary mt-4 px-4 py-2 rounded-pill">Continue Shopping</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

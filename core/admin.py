@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Slider, Category, Product, AboutSection, TeamMember, Testimonial,
     InstagramSection, InstagramImage, MapLocation, ContactDetail, ContactMessage,
-    WishlistItem
+    WishlistItem, Order, OrderItem
 )
 
 # Register your models here.
@@ -26,3 +26,16 @@ admin.site.register(MapLocation)
 admin.site.register(ContactDetail)
 admin.site.register(ContactMessage)
 admin.site.register(WishlistItem)
+
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 1
+
+class OrderAdmin(admin.ModelAdmin):
+    inlines = [OrderItemInline]
+    list_display = ('id', 'user', 'created_at')  # removed 'status'
+    list_filter = ()  # removed 'status'
+    search_fields = ('user__username', 'id')
+
+admin.site.register(Order, OrderAdmin)
+

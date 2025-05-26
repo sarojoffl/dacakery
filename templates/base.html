@@ -41,11 +41,11 @@
         <div class="offcanvas__cart">
             <div class="offcanvas__cart__links">
                 <a href="#" class="search-switch"><img src="{% static 'img/icon/search.png' %}" alt=""></a>
-                <a href="#"><img src="{% static 'img/icon/heart.png' %}" alt=""></a>
+                <a href="{% url 'wishlist' %}"><img src="{% static 'img/icon/heart.png' %}" alt=""></a>
             </div>
             <div class="offcanvas__cart__item">
-                <a href="#"><img src="{% static 'img/icon/cart.png' %}" alt=""> <span>{{ request.session.cart|length|default:0 }}</span></a>
-                <div class="cart__price">Cart: <span>$0.00</span></div>
+                <a href="{% url 'cart' %}"><img src="{% static 'img/icon/cart.png' %}" alt=""> <span>{{ cart_item_count|default:0 }}</span></a>
+                <div class="cart__price">Cart: <span>रु {{ cart_total|default:"0.00" }}</span></div>
             </div>
         </div>
         <div class="offcanvas__logo">
@@ -91,8 +91,8 @@
                                     <a href="{% url 'wishlist' %}"><img src="{% static 'img/icon/heart.png' %}" alt=""></a>
                                 </div>
                                 <div class="header__top__right__cart">
-                                    <a href="{% url 'cart' %}"><img src="{% static 'img/icon/cart.png' %}" alt=""> <span>{{ request.session.cart|length|default:0 }}</span></a>
-                                    <div class="cart__price">Cart: <span>$0.00</span></div>
+                                    <a href="{% url 'cart' %}"><img src="{% static 'img/icon/cart.png' %}" alt=""> <span>{{ cart_item_count|default:0 }}</span></a>
+                                    <div class="cart__price">Cart: <span>रु {{ cart_total|default:"0.00" }}</span></div>
                                 </div>
                             </div>
                         </div>

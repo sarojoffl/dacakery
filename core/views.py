@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import (
     Slider, Category, Product, AboutSection, TeamMember, Testimonial,
-    InstagramSection, MapLocation, ContactDetail, WishlistItem
+    InstagramSection, MapLocation, ContactDetail, WishlistItem, Order, OrderItem
 )
 from .forms import ContactForm
 from django.core.paginator import Paginator
@@ -10,6 +10,8 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 
 def user_login(request):
     if request.method == 'POST':
@@ -222,3 +224,107 @@ def apply_coupon(request):
         # You can implement real coupon logic here
         messages.info(request, f'Coupon "{code}" applied!')
     return redirect('cart')
+
+def checkout(request):
+    cart = request.session.get('cart', {})
+
+    if request.method == 'POST':
+        if not cart:
+            messages.error(request, "Your cart is empty. Please add items before checking out.")
+            return redirect('cart')  # or 'checkout'
+
+        user = request.user if request.user.is_authenticated else None
+
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        country = request.POST.get('country')
+        address_line1 = request.POST.get('address_line1')
+        address_line2 = request.POST.get('address_line2', '')
+        city = request.POST.get('city')
+        state = request.POST.get('state')
+        zip_code = request.POST.get('zip')
+        phone = request.POST.get('phone')
+        email = request.POST.get('email')
+        notes = request.POST.get('notes', '')
+        payment_method = request.POST.get('payment_method', 'cod')
+
+        # Handle account creation
+        create_account = request.POST.get('create_account')
+        account_password = request.POST.get('account_password')
+
+        if create_account and not user:
+            if User.objects.filter(username=email).exists():
+                messages.error(request, "User with this email already exists. Please log in.")
+                return redirect('checkout')
+            if not account_password:
+                messages.error(request, "Please enter a password to create an account.")
+                return redirect('checkout')
+
+            user = User.objects.create(
+                username=email,
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                password=make_password(account_password)
+            )
+
+        # Calculate total
+        total = 0
+        for product_id, quantity in cart.items():
+            product = Product.objects.get(id=product_id)
+            total += product.price * quantity
+
+        # Create Order
+        order = Order.objects.create(
+            user=user,
+            first_name=first_name,
+            last_name=last_name,
+            country=country,
+            address_line1=address_line1,
+            address_line2=address_line2,
+            city=city,
+            state=state,
+            zip=zip_code,
+            phone=phone,
+            email=email,
+            notes=notes,
+            payment_method=payment_method,
+            total_amount=total,
+        )
+
+        # Create Order Items
+        for product_id, quantity in cart.items():
+            product = Product.objects.get(id=product_id)
+            OrderItem.objects.create(
+                order=order,
+                product=product,
+                quantity=quantity,
+                price=product.price,
+            )
+
+        # Clear cart
+        request.session['cart'] = {}
+
+        return redirect('order_success', order_id=order.id)
+
+    # GET request: prepare cart data
+    cart_items = []
+    total = 0
+    for product_id, quantity in cart.items():
+        product = Product.objects.get(id=product_id)
+        subtotal = product.price * quantity
+        cart_items.append({
+            'product': product,
+            'quantity': quantity,
+            'subtotal': subtotal,
+        })
+        total += subtotal
+
+    return render(request, 'checkout.html', {
+        'cart_items': cart_items,
+        'total': total,
+    })
+
+def order_success(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    return render(request, 'success.html', {'order': order})
