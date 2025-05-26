@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Slider, Category, Product, AboutSection, TeamMember, Testimonial,
     InstagramSection, InstagramImage, MapLocation, ContactDetail, ContactMessage,
-    WishlistItem, Order, OrderItem
+    WishlistItem, Order, OrderItem, Coupon
 )
 
 # Register your models here.
@@ -39,3 +39,5 @@ class OrderAdmin(admin.ModelAdmin):
 
 admin.site.register(Order, OrderAdmin)
 
+
+admin.site.register(Coupon)

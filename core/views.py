@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import (
     Slider, Category, Product, AboutSection, TeamMember, Testimonial,
-    InstagramSection, MapLocation, ContactDetail, WishlistItem, Order, OrderItem
+    InstagramSection, MapLocation, ContactDetail, Coupon, WishlistItem, Order, OrderItem
 )
 from .forms import ContactForm
 from django.core.paginator import Paginator
@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
+from decimal import Decimal
 
 def user_login(request):
     if request.method == 'POST':
@@ -166,9 +167,16 @@ def cart(request):
             'subtotal': subtotal
         })
 
+    coupon_data = request.session.get('coupon')
+    discount = coupon_data['discount'] if coupon_data else 0
+    discounted_total = total - Decimal(str(discount))
+
     return render(request, 'shoping_cart.html', {
         'cart_items': cart_items,
         'total': total,
+        'discount': discount,
+        'discounted_total': discounted_total,
+        'coupon_code': coupon_data['code'] if coupon_data else '',
     })
 
 def add_to_cart(request, slug):
@@ -220,18 +228,38 @@ def remove_from_cart(request, product_id):
 
 def apply_coupon(request):
     if request.method == 'POST':
-        code = request.POST.get('coupon_code')
-        # You can implement real coupon logic here
-        messages.info(request, f'Coupon "{code}" applied!')
+        code = request.POST.get('coupon_code', '').strip()
+        cart = request.session.get('cart', {})
+
+        if not cart:
+            messages.error(request, "Your cart is empty.")
+            return redirect('cart')
+
+        try:
+            coupon = Coupon.objects.get(code__iexact=code, active=True)
+            request.session['coupon'] = {
+                'code': coupon.code,
+                'discount': float(coupon.discount),  # store discount as a float
+            }
+            messages.success(request, f"Coupon '{coupon.code}' applied successfully!")
+        except Coupon.DoesNotExist:
+            request.session.pop('coupon', None)
+            messages.error(request, "Invalid or expired coupon code.")
+
     return redirect('cart')
 
 def checkout(request):
     cart = request.session.get('cart', {})
 
+    # Get discount data from session (if any)
+    discount_data = request.session.get('coupon')
+    discount_amount = discount_data['discount'] if discount_data else 0
+    coupon_code = discount_data['code'] if discount_data else ''
+    
     if request.method == 'POST':
         if not cart:
             messages.error(request, "Your cart is empty. Please add items before checking out.")
-            return redirect('cart')  # or 'checkout'
+            return redirect('cart')
 
         user = request.user if request.user.is_authenticated else None
 
@@ -274,6 +302,8 @@ def checkout(request):
             product = Product.objects.get(id=product_id)
             total += product.price * quantity
 
+        final_total = total - discount_amount
+
         # Create Order
         order = Order.objects.create(
             user=user,
@@ -289,7 +319,9 @@ def checkout(request):
             email=email,
             notes=notes,
             payment_method=payment_method,
-            total_amount=total,
+            total_amount=final_total,
+            coupon_code=coupon_code,
+            discount_amount=discount_amount,
         )
 
         # Create Order Items
@@ -302,8 +334,9 @@ def checkout(request):
                 price=product.price,
             )
 
-        # Clear cart
+        # Clear cart and discount session
         request.session['cart'] = {}
+        request.session.pop('discount', None)
 
         return redirect('order_success', order_id=order.id)
 
@@ -320,9 +353,14 @@ def checkout(request):
         })
         total += subtotal
 
+        discount_amount = Decimal(str(discount_amount))
+        final_total = total - discount_amount
+
     return render(request, 'checkout.html', {
         'cart_items': cart_items,
-        'total': total,
+        'final_total': final_total,
+        'discount_amount': discount_amount,
+        'coupon_code': coupon_code,
     })
 
 def order_success(request, order_id):
