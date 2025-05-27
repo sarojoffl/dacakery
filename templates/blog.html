@@ -44,7 +44,7 @@
                     <div class="blog__item__text">
                         <h2>{{ blog.title }}</h2>
                         <p>{{ blog.content|truncatewords:40 }}</p>
-                        <a href="#">READ MORE</a>
+                        <a href="{% url 'blog_detail' blog.id %}" class="blog__btn">READ MORE <span class="arrow_right"></span></a>
                     </div>
                 </div>
                 {% endfor %}
@@ -56,7 +56,7 @@
                         <h5>Popular posts</h5>
                         <div class="blog__sidebar__recent">
                             {% for blog in recent_blogs %}
-                            <a href="#" class="blog__sidebar__recent__item">
+                            <a href="{% url 'blog_detail' blog.id %}" class="blog__sidebar__recent__item">
                                 <div class="blog__sidebar__recent__item__pic">
                                     <img src="{{ blog.image.url }}" alt="" style="width:90px; height:90px; object-fit:cover;">
                                 </div>

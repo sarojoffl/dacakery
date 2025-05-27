@@ -59,7 +59,7 @@
                                             <h6>{{ item.product.name }}</h6>
                                         </div>
                                     </td>
-                                    <td class="cart__price">${{ item.product.price }}</td>
+                                    <td class="cart__price">रु {{ item.product.price }}</td>
                                     <td class="cart__stock">
                                         {% if item.product.in_stock %}
                                             In stock
@@ -68,7 +68,14 @@
                                         {% endif %}
                                     </td>
                                     <td class="cart__btn">
-                                        <a href="#" class="primary-btn">Add to cart</a>
+                                        {% if item.product.in_stock %}
+                                            <form action="{% url 'add_to_cart' item.product.slug %}" method="post">
+                                                {% csrf_token %}
+                                                <button type="submit" class="primary-btn">Add to Cart</button>
+                                            </form>
+                                        {% else %}
+                                            <button class="primary-btn" disabled style="background-color: #ccc; cursor: not-allowed;">Out of Stock</button>
+                                        {% endif %}
                                     </td>
                                     <td class="cart__close">
                                         <a href="{% url 'remove_from_wishlist' item.product.slug %}">

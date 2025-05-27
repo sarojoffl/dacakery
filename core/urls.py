@@ -2,10 +2,6 @@ from django.urls import path
 from . import views
 from django.http import HttpResponse
 
-# Placeholder for pages not yet implemented
-def placeholder_view(request):
-    return HttpResponse("This page is coming soon.")
-
 urlpatterns = [
     # Core pages
     path('', views.home, name='home'),
@@ -33,7 +29,7 @@ urlpatterns = [
     # Authentication
     path('login/', views.user_login, name='login'),
     path('logout/', views.logout_view, name='logout'),
-    path('register/', placeholder_view, name='register'),
+    path('register/', views.register_user, name='register'),
 
     # Profile
     path('profile/', views.profile, name='profile'),
