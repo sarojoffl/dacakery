@@ -33,6 +33,7 @@ urlpatterns = [
 
     # Profile
     path('profile/', views.profile, name='profile'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
 
     path('checkout/', views.checkout, name='checkout'),
     path('success/<int:order_id>/', views.order_success, name='order_success'),
@@ -45,4 +46,8 @@ urlpatterns = [
     path('newsletter-signup/', views.newsletter_signup_ajax, name='newsletter_signup_ajax'),
     
     path('blog/<int:pk>/', views.blog_detail, name='blog_detail'),
+
+    
+    path('orders/', views.order_list, name='order_list'),
+    path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
 ]

@@ -64,6 +64,30 @@ def logout_view(request):
 def profile(request):
     return render(request, 'profile.html')
 
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        user = request.user
+        user.username = request.POST.get('username')
+        user.email = request.POST.get('email')
+        user.first_name = request.POST.get('first_name')
+        user.last_name = request.POST.get('last_name')
+        user.save()
+        messages.success(request, 'Profile updated successfully.')
+        return redirect('profile')
+    
+    return render(request, 'edit_profile.html', {'user': request.user})
+
+@login_required
+def order_list(request):
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'order_details.html', {'orders': orders})
+
+@login_required
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'order_detail.html', {'order': order})
+
 def home(request):
     sliders = Slider.objects.all()
     about = AboutSection.objects.first()

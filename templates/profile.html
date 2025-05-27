@@ -1,2 +1,66 @@
-<h1>User Profile</h1>
-<p>Welcome, {{ request.user.username }}!</p>
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb Begin -->
+<div class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                <div class="breadcrumb__text">
+                    <h2>Profile</h2>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                <div class="breadcrumb__links">
+                    <a href="{% url 'home' %}">Home</a>
+                    <span>Profile</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Breadcrumb End -->
+
+<!-- Profile Section Begin -->
+<section class="profile spad">
+    <div class="container" style="max-width: 800px;">
+
+        {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="profile__info">
+            <h4>Hello, {{ request.user.first_name|default:request.user.username }} 👋</h4>
+            <p class="mb-4 text-muted">Manage your personal information and view your order history.</p>
+
+            <div class="mb-3">
+                <strong>Username:</strong> {{ request.user.username }}
+            </div>
+            <div class="mb-3">
+                <strong>Email:</strong> {{ request.user.email }}
+            </div>
+            <div class="mb-3">
+                <strong>First Name:</strong> {{ request.user.first_name|default:"Not set" }}
+            </div>
+            <div class="mb-3">
+                <strong>Last Name:</strong> {{ request.user.last_name|default:"Not set" }}
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'edit_profile' %}" class="site-btn">Edit Profile</a>
+                <a href="{% url 'order_list' %}" class="site-btn btn-outline">My Orders</a>
+            </div>
+        </div>
+
+    </div>
+</section>
+<!-- Profile Section End -->
+{% endblock %}
