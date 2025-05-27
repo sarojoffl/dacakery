@@ -1,18 +1,20 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import (
     Slider, Category, Product, AboutSection, TeamMember, Testimonial,
-    InstagramSection, MapLocation, ContactDetail, Coupon, WishlistItem, Order, OrderItem
+    InstagramSection, MapLocation, ContactDetail, Coupon, WishlistItem, Order,
+    OrderItem, BlogPost, BlogCategory, NewsletterSubscriber
 )
-from .forms import ContactForm
+from .forms import ContactForm, NewsletterForm
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
-from decimal import Decimal, ROUND_DOWN
+from decimal import Decimal
+from django.http import JsonResponse
 
 def user_login(request):
     if request.method == 'POST':
@@ -373,3 +375,35 @@ def checkout(request):
 def order_success(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     return render(request, 'success.html', {'order': order})
+
+def blog_list(request):
+    blogs = BlogPost.objects.select_related('category').order_by('-created_at')
+
+    # Annotate categories with blog post counts
+    categories = BlogCategory.objects.annotate(count=Count('blog_posts'))
+
+    recent_blogs = blogs[:5]  # For sidebar
+
+    context = {
+        'blogs': blogs,
+        'recent_blogs': recent_blogs,
+        'categories': categories,
+    }
+    return render(request, 'blog.html', context)
+
+def blog_detail(request, pk):
+    blog = get_object_or_404(BlogPost, pk=pk)
+    return render(request, 'blog_detail.html', {'blog': blog})
+
+def newsletter_signup_ajax(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        if email:
+            subscriber, created = NewsletterSubscriber.objects.get_or_create(email=email)
+            if created:
+                return JsonResponse({'status': 'success', 'message': 'Thanks for subscribing!'})
+            else:
+                return JsonResponse({'status': 'info', 'message': 'You are already subscribed.'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Invalid email.'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})

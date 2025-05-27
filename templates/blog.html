@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}Da Cakery - Blog{% endblock %}
+
+{% load static %}
+
+{% block content %}
+    <!-- Breadcrumb Begin -->
+    <div class="breadcrumb-option">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <div class="breadcrumb__text">
+                        <h2>Blog</h2>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <div class="breadcrumb__links">
+                        <a href="{% url 'home' %}">Home</a>
+                        <span>Blog</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Breadcrumb End -->
+
+<!-- Blog Section Begin -->
+<section class="blog spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                {% for blog in blogs %}
+                <div class="blog__item">
+                    <div class="blog__item__pic set-bg" data-setbg="{{ blog.image.url }}">
+                        <div class="blog__pic__inner">
+                            <div class="label">{{ blog.category }}</div>
+                            <ul>
+                                <li>By <span>{{ blog.author }}</span></li>
+                                <li>{{ blog.created_at }}</li>
+                                <li>{{ blog.views }} Views</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="blog__item__text">
+                        <h2>{{ blog.title }}</h2>
+                        <p>{{ blog.content|truncatewords:40 }}</p>
+                        <a href="#">READ MORE</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="col-lg-4">
+                <div class="blog__sidebar">
+                    <div class="blog__sidebar__item">
+                        <h5>Popular posts</h5>
+                        <div class="blog__sidebar__recent">
+                            {% for blog in recent_blogs %}
+                            <a href="#" class="blog__sidebar__recent__item">
+                                <div class="blog__sidebar__recent__item__pic">
+                                    <img src="{{ blog.image.url }}" alt="" style="width:90px; height:90px; object-fit:cover;">
+                                </div>
+                                <div class="blog__sidebar__recent__item__text">
+                                    <h4>{{ blog.title|truncatewords:6 }}</h4>
+                                    <span>{{ blog.created_at }}</span>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="blog__sidebar__item">
+                        <h5>Categories</h5>
+                        <div class="blog__sidebar__item__categories">
+                            <ul>
+                                {% for cat in categories %}
+                                    <li>
+                                        <a href="#">
+                                            {{ cat.name }} <span>{{ cat.count }}</span>
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="blog__sidebar__item">
+                        <h5>NEWSLETTER</h5>
+                        <p>Subscribe to our newsletter and get our newest updates right on your inbox.</p>
+                        <form id="newsletter-form">
+                            {% csrf_token %}
+                            <input type="email" name="email" placeholder="Your email" required>
+                            <label for="agg">
+                                I agree to the terms & conditions
+                                <input type="checkbox" id="agg" required>
+                                <span class="checkmark"></span>
+                            </label>
+                            <button type="submit" class="site-btn">Subscribe</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Blog Section End -->
+
+{% endblock %}

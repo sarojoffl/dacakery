@@ -41,4 +41,12 @@ urlpatterns = [
     path('checkout/', views.checkout, name='checkout'),
     path('success/<int:order_id>/', views.order_success, name='order_success'),
     path('apply-coupon/', views.apply_coupon, name='apply_coupon'),
+
+    
+    path('blog/', views.blog_list, name='blog_list'),
+    
+    
+    path('newsletter-signup/', views.newsletter_signup_ajax, name='newsletter_signup_ajax'),
+    
+    path('blog/<int:pk>/', views.blog_detail, name='blog_detail'),
 ]

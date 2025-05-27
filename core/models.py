@@ -178,3 +178,32 @@ class Coupon(models.Model):
 
     def __str__(self):
         return self.code
+    
+class BlogCategory(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    
+    class Meta:
+        verbose_name_plural = "Blog Categories"
+    
+    def __str__(self):
+        return self.name
+
+
+class BlogPost(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    author = models.CharField(max_length=100)
+    image = models.ImageField(upload_to='blog_images/')
+    views = models.PositiveIntegerField(default=0)
+    category = models.ForeignKey(BlogCategory, on_delete=models.SET_NULL, null=True, related_name='blog_posts')
+    created_at = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+class NewsletterSubscriber(models.Model):
+    email = models.EmailField(unique=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.email

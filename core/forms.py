@@ -10,3 +10,6 @@ class ContactForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Your Email'}),
             'message': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Your Message'}),
         }
+
+class NewsletterForm(forms.Form):
+    email = forms.EmailField(label='Your email', max_length=254)
