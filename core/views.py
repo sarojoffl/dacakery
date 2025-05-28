@@ -31,7 +31,7 @@ def user_login(request):
         else:
             messages.error(request, 'Invalid username or password.')
 
-    return render(request, 'login.html')
+    return render(request, 'core/login.html')
 
 def register_user(request):
     if request.method == 'POST':
@@ -57,7 +57,7 @@ def register_user(request):
         messages.success(request, 'Account created successfully. You can now log in.')
         return redirect('login')
 
-    return render(request, 'register.html')
+    return render(request, 'core/register.html')
 
 def logout_view(request):
     logout(request)
@@ -65,7 +65,7 @@ def logout_view(request):
 
 @login_required
 def profile(request):
-    return render(request, 'profile.html')
+    return render(request, 'core/profile.html')
 
 @login_required
 def edit_profile(request):
@@ -79,17 +79,17 @@ def edit_profile(request):
         messages.success(request, 'Profile updated successfully.')
         return redirect('profile')
     
-    return render(request, 'edit_profile.html', {'user': request.user})
+    return render(request, 'core/edit_profile.html', {'user': request.user})
 
 @login_required
 def order_list(request):
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'order_details.html', {'orders': orders})
+    return render(request, 'core/order_details.html', {'orders': orders})
 
 @login_required
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
-    return render(request, 'order_detail.html', {'order': order})
+    return render(request, 'core/order_detail.html', {'order': order})
 
 def home(request):
     sliders = Slider.objects.all()
@@ -100,7 +100,7 @@ def home(request):
     testimonials = Testimonial.objects.all()
     instagram_section = InstagramSection.objects.prefetch_related('images').first()
     map_location = MapLocation.objects.first()
-    return render(request, 'home.html', {
+    return render(request, 'core/home.html', {
         'sliders': sliders,
         'about': about,
         'categories': categories,
@@ -115,7 +115,7 @@ def about(request):
     about = AboutSection.objects.first()
     team_members = TeamMember.objects.all()
     testimonials = Testimonial.objects.all()
-    return render(request, 'about.html', {
+    return render(request, 'core/about.html', {
         'about': about,
         'team_members': team_members,
         'testimonials': testimonials,
@@ -134,7 +134,7 @@ def contact(request):
     else:
         form = ContactForm()
 
-    return render(request, 'contact.html', {
+    return render(request, 'core/contact.html', {
         'map_location': map_location,
         'contact_detail': contact_detail,
         'form': form,
@@ -169,12 +169,12 @@ def shop(request):
         'page_obj': page_obj,
         'total_results': products.count(),
     }
-    return render(request, 'shop.html', context)
+    return render(request, 'core/shop.html', context)
 
 def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug)
     related_products = Product.objects.filter(category=product.category).exclude(id=product.id)[:6]
-    return render(request, 'product_detail.html', {
+    return render(request, 'core/product_detail.html', {
         'product': product,
         'related_products': related_products
     })
@@ -182,7 +182,7 @@ def product_detail(request, slug):
 @login_required
 def wishlist(request):
     wishlist_items = WishlistItem.objects.filter(user=request.user)
-    return render(request, 'wishlist.html', {'wishlist_items': wishlist_items})
+    return render(request, 'core/wishlist.html', {'wishlist_items': wishlist_items})
 
 @login_required
 def add_to_wishlist(request, slug):
@@ -229,7 +229,7 @@ def cart(request):
     discount = (total * discount_percent) / Decimal('100.0')
     discounted_total = total - discount
 
-    return render(request, 'shoping_cart.html', {
+    return render(request, 'core/shoping_cart.html', {
         'cart_items': cart_items,
         'total': total,
         'discount': discount,
@@ -416,7 +416,7 @@ def checkout(request):
     discount_amount = (total * discount_percent) / Decimal('100.0')
     final_total = total - discount_amount
 
-    return render(request, 'checkout.html', {
+    return render(request, 'core/checkout.html', {
         'cart_items': cart_items,
         'total': total,
         'final_total': final_total,
@@ -427,7 +427,7 @@ def checkout(request):
 
 def order_success(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-    return render(request, 'success.html', {'order': order})
+    return render(request, 'core/success.html', {'order': order})
 
 def blog_list(request):
     blogs = BlogPost.objects.select_related('category').order_by('-created_at')
@@ -442,11 +442,11 @@ def blog_list(request):
         'recent_blogs': recent_blogs,
         'categories': categories,
     }
-    return render(request, 'blog.html', context)
+    return render(request, 'core/blog.html', context)
 
 def blog_detail(request, pk):
     blog = get_object_or_404(BlogPost, pk=pk)
-    return render(request, 'blog_detail.html', {'blog': blog})
+    return render(request, 'core/blog_detail.html', {'blog': blog})
 
 def newsletter_signup_ajax(request):
     if request.method == 'POST':
