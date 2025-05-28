@@ -1,6 +1,5 @@
 from django.urls import path
 from . import views
-from django.http import HttpResponse
 
 urlpatterns = [
     # Core pages
@@ -8,7 +7,7 @@ urlpatterns = [
     path('about/', views.about, name='about'),
     path('contact/', views.contact, name='contact'),
 
-    # Shop & product
+    # Shop & Product
     path('shop/', views.shop, name='shop'),
     path('shop/<slug:slug>/', views.product_detail, name='product_detail'),
 
@@ -35,19 +34,18 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
 
+    # Checkout
     path('checkout/', views.checkout, name='checkout'),
     path('success/<int:order_id>/', views.order_success, name='order_success'),
-    path('apply-coupon/', views.apply_coupon, name='apply_coupon'),
 
-    
+    # Blog
     path('blog/', views.blog_list, name='blog_list'),
-    
-    
-    path('newsletter-signup/', views.newsletter_signup_ajax, name='newsletter_signup_ajax'),
-    
     path('blog/<int:pk>/', views.blog_detail, name='blog_detail'),
 
-    
+    # Newsletter
+    path('newsletter-signup/', views.newsletter_signup_ajax, name='newsletter_signup_ajax'),
+
+    # Orders
     path('orders/', views.order_list, name='order_list'),
     path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
 ]
