@@ -163,8 +163,9 @@
                     <div class="footer__newslatter">
                         <h6>Subscribe</h6>
                         <p>Get latest updates and offers.</p>
-                        <form action="#">
-                            <input type="text" placeholder="Email">
+                        <form id="newsletter-form" method="POST">
+                            {% csrf_token %}
+                            <input type="email" name="email" placeholder="Email" required>
                             <button type="submit"><i class="fa fa-send-o"></i></button>
                         </form>
                     </div>
