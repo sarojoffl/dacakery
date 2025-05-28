@@ -3,6 +3,10 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.contrib.auth import logout
+from .models import Slider, AboutSection
+from .admin_forms import AdminSliderForm, AboutSectionForm
+from django.contrib import messages
+from django.shortcuts import get_object_or_404
 
 @login_required
 def dashboard_home(request):
@@ -10,7 +14,42 @@ def dashboard_home(request):
 
 @login_required
 def sliders_list(request):
-    return render(request, 'dashboard/sliders_list.html')
+    sliders = Slider.objects.all()
+    return render(request, 'dashboard/sliders_list.html', {'sliders': sliders})
+
+@login_required
+def add_slider(request):
+    if request.method == 'POST':
+        form = AdminSliderForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Slider added successfully.')
+            return redirect('sliders_list')
+    else:
+        form = AdminSliderForm()
+    return render(request, 'dashboard/slider_form.html', {'form': form, 'title': 'Add Slider'})
+
+@login_required
+def edit_slider(request, pk):
+    slider = get_object_or_404(Slider, pk=pk)
+    if request.method == 'POST':
+        form = AdminSliderForm(request.POST, request.FILES, instance=slider)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Slider updated successfully.')
+            return redirect('sliders_list')
+    else:
+        form = AdminSliderForm(instance=slider)
+    return render(request, 'dashboard/slider_form.html', {'form': form, 'title': 'Edit Slider'})
+
+@login_required
+def delete_slider(request, pk):
+    slider = get_object_or_404(Slider, pk=pk)
+    if request.method == 'POST':
+        slider.delete()
+        messages.success(request, 'Slider deleted successfully.')
+        return redirect('sliders_list')
+    return render(request, 'dashboard/slider_confirm_delete.html', {'slider': slider})
 
 @login_required
 def categories_list(request):
@@ -30,7 +69,33 @@ def testimonials_list(request):
 
 @login_required
 def about_section(request):
-    return render(request, 'dashboard/about_section.html')
+    about = AboutSection.objects.first()
+    return render(request, 'dashboard/about_section.html', {'about': about})
+
+@login_required
+def add_about_section(request):
+    if request.method == 'POST':
+        form = AboutSectionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "About section created successfully.")
+            return redirect('about_section')
+    else:
+        form = AboutSectionForm()
+    return render(request, 'dashboard/about_section_form.html', {'form': form, 'title': 'Add About Section'})
+
+@login_required
+def edit_about_section(request, pk):
+    about = get_object_or_404(AboutSection, pk=pk)
+    if request.method == 'POST':
+        form = AboutSectionForm(request.POST, instance=about)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "About section updated successfully.")
+            return redirect('about_section')
+    else:
+        form = AboutSectionForm(instance=about)
+    return render(request, 'dashboard/about_section_form.html', {'form': form, 'title': 'Edit About Section'})
 
 @login_required
 def blog_posts_list(request):

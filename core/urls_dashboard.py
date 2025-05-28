@@ -8,7 +8,15 @@ urlpatterns = [
 
     # Manage
     path('sliders/', admin_views.sliders_list, name='sliders_list'),
+    path('sliders/add/', admin_views.add_slider, name='add_slider'),
+    path('sliders/edit/<int:pk>/', admin_views.edit_slider, name='edit_slider'),
+    path('sliders/delete/<int:pk>/', admin_views.delete_slider, name='delete_slider'),
+
+
     path('about/', admin_views.about_section, name='about_section'),
+    path('about-section/add/', admin_views.add_about_section, name='add_about_section'),
+    path('about-section/edit/<int:pk>/', admin_views.edit_about_section, name='edit_about_section'),
+
     path('categories/', admin_views.categories_list, name='categories_list'),
     path('products/', admin_views.products_list, name='products_list'),
     path('team-members/', admin_views.team_members_list, name='team_members_list'),
