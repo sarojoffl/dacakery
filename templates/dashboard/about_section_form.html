@@ -6,6 +6,8 @@
 {% block content %}
 <h2 class="mb-4">{{ title }}</h2>
 
+{{ form.media }}
+
 <form method="post" class="needs-validation" novalidate>
     {% csrf_token %}
 
@@ -19,10 +21,14 @@
         <div class="mb-4">
             <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
 
-            {% if field.errors %}
-                {{ field|add_class:"form-control is-invalid" }}
+            {% if field.name == "description" %}
+                {{ field }}
             {% else %}
-                {{ field|add_class:"form-control" }}
+                {% if field.errors %}
+                    {{ field|add_class:"form-control is-invalid" }}
+                {% else %}
+                    {{ field|add_class:"form-control" }}
+                {% endif %}
             {% endif %}
 
             {% if field.help_text %}
