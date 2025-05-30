@@ -1,5 +1,5 @@
 from django import forms
-from .models import Slider, AboutSection, BlogCategory
+from .models import Slider, AboutSection, BlogCategory, BlogPost
 from ckeditor.widgets import CKEditorWidget
 
 class AdminSliderForm(forms.ModelForm):
@@ -23,3 +23,8 @@ class BlogCategoryForm(forms.ModelForm):
     class Meta:
         model = BlogCategory
         fields = ['name']
+
+class BlogPostForm(forms.ModelForm):
+    class Meta:
+        model = BlogPost
+        fields = ['title', 'content', 'author', 'image', 'category']

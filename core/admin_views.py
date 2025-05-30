@@ -3,9 +3,9 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.contrib.auth import logout
-from .models import Slider, AboutSection, BlogCategory
+from .models import Slider, AboutSection, BlogCategory, BlogPost
 from .admin_forms import (
-    AdminSliderForm, AboutSectionForm, BlogCategoryForm
+    AdminSliderForm, AboutSectionForm, BlogCategoryForm, BlogPostForm
 )
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
@@ -122,6 +122,45 @@ def delete_blog_category(request, pk):
     return render(request, 'dashboard/blog_category_confirm_delete.html', {'category': category})
 
 @login_required
+def blog_posts_list(request):
+    posts = BlogPost.objects.all()
+    return render(request, 'dashboard/blog_posts_list.html', {'posts': posts})
+
+@login_required
+def add_blog_post(request):
+    if request.method == 'POST':
+        form = BlogPostForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Blog post added successfully.')
+            return redirect('blog_posts_list')
+    else:
+        form = BlogPostForm()
+    return render(request, 'dashboard/blog_post_form.html', {'form': form, 'title': 'Add Blog Post'})
+
+@login_required
+def edit_blog_post(request, pk):
+    post = get_object_or_404(BlogPost, pk=pk)
+    if request.method == 'POST':
+        form = BlogPostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Blog post updated successfully.')
+            return redirect('blog_posts_list')
+    else:
+        form = BlogPostForm(instance=post)
+    return render(request, 'dashboard/blog_post_form.html', {'form': form, 'title': 'Edit Blog Post'})
+
+@login_required
+def delete_blog_post(request, pk):
+    post = get_object_or_404(BlogPost, pk=pk)
+    if request.method == 'POST':
+        post.delete()
+        messages.success(request, 'Blog post deleted successfully.')
+        return redirect('blog_posts_list')
+    return render(request, 'dashboard/blog_post_confirm_delete.html', {'post': post})
+
+@login_required
 def categories_list(request):
     return render(request, 'dashboard/categories_list.html')
 
@@ -136,10 +175,6 @@ def team_members_list(request):
 @login_required
 def testimonials_list(request):
     return render(request, 'dashboard/testimonials_list.html')
-
-@login_required
-def blog_posts_list(request):
-    return render(request, 'dashboard/blog_posts_list.html')
 
 @login_required
 def contact_messages_list(request):

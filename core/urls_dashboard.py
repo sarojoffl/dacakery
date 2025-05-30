@@ -22,6 +22,12 @@ urlpatterns = [
     path('blog-categories/edit/<int:pk>/', admin_views.edit_blog_category, name='edit_blog_category'),
     path('blog-categories/delete/<int:pk>/', admin_views.delete_blog_category, name='delete_blog_category'),
 
+    
+    path('blog-posts/', admin_views.blog_posts_list, name='blog_posts_list'),
+    path('blog-posts/add/', admin_views.add_blog_post, name='add_blog_post'),
+    path('blog-posts/edit/<int:pk>/', admin_views.edit_blog_post, name='edit_blog_post'),
+    path('blog-posts/delete/<int:pk>/', admin_views.delete_blog_post, name='delete_blog_post'),
+
     path('categories/', admin_views.categories_list, name='categories_list'),
     path('products/', admin_views.products_list, name='products_list'),
     path('team-members/', admin_views.team_members_list, name='team_members_list'),
@@ -36,6 +42,5 @@ urlpatterns = [
     path('orders/', admin_views.orders_list, name='orders_list'),
     path('order-items/', admin_views.order_items_list, name='order_items_list'),
     path('coupons/', admin_views.coupons_list, name='coupons_list'),
-    path('blog-posts/', admin_views.blog_posts_list, name='blog_posts_list'),
     path('newsletter-subscribers/', admin_views.newsletter_subscribers_list, name='newsletter_subscribers_list'),
 ]
