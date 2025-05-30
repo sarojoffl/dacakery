@@ -1,5 +1,5 @@
 from django import forms
-from .models import Slider, AboutSection
+from .models import Slider, AboutSection, BlogCategory
 from ckeditor.widgets import CKEditorWidget
 
 class AdminSliderForm(forms.ModelForm):
@@ -16,5 +16,10 @@ class AboutSectionForm(forms.ModelForm):
             'happy_customers', 'years_of_baking'
         ]
         widgets = {
-            'description': CKEditorWidget(),
+            'description': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
         }
+
+class BlogCategoryForm(forms.ModelForm):
+    class Meta:
+        model = BlogCategory
+        fields = ['name']

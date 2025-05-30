@@ -3,8 +3,10 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.contrib.auth import logout
-from .models import Slider, AboutSection
-from .admin_forms import AdminSliderForm, AboutSectionForm
+from .models import Slider, AboutSection, BlogCategory
+from .admin_forms import (
+    AdminSliderForm, AboutSectionForm, BlogCategoryForm
+)
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
 
@@ -52,22 +54,6 @@ def delete_slider(request, pk):
     return render(request, 'dashboard/slider_confirm_delete.html', {'slider': slider})
 
 @login_required
-def categories_list(request):
-    return render(request, 'dashboard/categories_list.html')
-
-@login_required
-def products_list(request):
-    return render(request, 'dashboard/products_list.html')
-
-@login_required
-def team_members_list(request):
-    return render(request, 'dashboard/team_members_list.html')
-
-@login_required
-def testimonials_list(request):
-    return render(request, 'dashboard/testimonials_list.html')
-
-@login_required
 def about_section(request):
     about = AboutSection.objects.first()
     return render(request, 'dashboard/about_section.html', {'about': about})
@@ -96,6 +82,60 @@ def edit_about_section(request, pk):
     else:
         form = AboutSectionForm(instance=about)
     return render(request, 'dashboard/about_section_form.html', {'form': form, 'title': 'Edit About Section'})
+
+@login_required
+def blog_categories_list(request):
+    categories = BlogCategory.objects.all()
+    return render(request, 'dashboard/blog_categories_list.html', {'categories': categories})
+
+def add_blog_category(request):
+    if request.method == 'POST':
+        form = BlogCategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Blog category added successfully.')
+            return redirect('blog_categories_list')
+    else:
+        form = BlogCategoryForm()
+    return render(request, 'dashboard/blog_category_form.html', {'form': form, 'title': 'Add Blog Category'})
+
+@login_required
+def edit_blog_category(request, pk):
+    category = get_object_or_404(BlogCategory, pk=pk)
+    if request.method == 'POST':
+        form = BlogCategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Blog category updated successfully.')
+            return redirect('blog_categories_list')
+    else:
+        form = BlogCategoryForm(instance=category)
+    return render(request, 'dashboard/blog_category_form.html', {'form': form, 'title': 'Edit Blog Category'})
+
+@login_required
+def delete_blog_category(request, pk):
+    category = get_object_or_404(BlogCategory, pk=pk)
+    if request.method == 'POST':
+        category.delete()
+        messages.success(request, 'Blog category deleted successfully.')
+        return redirect('blog_categories_list')
+    return render(request, 'dashboard/blog_category_confirm_delete.html', {'category': category})
+
+@login_required
+def categories_list(request):
+    return render(request, 'dashboard/categories_list.html')
+
+@login_required
+def products_list(request):
+    return render(request, 'dashboard/products_list.html')
+
+@login_required
+def team_members_list(request):
+    return render(request, 'dashboard/team_members_list.html')
+
+@login_required
+def testimonials_list(request):
+    return render(request, 'dashboard/testimonials_list.html')
 
 @login_required
 def blog_posts_list(request):
@@ -140,10 +180,6 @@ def order_items_list(request):
 @login_required
 def coupons_list(request):
     return render(request, 'dashboard/coupons_list.html')
-
-@login_required
-def blog_categories_list(request):
-    return render(request, 'dashboard/blog_categories_list.html')
 
 @login_required
 def newsletter_subscribers_list(request):
