@@ -3,12 +3,14 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.contrib.auth import logout
-from .models import Slider, AboutSection, BlogCategory, BlogPost
+from .models import Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection, InstagramImage
 from .admin_forms import (
-    AdminSliderForm, AboutSectionForm, BlogCategoryForm, BlogPostForm
+    AdminSliderForm, AboutSectionForm, BlogCategoryForm, BlogPostForm, TestimonialForm,
+    InstagramSectionForm, InstagramImageForm
 )
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
+from django.forms import modelformset_factory
 
 @login_required
 def dashboard_home(request):
@@ -161,6 +163,128 @@ def delete_blog_post(request, pk):
     return render(request, 'dashboard/blog_post_confirm_delete.html', {'post': post})
 
 @login_required
+def testimonials_list(request):
+    testimonials = Testimonial.objects.all()
+    return render(request, 'dashboard/testimonials_list.html', {'testimonials': testimonials})
+
+@login_required
+def add_testimonial(request):
+    if request.method == 'POST':
+        form = TestimonialForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Testimonial added successfully.')
+            return redirect('testimonials_list')
+    else:
+        form = TestimonialForm()
+    return render(request, 'dashboard/testimonial_form.html', {'form': form, 'title': 'Add Testimonial'})
+
+@login_required
+def edit_testimonial(request, pk):
+    testimonial = get_object_or_404(Testimonial, pk=pk)
+    if request.method == 'POST':
+        form = TestimonialForm(request.POST, request.FILES, instance=testimonial)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Testimonial updated successfully.')
+            return redirect('testimonials_list')
+    else:
+        form = TestimonialForm(instance=testimonial)
+    return render(request, 'dashboard/testimonial_form.html', {'form': form, 'title': 'Edit Testimonial'})
+
+@login_required
+def delete_testimonial(request, pk):
+    testimonial = get_object_or_404(Testimonial, pk=pk)
+    if request.method == 'POST':
+        testimonial.delete()
+        messages.success(request, 'Testimonial deleted successfully.')
+        return redirect('testimonials_list')
+    return render(request, 'dashboard/testimonial_confirm_delete.html', {'testimonial': testimonial})
+
+InstagramImageFormSet = modelformset_factory(
+    InstagramImage,
+    form=InstagramImageForm,
+    extra=2,          # allow 2 extra blank forms for new images
+    can_delete=True
+)
+
+@login_required
+def instagram_sections_list(request):
+    section = InstagramSection.objects.first()
+    return render(request, 'dashboard/instagram_sections_list.html', {
+        'section': section,
+        'images': InstagramImage.objects.filter(section=section) if section else []
+    })
+
+@login_required
+def edit_instagram_section(request):
+    section = get_object_or_404(InstagramSection)
+
+    if request.method == "POST":
+        form = InstagramSectionForm(request.POST, instance=section)
+        formset = InstagramImageFormSet(request.POST, request.FILES, queryset=InstagramImage.objects.filter(section=section))
+
+        if form.is_valid() and formset.is_valid():
+            form.save()
+
+            for img_form in formset:
+                if img_form.cleaned_data.get('DELETE') and img_form.instance.pk:
+                    img_form.instance.delete()
+                elif img_form.cleaned_data.get('image'):
+                    image = img_form.save(commit=False)
+                    image.section = section
+                    image.save()
+
+            messages.success(request, "Instagram section updated successfully.")
+            return redirect("instagram_sections_list")
+        else:
+            print("FORM ERRORS:", form.errors)
+            for f in formset:
+                print(f.errors)
+            messages.error(request, "Please fix the errors below.")
+    else:
+        form = InstagramSectionForm(instance=section)
+        formset = InstagramImageFormSet(queryset=InstagramImage.objects.filter(section=section))
+
+    return render(request, "dashboard/instagram_section_form.html", {
+        "form": form,
+        "formset": formset,
+        "title": "Edit Instagram Section",
+    })
+
+@login_required
+def add_instagram_section(request):
+    if InstagramSection.objects.exists():
+        messages.info(request, "Instagram section already exists. You can edit it.")
+        return redirect('edit_instagram_section')
+
+    if request.method == 'POST':
+        form = InstagramSectionForm(request.POST)
+        formset = InstagramImageFormSet(request.POST, request.FILES)
+
+        if form.is_valid() and formset.is_valid():
+            section = form.save()
+            images = formset.save(commit=False)
+            for img in images:
+                img.section = section
+                img.save()
+            formset.save_m2m()
+            messages.success(request, "Instagram section added successfully.")
+            return redirect('edit_instagram_section')
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = InstagramSectionForm()
+        formset = InstagramImageFormSet()
+
+    return render(request, 'dashboard/instagram_section_form.html', {
+        'form': form,
+        'formset': formset,
+        'edit': False,
+        'title': 'Add Instagram Section',
+    })
+
+@login_required
 def categories_list(request):
     return render(request, 'dashboard/categories_list.html')
 
@@ -173,24 +297,12 @@ def team_members_list(request):
     return render(request, 'dashboard/team_members_list.html')
 
 @login_required
-def testimonials_list(request):
-    return render(request, 'dashboard/testimonials_list.html')
-
-@login_required
 def contact_messages_list(request):
     return render(request, 'dashboard/contact_messages_list.html')
 
 @login_required
 def map_locations_list(request):
     return render(request, 'dashboard/map_locations_list.html')
-
-@login_required
-def instagram_sections_list(request):
-    return render(request, 'dashboard/instagram_sections_list.html')
-
-@login_required
-def instagram_images_list(request):
-    return render(request, 'dashboard/instagram_images_list.html')
 
 @login_required
 def contact_details_list(request):

@@ -27,13 +27,19 @@ urlpatterns = [
     path('blog-posts/add/', admin_views.add_blog_post, name='add_blog_post'),
     path('blog-posts/edit/<int:pk>/', admin_views.edit_blog_post, name='edit_blog_post'),
     path('blog-posts/delete/<int:pk>/', admin_views.delete_blog_post, name='delete_blog_post'),
+    
+    path('testimonials/', admin_views.testimonials_list, name='testimonials_list'),
+    path('testimonials/add/', admin_views.add_testimonial, name='add_testimonial'),
+    path('testimonials/edit/<int:pk>/', admin_views.edit_testimonial, name='edit_testimonial'),
+    path('testimonials/delete/<int:pk>/', admin_views.delete_testimonial, name='delete_testimonial'),
+
+    path('instagram-sections/', admin_views.instagram_sections_list, name='instagram_sections_list'),
+    path('nstagram-sections/add/', admin_views.add_instagram_section, name='add_instagram_section'),
+    path('instagram-sections/edit/', admin_views.edit_instagram_section, name='edit_instagram_section'),   
 
     path('categories/', admin_views.categories_list, name='categories_list'),
     path('products/', admin_views.products_list, name='products_list'),
     path('team-members/', admin_views.team_members_list, name='team_members_list'),
-    path('testimonials/', admin_views.testimonials_list, name='testimonials_list'),
-    path('instagram-sections/', admin_views.instagram_sections_list, name='instagram_sections_list'),
-    path('instagram-images/', admin_views.instagram_images_list, name='instagram_images_list'),
     path('map-locations/', admin_views.map_locations_list, name='map_locations_list'),
     path('contact-details/', admin_views.contact_details_list, name='contact_details_list'),
     path('contact-messages/', admin_views.contact_messages_list, name='contact_messages_list'),
