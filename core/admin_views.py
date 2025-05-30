@@ -6,11 +6,11 @@ from django.shortcuts import redirect
 from django.contrib.auth import logout
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
-    InstagramImage, Category, Product, Coupon, WishlistItem, Order, OrderItem
+    InstagramImage, Category, Product, Coupon, WishlistItem, Order, NewsletterSubscriber, TeamMember
 )
 from .admin_forms import (
     AdminSliderForm, AboutSectionForm, BlogCategoryForm, BlogPostForm, TestimonialForm,
-    InstagramSectionForm, InstagramImageForm, CategoryForm, ProductForm, CouponForm, UserForm
+    InstagramSectionForm, InstagramImageForm, CategoryForm, ProductForm, CouponForm, UserForm, TeamMemberForm
 )
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
@@ -485,7 +485,36 @@ def order_delete(request, pk):
 
 @login_required
 def team_members_list(request):
-    return render(request, 'dashboard/team_members_list.html')
+    members = TeamMember.objects.all()
+    return render(request, 'dashboard/team_members_list.html', {'members': members})
+
+@login_required
+def add_team_member(request):
+    form = TeamMemberForm(request.POST or None, request.FILES or None)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Team member added successfully.")
+        return redirect('team_members_list')
+    return render(request, 'dashboard/team_member_form.html', {'form': form, 'title': 'Add Team Member'})
+
+@login_required
+def edit_team_member(request, pk):
+    member = get_object_or_404(TeamMember, pk=pk)
+    form = TeamMemberForm(request.POST or None, request.FILES or None, instance=member)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Team member updated successfully.")
+        return redirect('team_members_list')
+    return render(request, 'dashboard/team_member_form.html', {'form': form, 'title': 'Edit Team Member'})
+
+@login_required
+def delete_team_member(request, pk):
+    member = get_object_or_404(TeamMember, pk=pk)
+    if request.method == 'POST':
+        member.delete()
+        messages.success(request, "Team member deleted successfully.")
+        return redirect('team_members_list')
+    return render(request, 'dashboard/team_member_confirm_delete.html', {'member': member})
 
 @login_required
 def contact_messages_list(request):
@@ -501,7 +530,18 @@ def contact_details_list(request):
 
 @login_required
 def newsletter_subscribers_list(request):
-    return render(request, 'dashboard/newsletter_subscribers_list.html')
+    subscribers = NewsletterSubscriber.objects.all()
+    return render(request, 'dashboard/newsletter_subscribers_list.html', {'subscribers': subscribers})
+
+def delete_newsletter_subscriber(request, pk):
+    subscriber = get_object_or_404(NewsletterSubscriber, pk=pk)
+    if request.method == 'POST':
+        subscriber.delete()
+        messages.success(request, '🗑️ Newsletter subscriber deleted successfully.')
+        return redirect('newsletter_subscribers_list')
+    return render(request, 'dashboard/newsletter_subscribers_confirm_delete.html', {
+        'subscriber': subscriber
+    })
 
 @login_required
 def logout_view(request):

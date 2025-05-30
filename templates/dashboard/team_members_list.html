@@ -1,0 +1,52 @@
+{% extends "admin_base.html" %}
+{% block title %}Team Members{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Team Members</h2>
+    <a href="{% url 'add_team_member' %}" class="btn btn-success">Add Team Member</a>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<table class="table table-bordered table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>#</th>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for member in members %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if member.image %}
+                    <img src="{{ member.image.url }}" alt="{{ member.name }}" style="width: 60px; height: auto;">
+                {% else %}
+                    <span class="text-muted">No Image</span>
+                {% endif %}
+            </td>
+            <td>{{ member.name }}</td>
+            <td>{{ member.role }}</td>
+            <td>
+                <a href="{% url 'edit_team_member' member.id %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'delete_team_member' member.id %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center">No team members found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
