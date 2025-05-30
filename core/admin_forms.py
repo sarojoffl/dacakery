@@ -3,6 +3,8 @@ from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
     InstagramImage, Category, Product, Coupon
 )
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 from ckeditor.widgets import CKEditorWidget
 
 class AdminSliderForm(forms.ModelForm):
@@ -64,4 +66,19 @@ class ProductForm(forms.ModelForm):
 class CouponForm(forms.ModelForm):
     class Meta:
         model = Coupon
-        fields = ['code', 'discount', 'active']        
+        fields = ['code', 'discount', 'active']
+
+class UserForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=False, help_text="Leave blank to keep the current password.")
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'is_staff', 'password']
+
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        if password:
+            return make_password(password)
+        else:
+            # Password not changed
+            return self.instance.password

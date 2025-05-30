@@ -52,13 +52,21 @@ urlpatterns = [
     path('coupons/edit/<int:pk>/', admin_views.edit_coupon, name='edit_coupon'),
     path('coupons/delete/<int:pk>/', admin_views.delete_coupon, name='delete_coupon'),
 
+    path('users/', admin_views.users_list, name='users_list'),
+    path('users/add/', admin_views.add_user, name='add_user'),
+    path('users/edit/<int:pk>/', admin_views.edit_user, name='edit_user'),
+    path('users/delete/<int:pk>/', admin_views.delete_user, name='delete_user'),
+
+    path('wishlist-items/', admin_views.wishlist_items_list, name='wishlist_items_list'),
+    path('wishlist-items/delete/<int:pk>/', admin_views.delete_wishlist_item, name='delete_wishlist_item'),
+
+    path('orders/', admin_views.order_list, name='order_list'),
+    path('orders/<int:pk>/', admin_views.order_detail, name='order_detail'),
+    path('orders/delete/<int:pk>/', admin_views.order_delete, name='order_delete'),
+
     path('team-members/', admin_views.team_members_list, name='team_members_list'),
     path('map-locations/', admin_views.map_locations_list, name='map_locations_list'),
     path('contact-details/', admin_views.contact_details_list, name='contact_details_list'),
     path('contact-messages/', admin_views.contact_messages_list, name='contact_messages_list'),
-    path('users/', admin_views.users_list, name='users_list'),
-    path('wishlist-items/', admin_views.wishlist_items_list, name='wishlist_items_list'),
-    path('orders/', admin_views.orders_list, name='orders_list'),
-    path('order-items/', admin_views.order_items_list, name='order_items_list'),
     path('newsletter-subscribers/', admin_views.newsletter_subscribers_list, name='newsletter_subscribers_list'),
 ]

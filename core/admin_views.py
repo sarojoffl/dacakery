@@ -1,12 +1,16 @@
 # project/admin_views.py
+from django.contrib.auth.models import User
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.contrib.auth import logout
-from .models import Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection, InstagramImage, Category, Product, Coupon
+from .models import (
+    Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
+    InstagramImage, Category, Product, Coupon, WishlistItem, Order, OrderItem
+)
 from .admin_forms import (
     AdminSliderForm, AboutSectionForm, BlogCategoryForm, BlogPostForm, TestimonialForm,
-    InstagramSectionForm, InstagramImageForm, CategoryForm, ProductForm, CouponForm
+    InstagramSectionForm, InstagramImageForm, CategoryForm, ProductForm, CouponForm, UserForm
 )
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
@@ -408,6 +412,78 @@ def delete_coupon(request, pk):
     return render(request, 'dashboard/coupon_confirm_delete.html', {'coupon': coupon})
 
 @login_required
+def users_list(request):
+    users = User.objects.all()
+    return render(request, 'dashboard/users_list.html', {'users': users})
+
+@login_required
+def add_user(request):
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'User added successfully.')
+            return redirect('users_list')
+    else:
+        form = UserForm()
+    return render(request, 'dashboard/user_form.html', {'form': form, 'title': 'Add User'})
+
+@login_required
+def edit_user(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'User updated successfully.')
+            return redirect('users_list')
+    else:
+        form = UserForm(instance=user)
+    return render(request, 'dashboard/user_form.html', {'form': form, 'title': 'Edit User'})
+
+@login_required
+def delete_user(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    if request.method == 'POST':
+        user.delete()
+        messages.success(request, 'User deleted successfully.')
+        return redirect('users_list')
+    return render(request, 'dashboard/user_confirm_delete.html', {'user': user})
+
+@login_required
+def wishlist_items_list(request):
+    items = WishlistItem.objects.select_related('user', 'product').all()
+    return render(request, 'dashboard/wishlist_items_list.html', {'items': items})
+
+@login_required
+def delete_wishlist_item(request, pk):
+    item = get_object_or_404(WishlistItem, pk=pk)
+    if request.method == 'POST':
+        item.delete()
+        messages.success(request, 'Wishlist item deleted successfully.')
+        return redirect('wishlist_items_list')
+    return render(request, 'dashboard/wishlist_item_confirm_delete.html', {'item': item})
+
+@login_required
+def order_list(request):
+    orders = Order.objects.all().order_by('-created_at')
+    return render(request, 'dashboard/order_list.html', {'orders': orders})
+
+@login_required
+def order_detail(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    return render(request, 'dashboard/order_detail.html', {'order': order})
+
+@login_required
+def order_delete(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    if request.method == 'POST':
+        order.delete()
+        messages.success(request, 'Order deleted successfully.')
+        return redirect('order_list')
+    return render(request, 'dashboard/order_confirm_delete.html', {'order': order})
+
+@login_required
 def team_members_list(request):
     return render(request, 'dashboard/team_members_list.html')
 
@@ -422,22 +498,6 @@ def map_locations_list(request):
 @login_required
 def contact_details_list(request):
     return render(request, 'dashboard/contact_details_list.html')
-
-@login_required
-def users_list(request):
-    return render(request, 'dashboard/users_list.html')
-
-@login_required
-def wishlist_items_list(request):
-    return render(request, 'dashboard/wishlist_items_list.html')
-
-@login_required
-def orders_list(request):
-    return render(request, 'dashboard/orders_list.html')
-
-@login_required
-def order_items_list(request):
-    return render(request, 'dashboard/order_items_list.html')
 
 @login_required
 def newsletter_subscribers_list(request):

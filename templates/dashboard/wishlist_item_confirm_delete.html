@@ -1,0 +1,24 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Delete Wishlist Item{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h4 class="card-title text-danger">Confirm Deletion</h4>
+            <p class="mb-4">
+                Are you sure you want to delete this wishlist item?
+            </p>
+            <p><strong>User:</strong> {{ item.user.username }}</p>
+            <p><strong>Product:</strong> {{ item.product.name }}</p>
+
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">🗑️ Yes, Delete</button>
+                <a href="{% url 'wishlist_items_list' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

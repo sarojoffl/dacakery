@@ -1,0 +1,21 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Delete Order #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h4 class="card-title text-danger">Confirm Delete Order #{{ order.id }}</h4>
+            <p>Are you sure you want to delete this order?</p>
+            <p><strong>Customer:</strong> {{ order.first_name }} {{ order.last_name }}</p>
+            <p><strong>Email:</strong> {{ order.email }}</p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">🗑️ Yes, Delete</button>
+                <a href="{% url 'order_list' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

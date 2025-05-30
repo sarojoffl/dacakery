@@ -1,0 +1,48 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Orders{% endblock %}
+
+{% block content %}
+<h2>Orders</h2>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<table class="table table-bordered table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>#</th>
+            <th>Customer</th>
+            <th>Email</th>
+            <th>Total</th>
+            <th>Payment</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.id }}</td>
+            <td>{{ order.first_name }} {{ order.last_name }}</td>
+            <td>{{ order.email }}</td>
+            <td>रु {{ order.total_amount }}</td>
+            <td>{{ order.payment_method }}</td>
+            <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+            <td>
+                <a href="{% url 'order_detail' order.id %}" class="btn btn-sm btn-info">View</a>
+                <a href="{% url 'order_delete' order.id %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center">No orders found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
