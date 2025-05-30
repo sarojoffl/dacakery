@@ -1,7 +1,7 @@
 from django import forms
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
-    InstagramImage, Category, Product, Coupon, TeamMember
+    InstagramImage, Category, Product, Coupon, TeamMember, MapLocation, ContactDetail
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
@@ -87,3 +87,13 @@ class TeamMemberForm(forms.ModelForm):
     class Meta:
         model = TeamMember
         fields = ['name', 'role', 'image', 'facebook', 'twitter', 'instagram', 'youtube']
+
+class MapLocationForm(forms.ModelForm):
+    class Meta:
+        model = MapLocation
+        fields = '__all__'
+
+class ContactDetailForm(forms.ModelForm):
+    class Meta:
+        model = ContactDetail
+        fields = '__all__'

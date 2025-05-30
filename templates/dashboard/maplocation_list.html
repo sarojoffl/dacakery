@@ -1,0 +1,39 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h2 class="mb-4">{{ title }}</h2>
+
+  {# Django messages section #}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% if map_location %}
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">{{ map_location.title }}</h5>
+        <p><strong>Address:</strong> {{ map_location.address }}</p>
+        <p><strong>Email:</strong> {{ map_location.email }}</p>
+        <p><strong>Phone:</strong> {{ map_location.phone }}</p>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Map Preview:</label>
+          <div>{% autoescape off %}{{ map_location.map_iframe }}{% endautoescape %}</div>
+        </div>
+        <a href="{% url 'maplocation_edit' map_location.pk %}" class="btn btn-primary">Edit Map Location</a>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      No Map Location found.
+    </div>
+    <a href="{% url 'maplocation_add' %}" class="btn btn-success btn-lg">Add Map Location</a>
+  {% endif %}
+</div>
+{% endblock %}

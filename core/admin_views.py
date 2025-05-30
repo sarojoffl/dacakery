@@ -6,11 +6,13 @@ from django.shortcuts import redirect
 from django.contrib.auth import logout
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
-    InstagramImage, Category, Product, Coupon, WishlistItem, Order, NewsletterSubscriber, TeamMember
+    InstagramImage, Category, Product, Coupon, WishlistItem, Order, NewsletterSubscriber,
+    TeamMember, MapLocation, ContactDetail, ContactMessage
 )
 from .admin_forms import (
     AdminSliderForm, AboutSectionForm, BlogCategoryForm, BlogPostForm, TestimonialForm,
-    InstagramSectionForm, InstagramImageForm, CategoryForm, ProductForm, CouponForm, UserForm, TeamMemberForm
+    InstagramSectionForm, InstagramImageForm, CategoryForm, ProductForm, CouponForm, UserForm, TeamMemberForm,
+    MapLocationForm, ContactDetailForm
 )
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
@@ -517,16 +519,72 @@ def delete_team_member(request, pk):
     return render(request, 'dashboard/team_member_confirm_delete.html', {'member': member})
 
 @login_required
+def maplocation_list(request):
+    map_location = MapLocation.objects.first()
+    return render(request, 'dashboard/maplocation_list.html', {'map_location': map_location, 'title': 'Map Location'})
+
+@login_required
+def maplocation_edit(request, pk=None):
+    instance = None
+    if pk:
+        instance = get_object_or_404(MapLocation, pk=pk)
+    else:
+        instance = MapLocation.objects.first()
+
+    if request.method == 'POST':
+        form = MapLocationForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Map Location saved successfully.")
+            return redirect('maplocation_list')
+    else:
+        form = MapLocationForm(instance=instance)
+
+    return render(request, 'dashboard/maplocation_form.html', {'form': form, 'title': 'Edit Map Location' if instance else 'Add Map Location'})
+
+@login_required
+def contactdetail_list(request):
+    contact_detail = ContactDetail.objects.first()
+    return render(request, 'dashboard/contactdetail_list.html', {'contact_detail': contact_detail, 'title': 'Contact Detail'})
+
+@login_required
+def contactdetail_edit(request, pk=None):
+    instance = None
+    if pk:
+        instance = get_object_or_404(ContactDetail, pk=pk)
+    else:
+        instance = ContactDetail.objects.first()
+
+    if request.method == 'POST':
+        form = ContactDetailForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Contact Detail saved successfully.")
+            return redirect('contactdetail_list')
+    else:
+        form = ContactDetailForm(instance=instance)
+
+    return render(request, 'dashboard/contactdetail_form.html', {'form': form, 'title': 'Edit Contact Detail' if instance else 'Add Contact Detail'})
+
+@login_required
 def contact_messages_list(request):
-    return render(request, 'dashboard/contact_messages_list.html')
+    messages_list = ContactMessage.objects.order_by('-submitted_at')
+    return render(request, 'dashboard/contact_messages_list.html', {
+        'messages_list': messages_list,
+        'title': 'Contact Messages'
+    })
 
 @login_required
-def map_locations_list(request):
-    return render(request, 'dashboard/map_locations_list.html')
-
-@login_required
-def contact_details_list(request):
-    return render(request, 'dashboard/contact_details_list.html')
+def contact_message_delete(request, pk):
+    message_obj = get_object_or_404(ContactMessage, pk=pk)
+    if request.method == 'POST':
+        message_obj.delete()
+        messages.success(request, "Message deleted successfully.")
+        return redirect('contact_messages_list')
+    return render(request, 'dashboard/contact_message_confirm_delete.html', {
+        'message': message_obj,
+        'title': 'Delete Contact Message'
+    })
 
 @login_required
 def newsletter_subscribers_list(request):

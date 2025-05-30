@@ -70,10 +70,17 @@ urlpatterns = [
     path('team-members/edit/<int:pk>/', admin_views.edit_team_member, name='edit_team_member'),
     path('team-members/delete/<int:pk>/', admin_views.delete_team_member, name='delete_team_member'),
 
-    path('map-locations/', admin_views.map_locations_list, name='map_locations_list'),
-    path('contact-details/', admin_views.contact_details_list, name='contact_details_list'),
-    path('contact-messages/', admin_views.contact_messages_list, name='contact_messages_list'),
+    path('map-location/', admin_views.maplocation_list, name='maplocation_list'),
+    path('map-location/add/', admin_views.maplocation_edit, name='maplocation_add'),
+    path('map-location/edit/<int:pk>/', admin_views.maplocation_edit, name='maplocation_edit'),
+
+    path('contact-detail/', admin_views.contactdetail_list, name='contactdetail_list'),
+    path('contact-detail/add/', admin_views.contactdetail_edit, name='contactdetail_add'),
+    path('contact-detail/edit/<int:pk>/', admin_views.contactdetail_edit, name='contactdetail_edit'),
+
+    path('dashboard/contact-messages/', admin_views.contact_messages_list, name='contact_messages_list'),
+    path('dashboard/contact-messages/delete/<int:pk>/', admin_views.contact_message_delete, name='contact_message_delete'),
     
     path('newsletter-subscribers/', admin_views.newsletter_subscribers_list, name='newsletter_subscribers_list'),
-    path('newsletter-subscribers/<int:pk>/delete/', admin_views.delete_newsletter_subscriber, name='delete_newsletter_subscriber'),
+    path('newsletter-subscribers/delete/<int:pk>/', admin_views.delete_newsletter_subscriber, name='delete_newsletter_subscriber'),
 ]

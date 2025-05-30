@@ -1,0 +1,41 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h2 class="mb-4">{{ title }}</h2>
+
+  {# Display Django messages #}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% if contact_detail %}
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">{{ contact_detail.title }}</h5>
+        <p><strong>Availability Note:</strong> {{ contact_detail.availability_note }}</p>
+        <p><strong>Weekday Hours:</strong> {{ contact_detail.weekday_hours }}</p>
+        <p><strong>Weekend Hours:</strong> {{ contact_detail.weekend_hours }}</p>
+        {% if contact_detail.image %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Image:</label><br>
+            <img src="{{ contact_detail.image.url }}" alt="Contact Image" class="img-thumbnail" style="max-width: 200px;">
+          </div>
+        {% endif %}
+        <a href="{% url 'contactdetail_edit' contact_detail.pk %}" class="btn btn-primary">Edit Contact Detail</a>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      No Contact Detail found.
+    </div>
+    <a href="{% url 'contactdetail_add' %}" class="btn btn-success btn-lg">Add Contact Detail</a>
+  {% endif %}
+</div>
+{% endblock %}
