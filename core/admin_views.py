@@ -3,10 +3,10 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.contrib.auth import logout
-from .models import Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection, InstagramImage
+from .models import Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection, InstagramImage, Category, Product, Coupon
 from .admin_forms import (
     AdminSliderForm, AboutSectionForm, BlogCategoryForm, BlogPostForm, TestimonialForm,
-    InstagramSectionForm, InstagramImageForm
+    InstagramSectionForm, InstagramImageForm, CategoryForm, ProductForm, CouponForm
 )
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
@@ -285,12 +285,127 @@ def add_instagram_section(request):
     })
 
 @login_required
-def categories_list(request):
-    return render(request, 'dashboard/categories_list.html')
+def category_list(request):
+    categories = Category.objects.all()
+    return render(request, 'dashboard/category_list.html', {'categories': categories})
+
 
 @login_required
-def products_list(request):
-    return render(request, 'dashboard/products_list.html')
+def add_category(request):
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Category added successfully.')
+            return redirect('category_list')
+    else:
+        form = CategoryForm()
+    return render(request, 'dashboard/category_form.html', {'form': form, 'title': 'Add Category'})
+
+
+@login_required
+def edit_category(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Category updated successfully.')
+            return redirect('category_list')
+    else:
+        form = CategoryForm(instance=category)
+    return render(request, 'dashboard/category_form.html', {'form': form, 'title': 'Edit Category'})
+
+
+@login_required
+def delete_category(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    if request.method == 'POST':
+        category.delete()
+        messages.success(request, 'Category deleted successfully.')
+        return redirect('category_list')
+    return render(request, 'dashboard/category_confirm_delete.html', {'category': category})
+
+@login_required
+def product_list(request):
+    products = Product.objects.select_related('category').all()
+    return render(request, 'dashboard/product_list.html', {'products': products})
+
+
+@login_required
+def add_product(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Product added successfully.')
+            return redirect('product_list')
+    else:
+        form = ProductForm()
+    return render(request, 'dashboard/product_form.html', {'form': form, 'title': 'Add Product'})
+
+
+@login_required
+def edit_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Product updated successfully.')
+            return redirect('product_list')
+    else:
+        form = ProductForm(instance=product)
+    return render(request, 'dashboard/product_form.html', {'form': form, 'title': 'Edit Product', 'product': product})
+
+
+@login_required
+def delete_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == 'POST':
+        product.delete()
+        messages.success(request, 'Product deleted successfully.')
+        return redirect('product_list')
+    return render(request, 'dashboard/product_confirm_delete.html', {'product': product})
+
+@login_required
+def coupons_list(request):
+    coupons = Coupon.objects.all()
+    return render(request, 'dashboard/coupons_list.html', {'coupons': coupons})
+
+@login_required
+def add_coupon(request):
+    if request.method == 'POST':
+        form = CouponForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Coupon added successfully.')
+            return redirect('coupons_list')
+    else:
+        form = CouponForm()
+    return render(request, 'dashboard/coupon_form.html', {'form': form, 'title': 'Add Coupon'})
+
+@login_required
+def edit_coupon(request, pk):
+    coupon = get_object_or_404(Coupon, pk=pk)
+    if request.method == 'POST':
+        form = CouponForm(request.POST, instance=coupon)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Coupon updated successfully.')
+            return redirect('coupons_list')
+    else:
+        form = CouponForm(instance=coupon)
+    return render(request, 'dashboard/coupon_form.html', {'form': form, 'title': 'Edit Coupon'})
+
+@login_required
+def delete_coupon(request, pk):
+    coupon = get_object_or_404(Coupon, pk=pk)
+    if request.method == 'POST':
+        coupon.delete()
+        messages.success(request, 'Coupon deleted successfully.')
+        return redirect('coupons_list')
+    return render(request, 'dashboard/coupon_confirm_delete.html', {'coupon': coupon})
 
 @login_required
 def team_members_list(request):
@@ -323,10 +438,6 @@ def orders_list(request):
 @login_required
 def order_items_list(request):
     return render(request, 'dashboard/order_items_list.html')
-
-@login_required
-def coupons_list(request):
-    return render(request, 'dashboard/coupons_list.html')
 
 @login_required
 def newsletter_subscribers_list(request):

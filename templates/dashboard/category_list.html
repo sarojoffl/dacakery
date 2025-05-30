@@ -1,0 +1,45 @@
+{% extends "admin_base.html" %}
+{% block title %}Categories{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Categories</h2>
+    <a href="{% url 'add_category' %}" class="btn btn-success">Add Category</a>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<table class="table table-bordered table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Icon Class</th>
+            <th>Slug</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in categories %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ category.name }}</td>
+            <td>{{ category.icon_class }}</td>
+            <td>{{ category.slug }}</td>
+            <td>
+                <a href="{% url 'edit_category' category.id %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'delete_category' category.id %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center">No categories found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

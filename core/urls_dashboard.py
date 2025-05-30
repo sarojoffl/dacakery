@@ -35,10 +35,23 @@ urlpatterns = [
 
     path('instagram-sections/', admin_views.instagram_sections_list, name='instagram_sections_list'),
     path('nstagram-sections/add/', admin_views.add_instagram_section, name='add_instagram_section'),
-    path('instagram-sections/edit/', admin_views.edit_instagram_section, name='edit_instagram_section'),   
+    path('instagram-sections/edit/', admin_views.edit_instagram_section, name='edit_instagram_section'),
+    
+    path('categories/', admin_views.category_list, name='category_list'),
+    path('categories/add/', admin_views.add_category, name='add_category'),
+    path('categories/edit/<int:pk>/', admin_views.edit_category, name='edit_category'),
+    path('categories/delete/<int:pk>/', admin_views.delete_category, name='delete_category'),
 
-    path('categories/', admin_views.categories_list, name='categories_list'),
-    path('products/', admin_views.products_list, name='products_list'),
+    path('products/', admin_views.product_list, name='product_list'),
+    path('products/add/', admin_views.add_product, name='add_product'),
+    path('products/edit/<int:pk>/', admin_views.edit_product, name='edit_product'),
+    path('products/delete/<int:pk>/', admin_views.delete_product, name='delete_product'),
+
+    path('coupons/', admin_views.coupons_list, name='coupons_list'),
+    path('coupons/add/', admin_views.add_coupon, name='add_coupon'),
+    path('coupons/edit/<int:pk>/', admin_views.edit_coupon, name='edit_coupon'),
+    path('coupons/delete/<int:pk>/', admin_views.delete_coupon, name='delete_coupon'),
+
     path('team-members/', admin_views.team_members_list, name='team_members_list'),
     path('map-locations/', admin_views.map_locations_list, name='map_locations_list'),
     path('contact-details/', admin_views.contact_details_list, name='contact_details_list'),
@@ -47,6 +60,5 @@ urlpatterns = [
     path('wishlist-items/', admin_views.wishlist_items_list, name='wishlist_items_list'),
     path('orders/', admin_views.orders_list, name='orders_list'),
     path('order-items/', admin_views.order_items_list, name='order_items_list'),
-    path('coupons/', admin_views.coupons_list, name='coupons_list'),
     path('newsletter-subscribers/', admin_views.newsletter_subscribers_list, name='newsletter_subscribers_list'),
 ]

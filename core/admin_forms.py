@@ -1,5 +1,8 @@
 from django import forms
-from .models import Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection, InstagramImage
+from .models import (
+    Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
+    InstagramImage, Category, Product, Coupon
+)
 from ckeditor.widgets import CKEditorWidget
 
 class AdminSliderForm(forms.ModelForm):
@@ -47,3 +50,18 @@ class InstagramImageForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['image'].required = False
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ['name', 'icon_class']
+
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = ['category', 'name', 'description', 'in_stock', 'tags', 'price', 'image']
+
+class CouponForm(forms.ModelForm):
+    class Meta:
+        model = Coupon
+        fields = ['code', 'discount', 'active']        
