@@ -1,4 +1,5 @@
 from .models import Product
+from .models import OrganizationDetails
 
 def cart_summary(request):
     cart = request.session.get('cart', {})
@@ -19,4 +20,11 @@ def cart_summary(request):
     return {
         'cart_total': total,
         'cart_item_count': item_count
+    }
+
+def organization_details(request):
+    # Assuming there is only one OrganizationDetails instance
+    organization = OrganizationDetails.objects.first()
+    return {
+        'organization': organization
     }

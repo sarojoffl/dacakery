@@ -2,7 +2,7 @@ from django import forms
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
     InstagramImage, Category, Product, Coupon, TeamMember, MapLocation, ContactDetail,
-    SpecialOffer
+    SpecialOffer, OrganizationDetails
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
@@ -106,3 +106,8 @@ class SpecialOfferForm(forms.ModelForm):
         widgets = {
             'valid_until': forms.DateInput(attrs={'type': 'date'}),
         }
+
+class OrganizationDetailsForm(forms.ModelForm):
+    class Meta:
+        model = OrganizationDetails
+        fields = '__all__' 

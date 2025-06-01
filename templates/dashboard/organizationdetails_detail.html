@@ -1,0 +1,129 @@
+{% extends "admin_base.html" %}
+{% block title %}Organization Details{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+  {% if messages %}
+    <div class="mb-4">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if organization %}
+    <div class="card shadow-lg rounded-4 border-0">
+      <div class="card-header bg-primary text-white rounded-top-4">
+        <h3 class="mb-0"><i class="bi bi-building"></i> Organization Details</h3>
+      </div>
+
+      <div class="card-body px-5 py-4">
+        <div class="row gy-4">
+
+          <!-- Organization Name & Description -->
+          <div class="col-md-6">
+            <h5 class="fw-bold">Name</h5>
+            <p class="fs-5">{{ organization.name }}</p>
+
+            <h5 class="fw-bold mt-4">Description</h5>
+            <p class="text-muted fs-6">{{ organization.description|linebreaks }}</p>
+          </div>
+
+          <!-- Contact Info -->
+          <div class="col-md-6">
+            <h5 class="fw-bold">Contact Details</h5>
+            <ul class="list-group list-group-flush">
+              {% if organization.phone %}
+              <li class="list-group-item d-flex align-items-center">
+                <i class="bi bi-telephone-fill me-3 text-primary fs-4"></i>
+                <span>{{ organization.phone }}</span>
+              </li>
+              {% endif %}
+
+              {% if organization.email %}
+              <li class="list-group-item d-flex align-items-center">
+                <i class="bi bi-envelope-fill me-3 text-primary fs-4"></i>
+                <span>{{ organization.email }}</span>
+              </li>
+              {% endif %}
+
+              {% if organization.address %}
+              <li class="list-group-item d-flex align-items-center">
+                <i class="bi bi-geo-alt-fill me-3 text-primary fs-4"></i>
+                <span>{{ organization.address|linebreaksbr }}</span>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- Working Hours -->
+        <div class="mt-5">
+          <h5 class="fw-bold">Working Hours</h5>
+          <ul class="list-group list-group-horizontal flex-wrap gap-3">
+            <li class="list-group-item flex-fill border rounded shadow-sm">
+              <strong>Monday - Friday:</strong> 08:00 am – 08:30 pm
+            </li>
+            <li class="list-group-item flex-fill border rounded shadow-sm">
+              <strong>Saturday:</strong> 10:00 am – 04:30 pm
+            </li>
+            <li class="list-group-item flex-fill border rounded shadow-sm">
+              <strong>Sunday:</strong> 10:00 am – 04:30 pm
+            </li>
+          </ul>
+        </div>
+
+        <!-- Social Media -->
+        <div class="mt-5">
+          <h5 class="fw-bold mb-3">Follow Us</h5>
+          <div class="d-flex gap-3">
+            {% if organization.facebook_url %}
+              <a href="{{ organization.facebook_url }}" target="_blank" class="btn btn-outline-primary rounded-circle p-3 fs-4 shadow-sm" title="Facebook">
+                <i class="bi bi-facebook"></i>
+              </a>
+            {% endif %}
+            {% if organization.twitter_url %}
+              <a href="{{ organization.twitter_url }}" target="_blank" class="btn btn-outline-info rounded-circle p-3 fs-4 shadow-sm" title="Twitter">
+                <i class="bi bi-twitter"></i>
+              </a>
+            {% endif %}
+            {% if organization.instagram_url %}
+              <a href="{{ organization.instagram_url }}" target="_blank" class="btn btn-outline-danger rounded-circle p-3 fs-4 shadow-sm" title="Instagram">
+                <i class="bi bi-instagram"></i>
+              </a>
+            {% endif %}
+            {% if organization.youtube_url %}
+              <a href="{{ organization.youtube_url }}" target="_blank" class="btn btn-outline-danger rounded-circle p-3 fs-4 shadow-sm" title="YouTube">
+                <i class="bi bi-youtube"></i>
+              </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Edit Button -->
+        <div class="mt-5 text-end">
+          <a href="{% url 'edit_organization_details' %}" class="btn btn-lg btn-primary shadow">
+            <i class="bi bi-pencil-square me-2"></i> Edit Details
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+  {% else %}
+    <!-- No organization details found - show add button -->
+    <div class="d-flex flex-column justify-content-center align-items-center vh-75">
+      <h2 class="mb-4 text-secondary">No Organization Details Found</h2>
+      <a href="{% url 'add_organization_details' %}" class="btn btn-lg btn-success shadow">
+        <i class="bi bi-plus-circle me-2"></i> Add Organization Details
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

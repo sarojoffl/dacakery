@@ -137,12 +137,33 @@
             <div class="row">
                 <div class="col-lg-4 col-md-6 col-sm-6">
                     <div class="footer__widget">
-                        <h6>WORKING HOURS</h6>
-                        <ul>
-                            <li>Monday - Friday: 08:00 am – 08:30 pm</li>
-                            <li>Saturday: 10:00 am – 16:30 pm</li>
-                            <li>Sunday: 10:00 am – 16:30 pm</li>
-                        </ul>
+                    <h6>WORKING HOURS</h6>
+                    <ul>
+                        <li>
+                            Monday - Friday:
+                            {% if organization.working_hours_mon_fri %}
+                                {{ organization.working_hours_mon_fri }}
+                            {% else %}
+                                Not Available
+                            {% endif %}
+                        </li>
+                        <li>
+                            Saturday:
+                            {% if organization.working_hours_sat %}
+                                {{ organization.working_hours_sat }}
+                            {% else %}
+                                Not Available
+                            {% endif %}
+                        </li>
+                        <li>
+                            Sunday:
+                            {% if organization.working_hours_sun %}
+                                {{ organization.working_hours_sun }}
+                            {% else %}
+                                Not Available
+                            {% endif %}
+                        </li>
+                    </ul>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 col-sm-6">
@@ -150,12 +171,37 @@
                         <div class="footer__logo">
                             <a href="#"><img src="{% static 'img/footer-logo.png' %}" alt=""></a>
                         </div>
-                        <p>Lorem ipsum dolor amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore dolore magna aliqua.</p>
+                        <p>
+                        {% if organization.address %}{{ organization.address }}<br>{% endif %}
+                        {% if organization.phone %}Phone: {{ organization.phone }}<br>{% endif %}
+                        {% if organization.email %}
+                            Email: <a href="mailto:{{ organization.email }}">{{ organization.email }}</a>
+                        {% endif %}
+                        </p>
                         <div class="footer__social">
-                            <a href="#"><i class="fa fa-facebook"></i></a>
-                            <a href="#"><i class="fa fa-twitter"></i></a>
-                            <a href="#"><i class="fa fa-instagram"></i></a>
-                            <a href="#"><i class="fa fa-youtube-play"></i></a>
+                        {% if organization.facebook_url %}
+                        <a href="{{ organization.facebook_url }}" target="_blank">
+                            <i class="fa fa-facebook"></i>
+                        </a>
+                        {% endif %}
+
+                        {% if organization.twitter_url %}
+                        <a href="{{ organization.twitter_url }}" target="_blank">
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                        {% endif %}
+
+                        {% if organization.instagram_url %}
+                        <a href="{{ organization.instagram_url }}" target="_blank">
+                            <i class="fa fa-instagram"></i>
+                        </a>
+                        {% endif %}
+
+                        {% if organization.youtube_url %}
+                        <a href="{{ organization.youtube_url }}" target="_blank">
+                            <i class="fa fa-youtube-play"></i>
+                        </a>
+                        {% endif %}
                         </div>
                     </div>
                 </div>

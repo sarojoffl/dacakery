@@ -103,7 +103,7 @@ urlpatterns = [
     path('specialoffers/delete/<int:pk>/', admin_views.delete_specialoffer, name='specialoffer_delete'),
 
     # Organization Details (Singleton)
-    path('organizationdetails/', admin_views.organizationdetails_detail, name='organization_details_list'),
-    path('organizationdetails/add/', admin_views.add_organizationdetails, name='organizationdetails_add'),
-    path('organizationdetails/edit/', admin_views.edit_organizationdetails, name='organizationdetails_edit'),
+    path('organizationdetails/add/', admin_views.add_organization_details, name='add_organization_details'),
+    path('organizationdetails/edit/', admin_views.edit_organization_details, name='edit_organization_details'),
+    path('organizationdetails/', admin_views.organization_details, name='organization_details_list')
 ]

@@ -7,12 +7,12 @@ from django.contrib.auth import logout
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
     InstagramImage, Category, Product, Coupon, WishlistItem, Order, NewsletterSubscriber,
-    TeamMember, MapLocation, ContactDetail, ContactMessage, SpecialOffer
+    TeamMember, MapLocation, ContactDetail, ContactMessage, SpecialOffer, OrganizationDetails
 )
 from .admin_forms import (
     AdminSliderForm, AboutSectionForm, BlogCategoryForm, BlogPostForm, TestimonialForm,
     InstagramSectionForm, InstagramImageForm, CategoryForm, ProductForm, CouponForm, UserForm, TeamMemberForm,
-    MapLocationForm, ContactDetailForm, SpecialOfferForm
+    MapLocationForm, ContactDetailForm, SpecialOfferForm, OrganizationDetailsForm
 )
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
@@ -649,38 +649,37 @@ def delete_specialoffer(request, pk):
 
 # -------- Organization Details (Singleton) ---------
 
-def organizationdetails_detail(request):
-    # Usually only one OrganizationDetails object exists
-    organizationdetails = OrganizationDetails.objects.first()
-    return render(request, 'dashboard/organizationdetails_detail.html', {'organizationdetails': organizationdetails})
+def organization_details(request):
+    organization = OrganizationDetails.objects.first()
+    return render(request, 'dashboard/organizationdetails_detail.html', {'organization': organization})
 
-def add_organizationdetails(request):
+def add_organization_details(request):
     if OrganizationDetails.objects.exists():
         messages.warning(request, "Organization Details already exist. You can edit them instead.")
-        return redirect('organizationdetails_edit')
+        return redirect('edit_organization_details')
 
     if request.method == 'POST':
         form = OrganizationDetailsForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             messages.success(request, "Organization Details added successfully!")
-            return redirect('organizationdetails_detail')
+            return redirect('organization_details_list')
     else:
         form = OrganizationDetailsForm()
     return render(request, 'dashboard/organizationdetails_form.html', {'form': form, 'title': 'Add Organization Details'})
 
-def edit_organizationdetails(request):
+def edit_organization_details(request):
     organizationdetails = OrganizationDetails.objects.first()
     if not organizationdetails:
         messages.warning(request, "No Organization Details found. Please add one first.")
-        return redirect('organizationdetails_add')
+        return redirect('add_organization_details')
 
     if request.method == 'POST':
         form = OrganizationDetailsForm(request.POST, request.FILES, instance=organizationdetails)
         if form.is_valid():
             form.save()
             messages.success(request, "Organization Details updated successfully!")
-            return redirect('organizationdetails_detail')
+            return redirect('organization_details_list')
     else:
         form = OrganizationDetailsForm(instance=organizationdetails)
     return render(request, 'dashboard/organizationdetails_form.html', {'form': form, 'title': 'Edit Organization Details'})

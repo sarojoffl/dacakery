@@ -222,3 +222,23 @@ class NewsletterSubscriber(models.Model):
 
     def __str__(self):
         return self.email
+    
+class OrganizationDetails(models.Model):
+    name = models.CharField(max_length=200)
+    address = models.TextField(blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(blank=True)
+    logo = models.ImageField(upload_to='organization_logos/', blank=True, null=True)
+    description = models.TextField(blank=True)
+
+    working_hours_mon_fri = models.CharField(max_length=50, default="08:00 am – 08:30 pm")
+    working_hours_sat = models.CharField(max_length=50, default="10:00 am – 16:30 pm")
+    working_hours_sun = models.CharField(max_length=50, default="10:00 am – 16:30 pm")
+
+    facebook_url = models.URLField(blank=True, verbose_name="Facebook URL")
+    twitter_url = models.URLField(blank=True, verbose_name="Twitter URL")
+    instagram_url = models.URLField(blank=True, verbose_name="Instagram URL")
+    youtube_url = models.URLField(blank=True, verbose_name="YouTube URL")
+
+    def __str__(self):
+        return self.name
