@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Product Section Begin -->
+<section class="product spad">
+    <div class="container">
+        <div class="section-title">
+            <span>Search Results</span>
+            <h2>Results for "{{ query }}"</h2>
+        </div>
+        <div class="row">
+            {% if results %}
+                {% for product in results %}
+                <div class="col-lg-3 col-md-6 col-sm-6">
+                    <div class="product__item">
+                        <div class="product__item__pic set-bg" data-setbg="{{ product.image.url }}">
+                            <div class="product__label">
+                                <span>{{ product.category.name }}</span>
+                            </div>
+                        </div>
+                        <div class="product__item__text">
+                            <h6><a href="{% url 'product_detail' slug=product.slug %}">{{ product.name }}</a></h6>
+                            <div class="product__item__price">रु {{ product.price }}</div>
+                            <div class="cart_add">
+                                {% if product.in_stock %}
+                                <form action="{% url 'add_to_cart' product.slug %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit">Add to Cart</button>
+                                </form>
+                                {% else %}
+                                <button disabled>Out of Stock</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center w-100 mt-4">No results found for "{{ query }}".</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+<!-- Product Section End -->
+{% endblock %}

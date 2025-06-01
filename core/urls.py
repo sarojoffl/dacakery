@@ -30,13 +30,15 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('register/', views.register_user, name='register'),
 
-    # Profile
+    # User Profile
     path('profile/', views.profile, name='profile'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
 
-    # Checkout
+    # Checkout & Orders
     path('checkout/', views.checkout, name='checkout'),
     path('success/<int:order_id>/', views.order_success, name='order_success'),
+    path('orders/', views.order_list, name='order_list'),
+    path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
 
     # Blog
     path('blog/', views.blog_list, name='blog_list'),
@@ -45,7 +47,6 @@ urlpatterns = [
     # Newsletter
     path('newsletter-signup/', views.newsletter_signup_ajax, name='newsletter_signup_ajax'),
 
-    # Orders
-    path('orders/', views.order_list, name='order_list'),
-    path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
+    # Search
+    path('search/', views.search_results, name='search_results'),
 ]

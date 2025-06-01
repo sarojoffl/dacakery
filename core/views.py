@@ -466,3 +466,16 @@ def newsletter_signup_ajax(request):
         else:
             return JsonResponse({'status': 'error', 'message': 'Invalid email.'})
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+def search_results(request):
+    query = request.GET.get('q', '').strip()
+    results = []
+    if query:
+        # Example: search Products by name or description containing the query (case insensitive)
+        results = Product.objects.filter(name__icontains=query) | Product.objects.filter(description__icontains=query)
+    
+    context = {
+        'query': query,
+        'results': results,
+    }
+    return render(request, 'core/search_results.html', context)
