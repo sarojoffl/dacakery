@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import (
     Slider, Category, Product, AboutSection, TeamMember, Testimonial,
     InstagramSection, MapLocation, ContactDetail, Coupon, WishlistItem, Order,
-    OrderItem, BlogPost, BlogCategory, NewsletterSubscriber
+    OrderItem, BlogPost, BlogCategory, NewsletterSubscriber, SpecialOffer
 )
 from .forms import ContactForm, NewsletterForm
 from django.core.paginator import Paginator
@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from decimal import Decimal
 from django.http import JsonResponse
+from django.utils.timezone import now
 
 def user_login(request):
     if request.method == 'POST':
@@ -100,6 +101,10 @@ def home(request):
     testimonials = Testimonial.objects.all()
     instagram_section = InstagramSection.objects.prefetch_related('images').first()
     map_location = MapLocation.objects.first()
+    special_offers = SpecialOffer.objects.filter(
+        valid_until__gte=now().date()
+    ) | SpecialOffer.objects.filter(valid_until__isnull=True)  # include offers without an expiry
+    
     return render(request, 'core/home.html', {
         'sliders': sliders,
         'about': about,
@@ -109,6 +114,7 @@ def home(request):
         'testimonials': testimonials,
         'instagram_section': instagram_section,
         'map_location': map_location,
+        'special_offers': special_offers,
     })
 
 def about(request):

@@ -4059,3 +4059,72 @@ ol {
   opacity: 1;
   transform: scale(1);
 }
+
+.special-offer {
+    padding: 60px 0;
+}
+
+.special-offer__item {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+    transition: transform 0.3s ease;
+}
+
+.special-offer__item:hover {
+    transform: translateY(-5px);
+}
+
+.special-offer__item__pic {
+    position: relative;
+    height: 220px;
+    background-size: cover !important;
+    background-position: center !important;
+    flex-shrink: 0;
+}
+
+.offer__validity {
+    position: absolute;
+    bottom: 8px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 4px 10px;
+    font-size: 13px;
+    color: #333;
+    border-radius: 5px;
+    font-weight: 600;
+}
+
+.special-offer__item__text {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.special-offer__item__text h5 {
+    margin-bottom: 10px;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.special-offer__item__text p {
+    flex-grow: 1; /* pushes the coupon to the bottom */
+    margin-bottom: 0;
+    color: #555;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.offer__coupon {
+    margin-top: 15px;
+    font-size: 15px;
+    color: #e03e2f;
+    font-weight: 700;
+}
+

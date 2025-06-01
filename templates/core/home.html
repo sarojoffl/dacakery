@@ -26,6 +26,43 @@
 
 {% include 'partials/about_section.html' %}
 
+<!-- Special Offer Section Begin -->
+<section class="special-offer spad">
+    <div class="container">
+        <div class="section-title">
+            <span>Special Offers</span>
+            <h2>Don't Miss Out On Our Exclusive Deals!</h2>
+        </div>
+        <div class="row">
+            {% for offer in special_offers %}
+            <div class="col-lg-4 col-md-6">
+                <div class="special-offer__item">
+                    <div class="special-offer__item__pic set-bg" data-setbg="{{ offer.image.url }}">
+                        {% if offer.valid_until %}
+                        <div class="offer__validity">
+                            Valid Until: {{ offer.valid_until|date:"M d, Y" }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="special-offer__item__text">
+                        <h5>{{ offer.title }}</h5>
+                        <p>{{ offer.description|truncatewords:20 }}</p>
+                        {% if offer.coupon %}
+                        <div class="offer__coupon">
+                            Coupon Code: <strong>{{ offer.coupon.code }}</strong>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p>No special offers available at the moment. Please check back later!</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<!-- Special Offer Section End -->
+
 <!-- Product Section Begin -->
 <section class="product spad">
     <div class="container">

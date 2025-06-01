@@ -178,6 +178,22 @@ class Coupon(models.Model):
     def __str__(self):
         return self.code
     
+class SpecialOffer(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to='offers/')
+    valid_until = models.DateField(null=True, blank=True)
+    coupon = models.ForeignKey(Coupon, null=True, blank=True, on_delete=models.SET_NULL)
+
+    def is_active(self):
+        from django.utils.timezone import now
+        if self.valid_until:
+            return self.valid_until >= now().date()
+        return True
+
+    def __str__(self):
+        return self.title
+    
 class BlogCategory(models.Model):
     name = models.CharField(max_length=100, unique=True)
     
