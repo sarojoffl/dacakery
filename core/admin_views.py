@@ -7,12 +7,12 @@ from django.contrib.auth import logout
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
     InstagramImage, Category, Product, Coupon, WishlistItem, Order, NewsletterSubscriber,
-    TeamMember, MapLocation, ContactDetail, ContactMessage
+    TeamMember, MapLocation, ContactDetail, ContactMessage, SpecialOffer
 )
 from .admin_forms import (
     AdminSliderForm, AboutSectionForm, BlogCategoryForm, BlogPostForm, TestimonialForm,
     InstagramSectionForm, InstagramImageForm, CategoryForm, ProductForm, CouponForm, UserForm, TeamMemberForm,
-    MapLocationForm, ContactDetailForm
+    MapLocationForm, ContactDetailForm, SpecialOfferForm
 )
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
@@ -605,3 +605,82 @@ def delete_newsletter_subscriber(request, pk):
 def logout_view(request):
     logout(request)
     return redirect('home')  # Replace 'home' with your actual homepage url name
+
+# -------- Special Offers ---------
+
+def specialoffers_list(request):
+    specialoffers = SpecialOffer.objects.all()
+    return render(request, 'dashboard/specialoffers_list.html', {'specialoffers': specialoffers})
+
+def add_specialoffer(request):
+    if request.method == 'POST':
+        form = SpecialOfferForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Special Offer added successfully!")
+            return redirect('specialoffers_list')
+    else:
+        form = SpecialOfferForm()
+    return render(request, 'dashboard/specialoffer_form.html', {'form': form, 'title': 'Add Special Offer'})
+
+def edit_specialoffer(request, pk):
+    specialoffer = get_object_or_404(SpecialOffer, pk=pk)
+    if request.method == 'POST':
+        form = SpecialOfferForm(request.POST, request.FILES, instance=specialoffer)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Special Offer updated successfully!")
+            return redirect('specialoffers_list')
+    else:
+        form = SpecialOfferForm(instance=specialoffer)
+    return render(request, 'dashboard/specialoffer_form.html', {'form': form, 'title': 'Edit Special Offer'})
+
+def delete_specialoffer(request, pk):
+    specialoffer = get_object_or_404(SpecialOffer, pk=pk)
+    if request.method == 'POST':
+        specialoffer.delete()
+        messages.success(request, "Special Offer deleted successfully!")
+        return redirect('specialoffers_list')
+    return render(request, 'dashboard/specialoffer_confirm_delete.html', {
+        'specialoffer': specialoffer,
+        'title': 'Delete Special Offer'
+    })
+
+
+# -------- Organization Details (Singleton) ---------
+
+def organizationdetails_detail(request):
+    # Usually only one OrganizationDetails object exists
+    organizationdetails = OrganizationDetails.objects.first()
+    return render(request, 'dashboard/organizationdetails_detail.html', {'organizationdetails': organizationdetails})
+
+def add_organizationdetails(request):
+    if OrganizationDetails.objects.exists():
+        messages.warning(request, "Organization Details already exist. You can edit them instead.")
+        return redirect('organizationdetails_edit')
+
+    if request.method == 'POST':
+        form = OrganizationDetailsForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Organization Details added successfully!")
+            return redirect('organizationdetails_detail')
+    else:
+        form = OrganizationDetailsForm()
+    return render(request, 'dashboard/organizationdetails_form.html', {'form': form, 'title': 'Add Organization Details'})
+
+def edit_organizationdetails(request):
+    organizationdetails = OrganizationDetails.objects.first()
+    if not organizationdetails:
+        messages.warning(request, "No Organization Details found. Please add one first.")
+        return redirect('organizationdetails_add')
+
+    if request.method == 'POST':
+        form = OrganizationDetailsForm(request.POST, request.FILES, instance=organizationdetails)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Organization Details updated successfully!")
+            return redirect('organizationdetails_detail')
+    else:
+        form = OrganizationDetailsForm(instance=organizationdetails)
+    return render(request, 'dashboard/organizationdetails_form.html', {'form': form, 'title': 'Edit Organization Details'})

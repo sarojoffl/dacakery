@@ -1,7 +1,8 @@
 from django import forms
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
-    InstagramImage, Category, Product, Coupon, TeamMember, MapLocation, ContactDetail
+    InstagramImage, Category, Product, Coupon, TeamMember, MapLocation, ContactDetail,
+    SpecialOffer
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
@@ -97,3 +98,11 @@ class ContactDetailForm(forms.ModelForm):
     class Meta:
         model = ContactDetail
         fields = '__all__'
+
+class SpecialOfferForm(forms.ModelForm):
+    class Meta:
+        model = SpecialOffer
+        fields = ['title', 'description', 'image', 'valid_until', 'coupon']
+        widgets = {
+            'valid_until': forms.DateInput(attrs={'type': 'date'}),
+        }

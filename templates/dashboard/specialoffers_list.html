@@ -1,0 +1,62 @@
+{% extends "admin_base.html" %}
+{% block title %}Special Offers{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Special Offers</h2>
+    <a href="{% url 'specialoffer_add' %}" class="btn btn-success">Add Special Offer</a>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<table class="table table-bordered table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>#</th>
+            <th>Image</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Valid Until</th>
+            <th>Coupon Code</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for offer in specialoffers %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if offer.image %}
+                    <img src="{{ offer.image.url }}" alt="{{ offer.title }}" style="width: 60px; height: auto;">
+                {% else %}
+                    <span class="text-muted">No Image</span>
+                {% endif %}
+            </td>
+            <td>{{ offer.title }}</td>
+            <td>{{ offer.description|truncatewords:10 }}</td>
+            <td>{{ offer.valid_until|date:"Y-m-d" }}</td>
+            <td>
+                {% if offer.coupon %}
+                    {{ offer.coupon.code }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'specialoffer_edit' offer.id %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'specialoffer_delete' offer.id %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center">No special offers found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
