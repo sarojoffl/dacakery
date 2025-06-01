@@ -26,25 +26,6 @@
 
 {% include 'partials/about_section.html' %}
 
-<!-- Categories Section Begin -->
-<div class="categories">
-    <div class="container">
-        <div class="row">
-            <div class="categories__slider owl-carousel">
-                {% for category in categories %}
-                <div class="categories__item">
-                    <div class="categories__item__icon">
-                        <span class="{{ category.icon_class }}"></span>
-                        <h5>{{ category.name }}</h5>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Categories Section End -->
-
 <!-- Product Section Begin -->
 <section class="product spad">
     <div class="container">

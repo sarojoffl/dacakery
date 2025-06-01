@@ -26,7 +26,6 @@ class AboutSection(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
-    icon_class = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, blank=True)
 
     def __str__(self):

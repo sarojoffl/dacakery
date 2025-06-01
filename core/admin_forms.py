@@ -56,7 +56,7 @@ class InstagramImageForm(forms.ModelForm):
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
-        fields = ['name', 'icon_class']
+        fields = ['name']
 
 class ProductForm(forms.ModelForm):
     class Meta:
