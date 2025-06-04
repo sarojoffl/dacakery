@@ -28,27 +28,27 @@
         <div class="row d-flex justify-content-center">
             <div class="col-lg-8">
                 <div class="blog__details__content">
-                <div class="blog__details__share">
-                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="facebook">
-                        <i class="fa fa-facebook"></i>
-                    </a>
-                    <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ blog.title|urlencode }}" target="_blank" class="twitter">
-                        <i class="fa fa-twitter"></i>
-                    </a>
-                    <a href="https://www.youtube.com/" target="_blank" class="youtube">
-                        <i class="fa fa-youtube-play"></i>
-                    </a>
-                    <a href="https://www.instagram.com/" target="_blank" class="instagram">
-                        <i class="fa fa-instagram"></i>
-                    </a>
-                </div>
+                    <div class="blog__details__share">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="facebook">
+                            <i class="fa fa-facebook"></i>
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ blog.title|urlencode }}" target="_blank" class="twitter">
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                        <a href="https://www.youtube.com/" target="_blank" class="youtube">
+                            <i class="fa fa-youtube-play"></i>
+                        </a>
+                        <a href="https://www.instagram.com/" target="_blank" class="instagram">
+                            <i class="fa fa-instagram"></i>
+                        </a>
+                    </div>
 
                     <!-- Main Blog Content -->
                     <div class="blog__details__text">
                         {{ blog.content|linebreaks }}
                     </div>
 
-                    <!-- Tags (optional - implement as needed) -->
+                    <!-- Tags -->
                     {% if blog.tags.all %}
                     <div class="blog__details__tags">
                         <span>Tag</span>
@@ -58,7 +58,7 @@
                     </div>
                     {% endif %}
 
-                    <!-- Previous & Next Post Buttons (optional logic) -->
+                    <!-- Previous & Next Post Buttons -->
                     <div class="blog__details__btns">
                         <div class="row">
                             <div class="col-lg-6 col-md-6 col-sm-6">
@@ -82,24 +82,42 @@
                         </div>
                     </div>
 
-                    <!-- Author Info (static for now or fetch from user model if available) -->
+                    <!-- Author Info -->
                     <div class="blog__details__author">
                         <div class="blog__details__author__pic">
-                            <img src="{% static 'img/blog/details/blog-author.jpg' %}" alt="">
+                            {% if author_profile and author_profile.profile_picture %}
+                                <img src="{{ author_profile.profile_picture.url }}" alt="{{ blog.author.get_full_name }}">
+                            {% else %}
+                                <img src="{% static 'img/blog/details/blog-author.jpg' %}" alt="">
+                            {% endif %}
                         </div>
                         <div class="blog__details__author__text">
-                            <h6>{{ blog.author }}</h6>
+                            <h6>{{ blog.author.get_full_name }}</h6>
                             <div class="blog__details__author__social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                                <a href="#"><i class="fa fa-youtube-play"></i></a>
+                                {% if author_profile and author_profile.facebook %}
+                                    <a href="{{ author_profile.facebook }}" target="_blank" class="me-2"><i class="fa fa-facebook"></i></a>
+                                {% endif %}
+                                {% if author_profile and author_profile.twitter %}
+                                    <a href="{{ author_profile.twitter }}" target="_blank" class="me-2"><i class="fa fa-twitter"></i></a>
+                                {% endif %}
+                                {% if author_profile and author_profile.instagram %}
+                                    <a href="{{ author_profile.instagram }}" target="_blank" class="me-2"><i class="fa fa-instagram"></i></a>
+                                {% endif %}
+                                {% if author_profile and author_profile.linkedin %}
+                                    <a href="{{ author_profile.linkedin }}" target="_blank" class="me-2"><i class="fa fa-linkedin"></i></a>
+                                {% endif %}
                             </div>
-                            <p>This is a static bio section. You can make it dynamic if authors are user profiles.</p>
+                            <p>
+                                {% if author_profile and author_profile.bio %}
+                                    {{ author_profile.bio }}
+                                {% else %}
+                                    This is a static bio section. You can make it dynamic if authors are user profiles.
+                                {% endif %}
+                            </p>
                         </div>
                     </div>
 
-                    <!-- Comments section placeholder -->
+                    <!-- Comments -->
                     <div class="blog__details__comment">
                         <h5>Comments</h5>
                         <a href="#" class="primary-btn">Leave a comment</a>

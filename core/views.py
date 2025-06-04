@@ -586,7 +586,16 @@ def blog_list(request):
 
 def blog_detail(request, pk):
     blog = get_object_or_404(BlogPost, pk=pk)
-    return render(request, 'core/blog_detail.html', {'blog': blog})
+    author_profile = None
+    if blog.author:
+        author_profile = getattr(blog.author, 'userprofile', None)
+
+    context = {
+        'blog': blog,
+        'author_profile': author_profile,
+        # You can add prev_blog, next_blog here if you have logic for it
+    }
+    return render(request, 'core/blog_detail.html', context)
 
 def newsletter_signup_ajax(request):
     if request.method == 'POST':

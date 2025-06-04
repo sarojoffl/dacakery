@@ -232,7 +232,7 @@ class BlogCategory(models.Model):
 class BlogPost(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
-    author = models.CharField(max_length=100)
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='blog_posts')
     image = models.ImageField(upload_to='blog_images/')
     views = models.PositiveIntegerField(default=0)
     category = models.ForeignKey(BlogCategory, on_delete=models.SET_NULL, null=True, related_name='blog_posts')
