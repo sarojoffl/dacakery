@@ -495,7 +495,7 @@ def order_delete(request, pk):
     if request.method == 'POST':
         order.delete()
         messages.success(request, 'Order deleted successfully.')
-        return redirect('order_list')
+        return redirect('admin_order_list')
     return render(request, 'dashboard/order_confirm_delete.html', {'order': order})
 
 # -- -------- Team Members ---------

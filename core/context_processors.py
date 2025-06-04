@@ -8,19 +8,21 @@ def cart_summary(request):
 
     try:
         products = Product.objects.filter(id__in=cart.keys())
-
         for product in products:
-            quantity = cart.get(str(product.id), 0)
-            subtotal = product.price * quantity
-            total += subtotal
+            item = cart.get(str(product.id), {})
+            # item is a dict, get quantity safely
+            quantity = item.get('quantity', 0) if isinstance(item, dict) else 0
+
+            total += product.price * quantity
             item_count += quantity
-    except:
-        pass  # Fails silently if Product table doesn't exist (e.g., during migrations)
+    except Exception:
+        pass  # Fail silently, e.g. migrations
 
     return {
         'cart_total': total,
-        'cart_item_count': item_count
+        'cart_item_count': item_count,
     }
+
 
 def organization_details(request):
     # Assuming there is only one OrganizationDetails instance
