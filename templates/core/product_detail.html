@@ -26,19 +26,25 @@
 <!-- Shop Details Section Begin -->
 <section class="product-details spad">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-6">
+        
+        <!-- 🔼 Image + Thumbnails at the top -->
+        <div class="row mb-4">
                 <div class="product__details__img">
                     <div class="product__details__big__img">
                         <img class="big_img" src="{{ product.image.url }}" alt="{{ product.name }}">
                     </div>
                 </div>
-            </div>
-            <div class="col-lg-6">
+        </div>
+
+        <!-- 🔽 Product Info (Left) + Form (Right) -->
+        <div class="row">
+            <!-- Left: Product Info -->
+            <div class="col-md-6">
                 <div class="product__details__text">
                     <div class="product__label">{{ product.category.name }}</div>
                     <h4>{{ product.name }}</h4>
-                    <h5>रु {{ product.price }}</h5>
+                    <h5>रु <span id="dynamic-price">{{ product.price }}</span></h5>
+                    <input type="hidden" id="base-price" value="{{ product.price }}">
                     <p>{{ product.description }}</p>
                     <ul>
                         <li>SKU: <span>{{ product.id }}</span></li>
@@ -54,38 +60,60 @@
                             </span>
                         </li>
                     </ul>
-                    <div class="product__details__option">
-                        {% if product.in_stock %}
-                            <form action="{% url 'add_to_cart' product.slug %}" method="POST">
-                                {% csrf_token %}
-                                <div class="quantity">
-                                    <div class="pro-qty">
-                                        <input type="number" name="quantity" value="1" min="1">
-                                    </div>
-                                </div>
-                                <button type="submit" class="primary-btn">Add to cart</button>
-                            </form>
-                        {% else %}
-                            <div class="quantity">
-                                <div class="pro-qty">
-                                    <input type="number" value="0" disabled>
-                                </div>
-                            </div>
-                            <button class="primary-btn" disabled style="background-color: #ccc; cursor: not-allowed;">
-                                Out of Stock
-                            </button>
-                        {% endif %}
+                </div>
+            </div>
 
-                        {% if user.is_authenticated %}
-                            <a href="{% url 'add_to_wishlist' product.slug %}" class="heart__btn" title="Add to Wishlist">
-                                <span class="icon_heart_alt"></span>
-                            </a>
-                        {% else %}
-                            <a href="{% url 'login' %}?next={{ request.path }}" class="heart__btn" title="Login to use Wishlist">
-                                <span class="icon_heart_alt"></span>
-                            </a>
-                        {% endif %}
+            <!-- Right: Customization Form -->
+            <div class="col-md-6">
+                <div class="product__details__option">
+                    <div class="row mb-4">
+                        <div class="col-12 text-center">
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'add_to_wishlist' product.slug %}" class="heart__btn d-inline-block" title="Add to Wishlist">
+                                    <span class="icon_heart_alt"></span> Add to Wishlist
+                                </a>
+                            {% else %}
+                                <a href="{% url 'login' %}?next={{ request.path }}" class="heart__btn d-inline-block" title="Login to use Wishlist">
+                                    <span class="icon_heart_alt"></span> Login to Wishlist
+                                </a>
+                            {% endif %}
+                        </div>
                     </div>
+
+                    {% if product.in_stock %}
+                <form action="{% url 'add_to_cart' product.slug %}" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label><strong>Options:</strong></label><br>
+                        <label><input type="checkbox" name="eggless" id="eggless"> Eggless (+रु 150)</label>
+                        <label><input type="checkbox" name="sugarless" id="sugarless"> Sugarless (+रु 100)</label>
+                    </div>
+                    <div class="mb-3" style="display: flex; align-items: center; gap: 10px;">
+                        <label for="size" style="margin-bottom: 0;"><strong>Size:</strong></label>
+                        <select name="size" id="size" class="form-control" required style="flex: 1;">
+                            <option value="">Select Size</option>
+                            <option value="0.5">Small</option>
+                            <option value="1">Medium</option>
+                            <option value="2">Large</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message"><strong>Custom Message on Cake:</strong></label>
+                        <input type="text" name="message" maxlength="100" class="form-control" placeholder="Happy Birthday!">
+                    </div>
+                    <div class="quantity mb-3">
+                        <div class="pro-qty">
+                            <input type="number" name="quantity" value="1" min="1">
+                        </div>
+                    </div>
+                    <button type="submit" class="primary-btn">Add to cart</button>
+                </form>
+
+                    {% else %}
+                        <button class="primary-btn" disabled style="background-color: #ccc; cursor: not-allowed;">
+                            Out of Stock
+                        </button>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -93,6 +121,7 @@
 </section>
 <!-- Shop Details Section End -->
 
+{% if related_products %}
 <!-- Related Products Section Begin -->
 <section class="related-products spad">
     <div class="container">
@@ -135,4 +164,60 @@
     </div>
 </section>
 <!-- Related Products Section End -->
+{% endif %}
+
+{% block extra_scripts %}
+{{ block.super }}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const EXTRA_PRICES = {
+      eggless: 150.0,
+      sugarless: 100.0,
+      size: {
+        '0.5': 0.5,
+        '1': 1.0,
+        '2': 2.0
+      }
+    };
+
+    const basePrice = parseFloat(document.getElementById('base-price').value);
+    const priceDisplay = document.getElementById('dynamic-price');
+
+    const sizeSelect = document.getElementById('size');
+    const egglessCheckbox = document.getElementById('eggless');
+    const sugarlessCheckbox = document.getElementById('sugarless');
+
+    function updatePrice() {
+      console.log('Updating price...');
+      const selectedSize = sizeSelect.value;
+      const sizeMultiplier = EXTRA_PRICES.size[selectedSize] || 1.0;
+
+      let finalPrice = basePrice * sizeMultiplier;
+
+      if (egglessCheckbox.checked) finalPrice += EXTRA_PRICES.eggless;
+      if (sugarlessCheckbox.checked) finalPrice += EXTRA_PRICES.sugarless;
+
+      priceDisplay.textContent = finalPrice.toFixed(2);
+    }
+
+    sizeSelect.addEventListener('change', () => {
+      console.log('Size changed:', sizeSelect.value);
+      updatePrice();
+    });
+
+    egglessCheckbox.addEventListener('change', () => {
+      console.log('Eggless changed:', egglessCheckbox.checked);
+      updatePrice();
+    });
+
+    sugarlessCheckbox.addEventListener('change', () => {
+      console.log('Sugarless changed:', sugarlessCheckbox.checked);
+      updatePrice();
+    });
+
+    updatePrice();
+  });
+</script>
+{% endblock %}
+
 {% endblock %}

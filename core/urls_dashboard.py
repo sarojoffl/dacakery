@@ -68,9 +68,9 @@ urlpatterns = [
     path('wishlist-items/delete/<int:pk>/', admin_views.delete_wishlist_item, name='delete_wishlist_item'),
 
     # Orders
-    path('orders/', admin_views.order_list, name='order_list'),
-    path('orders/<int:pk>/', admin_views.order_detail, name='order_detail'),
-    path('orders/delete/<int:pk>/', admin_views.order_delete, name='order_delete'),
+    path('orders/', admin_views.order_list, name='admin_order_list'),
+    path('orders/<int:pk>/', admin_views.order_detail, name='admin_order_detail'),
+    path('orders/delete/<int:pk>/', admin_views.order_delete, name='admin_order_delete'),
 
     # Team Members
     path('team-members/', admin_views.team_members_list, name='team_members_list'),

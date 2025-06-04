@@ -16,6 +16,7 @@ from django.contrib.auth.hashers import make_password
 from decimal import Decimal
 from django.http import JsonResponse
 from django.utils.timezone import now
+from datetime import date
 
 def user_login(request):
     if request.method == 'POST':
@@ -211,27 +212,66 @@ def remove_from_wishlist(request, slug):
         messages.error(request, f'{product.name} is not in your wishlist.')
     return redirect('wishlist')
 
+EXTRA_PRICES = {
+    'eggless': Decimal('150.0'),
+    'sugarless': Decimal('100.0'),
+    'size': {
+        '0.5': Decimal('0.5'),
+        '1': Decimal('1.0'),
+        '2': Decimal('2.0')
+    }
+}
+
 def cart(request):
     cart = request.session.get('cart', {})
-    products = Product.objects.filter(id__in=cart.keys())
-    
     cart_items = []
-    total = 0
+    total = Decimal('0')
 
-    for product in products:
-        quantity = cart[str(product.id)]
-        subtotal = product.price * quantity
+    for product_id, item in cart.items():
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            continue
+
+        # Fix here: check if item is dict, else assume quantity as int
+        if isinstance(item, dict):
+            quantity = item.get('quantity', 1)
+            size = item.get('size', '1')
+            eggless = item.get('eggless', False)
+            sugarless = item.get('sugarless', False)
+            message = item.get('message')
+        else:
+            # Item is just quantity (int)
+            quantity = item
+            size = '1'  # default size
+            eggless = False
+            sugarless = False
+            message = ''
+
+        # Base price adjustments
+        base_price = product.price * EXTRA_PRICES['size'].get(size, Decimal('1.0'))
+
+        if eggless:
+            base_price += EXTRA_PRICES['eggless']
+        if sugarless:
+            base_price += EXTRA_PRICES['sugarless']
+
+        subtotal = base_price * quantity
         total += subtotal
+
         cart_items.append({
             'product': product,
             'quantity': quantity,
+            'eggless': eggless,
+            'sugarless': sugarless,
+            'size': size,
+            'message': message,
             'subtotal': subtotal
         })
 
     coupon_data = request.session.get('coupon')
     discount_percent = Decimal(str(coupon_data['discount'])) if coupon_data else Decimal('0.0')
-    discount_percent = min(discount_percent, Decimal('100.0'))  # Cap at 100%
-
+    discount_percent = min(discount_percent, Decimal('100.0'))
     discount = (total * discount_percent) / Decimal('100.0')
     discounted_total = total - discount
 
@@ -251,32 +291,44 @@ def add_to_cart(request, slug):
 
         product_id = str(product.id)
         quantity = int(request.POST.get('quantity', 1))
+        eggless = request.POST.get('eggless') == 'on'
+        sugarless = request.POST.get('sugarless') == 'on'
+        size = request.POST.get('size')
+        message = request.POST.get('message')
 
-        if product_id in cart:
-            cart[product_id] += quantity
-        else:
-            cart[product_id] = quantity
+        item = {
+            'quantity': quantity,
+            'eggless': eggless,
+            'sugarless': sugarless,
+            'size': size,
+            'message': message
+        }
 
+        cart[product_id] = item
         request.session['cart'] = cart
         messages.success(request, f"{product.name} added to cart!")
         return redirect('cart')
     else:
         return redirect('product_detail', slug=slug)
 
+
 def update_cart(request):
     if request.method == 'POST':
         cart = request.session.get('cart', {})
 
-        # Loop through POST data and update quantities
         for key, value in request.POST.items():
             if key.startswith('quantity_'):
                 try:
                     product_id = key.split('_')[1]
                     quantity = int(value)
                     if quantity < 1:
-                        continue
-                    if product_id in cart:
-                        cart[product_id] = quantity
+                        # Remove item if quantity less than 1
+                        if product_id in cart:
+                            del cart[product_id]
+                    else:
+                        if product_id in cart:
+                            # Update quantity inside the cart item dict
+                            cart[product_id]['quantity'] = quantity
                 except (ValueError, IndexError):
                     continue
 
@@ -316,7 +368,7 @@ def apply_coupon(request):
 def checkout(request):
     cart = request.session.get('cart', {})
 
-    coupon_data = request.session.get('coupon', None)
+    coupon_data = request.session.get('coupon')
     discount_percent = Decimal(str(coupon_data['discount'])) if coupon_data else Decimal('0.0')
     discount_percent = min(discount_percent, Decimal('100.0'))
     coupon_code = coupon_data['code'] if coupon_data else ''
@@ -340,8 +392,15 @@ def checkout(request):
         email = request.POST.get('email')
         notes = request.POST.get('notes', '')
         payment_method = request.POST.get('payment_method', 'cod')
+        delivery_date = request.POST.get('delivery_date')
+        delivery_time = request.POST.get('delivery_time')
 
-        # Handle account creation
+        # Validate delivery date
+        if delivery_date and date.fromisoformat(delivery_date) < date.today():
+            messages.error(request, "Delivery date cannot be in the past.")
+            return redirect('checkout')
+
+        # Account creation
         create_account = request.POST.get('create_account')
         account_password = request.POST.get('account_password')
 
@@ -361,11 +420,45 @@ def checkout(request):
                 password=make_password(account_password)
             )
 
-        # Calculate total
-        total = 0
-        for product_id, quantity in cart.items():
-            product = Product.objects.get(id=product_id)
-            total += product.price * quantity
+        total = Decimal('0')
+        order_items = []
+
+        for product_id, item in cart.items():
+            product = get_object_or_404(Product, id=product_id)
+
+            if isinstance(item, dict):
+                quantity = int(item.get('quantity', 1))
+                size = item.get('size', '1')
+                eggless = item.get('eggless', False)
+                sugarless = item.get('sugarless', False)
+                message = item.get('message', '')
+            else:
+                quantity = int(item)
+                size = '1'
+                eggless = False
+                sugarless = False
+                message = ''
+
+            base_price = product.price * EXTRA_PRICES['size'].get(size, Decimal('1.0'))
+            if eggless:
+                base_price += EXTRA_PRICES['eggless']
+            if sugarless:
+                base_price += EXTRA_PRICES['sugarless']
+
+            subtotal = base_price * quantity
+            total += subtotal
+
+            order_items.append({
+                'product': product,
+                'quantity': quantity,
+                'price': base_price,
+                'size': size,
+                'eggless': eggless,
+                'sugarless': sugarless,
+                'delivery_date': delivery_date,
+                'delivery_time': delivery_time,
+                'message': message
+            })
 
         discount_amount = (total * discount_percent) / Decimal('100.0')
         final_total = total - discount_amount
@@ -388,36 +481,62 @@ def checkout(request):
             total_amount=final_total,
             coupon_code=coupon_code,
             discount_amount=discount_amount,
+            delivery_date=delivery_date,
+            delivery_time=delivery_time,
         )
 
-        # Create Order Items
-        for product_id, quantity in cart.items():
-            product = Product.objects.get(id=product_id)
+        # Create OrderItems
+        for item in order_items:
             OrderItem.objects.create(
                 order=order,
-                product=product,
-                quantity=quantity,
-                price=product.price,
+                product=item['product'],
+                quantity=item['quantity'],
+                price=item['price'],
+                eggless=item['eggless'],
+                sugarless=item['sugarless'],
+                size=item['size'],
+                message=item['message'],
             )
 
-        # Clear cart and discount session
         request.session['cart'] = {}
-        request.session.pop('coupon', None)  # fixed from 'discount' to 'coupon'
+        request.session.pop('coupon', None)
 
         return redirect('order_success', order_id=order.id)
 
-    # GET request: prepare cart data
+    # GET: Prepare cart summary for checkout page
     cart_items = []
-    total = 0
-    for product_id, quantity in cart.items():
-        product = Product.objects.get(id=product_id)
-        subtotal = product.price * quantity
+    total = Decimal('0')
+    for product_id, item in cart.items():
+        product = get_object_or_404(Product, id=product_id)
+
+        if isinstance(item, dict):
+            quantity = int(item.get('quantity', 1))
+            size = item.get('size', '1')
+            eggless = item.get('eggless', False)
+            sugarless = item.get('sugarless', False)
+        else:
+            quantity = int(item)
+            size = '1'
+            eggless = False
+            sugarless = False
+
+        base_price = product.price * EXTRA_PRICES['size'].get(size, Decimal('1.0'))
+        if eggless:
+            base_price += EXTRA_PRICES['eggless']
+        if sugarless:
+            base_price += EXTRA_PRICES['sugarless']
+
+        subtotal = base_price * quantity
+        total += subtotal
+
         cart_items.append({
             'product': product,
             'quantity': quantity,
+            'size': size,
+            'eggless': eggless,
+            'sugarless': sugarless,
             'subtotal': subtotal,
         })
-        total += subtotal
 
     discount_amount = (total * discount_percent) / Decimal('100.0')
     final_total = total - discount_amount

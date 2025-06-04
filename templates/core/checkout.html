@@ -101,6 +101,14 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="checkout__input">
+                            <p>Delivery Date<span>*</span></p>
+                            <input type="date" name="delivery_date" required>
+                        </div>
+                        <div class="checkout__input">
+                            <p>Delivery Time<span>*</span></p>
+                            <input type="time" name="delivery_time" required>
+                        </div>
 
                         {% if not request.user.is_authenticated %}
                             <div class="checkout__input__checkbox">

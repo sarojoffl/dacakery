@@ -1,7 +1,7 @@
 # project/admin_views.py
 from django.contrib.auth.models import User
 from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import redirect
 from django.contrib.auth import logout
 from .models import (
@@ -18,16 +18,18 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from django.forms import modelformset_factory
 
-@login_required
+# -- -------- Dashboard Home ---------
+@staff_member_required
 def dashboard_home(request):
     return render(request, 'dashboard/home.html')
 
-@login_required
+# -- -------- Sliders ---------
+@staff_member_required
 def sliders_list(request):
     sliders = Slider.objects.all()
     return render(request, 'dashboard/sliders_list.html', {'sliders': sliders})
 
-@login_required
+@staff_member_required
 def add_slider(request):
     if request.method == 'POST':
         form = AdminSliderForm(request.POST, request.FILES)
@@ -39,7 +41,7 @@ def add_slider(request):
         form = AdminSliderForm()
     return render(request, 'dashboard/slider_form.html', {'form': form, 'title': 'Add Slider'})
 
-@login_required
+@staff_member_required
 def edit_slider(request, pk):
     slider = get_object_or_404(Slider, pk=pk)
     if request.method == 'POST':
@@ -52,7 +54,7 @@ def edit_slider(request, pk):
         form = AdminSliderForm(instance=slider)
     return render(request, 'dashboard/slider_form.html', {'form': form, 'title': 'Edit Slider'})
 
-@login_required
+@staff_member_required
 def delete_slider(request, pk):
     slider = get_object_or_404(Slider, pk=pk)
     if request.method == 'POST':
@@ -61,12 +63,13 @@ def delete_slider(request, pk):
         return redirect('sliders_list')
     return render(request, 'dashboard/slider_confirm_delete.html', {'slider': slider})
 
-@login_required
+# -- -------- About Section ---------
+@staff_member_required
 def about_section(request):
     about = AboutSection.objects.first()
     return render(request, 'dashboard/about_section.html', {'about': about})
 
-@login_required
+@staff_member_required
 def add_about_section(request):
     if request.method == 'POST':
         form = AboutSectionForm(request.POST)
@@ -78,7 +81,7 @@ def add_about_section(request):
         form = AboutSectionForm()
     return render(request, 'dashboard/about_section_form.html', {'form': form, 'title': 'Add About Section'})
 
-@login_required
+@staff_member_required
 def edit_about_section(request, pk):
     about = get_object_or_404(AboutSection, pk=pk)
     if request.method == 'POST':
@@ -91,7 +94,8 @@ def edit_about_section(request, pk):
         form = AboutSectionForm(instance=about)
     return render(request, 'dashboard/about_section_form.html', {'form': form, 'title': 'Edit About Section'})
 
-@login_required
+# -- -------- Blog Categories ---------
+@staff_member_required
 def blog_categories_list(request):
     categories = BlogCategory.objects.all()
     return render(request, 'dashboard/blog_categories_list.html', {'categories': categories})
@@ -107,7 +111,7 @@ def add_blog_category(request):
         form = BlogCategoryForm()
     return render(request, 'dashboard/blog_category_form.html', {'form': form, 'title': 'Add Blog Category'})
 
-@login_required
+@staff_member_required
 def edit_blog_category(request, pk):
     category = get_object_or_404(BlogCategory, pk=pk)
     if request.method == 'POST':
@@ -120,7 +124,7 @@ def edit_blog_category(request, pk):
         form = BlogCategoryForm(instance=category)
     return render(request, 'dashboard/blog_category_form.html', {'form': form, 'title': 'Edit Blog Category'})
 
-@login_required
+@staff_member_required
 def delete_blog_category(request, pk):
     category = get_object_or_404(BlogCategory, pk=pk)
     if request.method == 'POST':
@@ -129,12 +133,13 @@ def delete_blog_category(request, pk):
         return redirect('blog_categories_list')
     return render(request, 'dashboard/blog_category_confirm_delete.html', {'category': category})
 
-@login_required
+# -- -------- Blog Posts ---------
+@staff_member_required
 def blog_posts_list(request):
     posts = BlogPost.objects.all()
     return render(request, 'dashboard/blog_posts_list.html', {'posts': posts})
 
-@login_required
+@staff_member_required
 def add_blog_post(request):
     if request.method == 'POST':
         form = BlogPostForm(request.POST, request.FILES)
@@ -146,7 +151,7 @@ def add_blog_post(request):
         form = BlogPostForm()
     return render(request, 'dashboard/blog_post_form.html', {'form': form, 'title': 'Add Blog Post'})
 
-@login_required
+@staff_member_required
 def edit_blog_post(request, pk):
     post = get_object_or_404(BlogPost, pk=pk)
     if request.method == 'POST':
@@ -159,7 +164,7 @@ def edit_blog_post(request, pk):
         form = BlogPostForm(instance=post)
     return render(request, 'dashboard/blog_post_form.html', {'form': form, 'title': 'Edit Blog Post'})
 
-@login_required
+@staff_member_required
 def delete_blog_post(request, pk):
     post = get_object_or_404(BlogPost, pk=pk)
     if request.method == 'POST':
@@ -168,12 +173,13 @@ def delete_blog_post(request, pk):
         return redirect('blog_posts_list')
     return render(request, 'dashboard/blog_post_confirm_delete.html', {'post': post})
 
-@login_required
+# -- -------- Testimonials ---------
+@staff_member_required
 def testimonials_list(request):
     testimonials = Testimonial.objects.all()
     return render(request, 'dashboard/testimonials_list.html', {'testimonials': testimonials})
 
-@login_required
+@staff_member_required
 def add_testimonial(request):
     if request.method == 'POST':
         form = TestimonialForm(request.POST, request.FILES)
@@ -185,7 +191,7 @@ def add_testimonial(request):
         form = TestimonialForm()
     return render(request, 'dashboard/testimonial_form.html', {'form': form, 'title': 'Add Testimonial'})
 
-@login_required
+@staff_member_required
 def edit_testimonial(request, pk):
     testimonial = get_object_or_404(Testimonial, pk=pk)
     if request.method == 'POST':
@@ -198,7 +204,7 @@ def edit_testimonial(request, pk):
         form = TestimonialForm(instance=testimonial)
     return render(request, 'dashboard/testimonial_form.html', {'form': form, 'title': 'Edit Testimonial'})
 
-@login_required
+@staff_member_required
 def delete_testimonial(request, pk):
     testimonial = get_object_or_404(Testimonial, pk=pk)
     if request.method == 'POST':
@@ -207,6 +213,7 @@ def delete_testimonial(request, pk):
         return redirect('testimonials_list')
     return render(request, 'dashboard/testimonial_confirm_delete.html', {'testimonial': testimonial})
 
+# -- -------- Instagram Sections ---------
 InstagramImageFormSet = modelformset_factory(
     InstagramImage,
     form=InstagramImageForm,
@@ -214,7 +221,7 @@ InstagramImageFormSet = modelformset_factory(
     can_delete=True
 )
 
-@login_required
+@staff_member_required
 def instagram_sections_list(request):
     section = InstagramSection.objects.first()
     return render(request, 'dashboard/instagram_sections_list.html', {
@@ -222,7 +229,7 @@ def instagram_sections_list(request):
         'images': InstagramImage.objects.filter(section=section) if section else []
     })
 
-@login_required
+@staff_member_required
 def edit_instagram_section(request):
     section = get_object_or_404(InstagramSection)
 
@@ -258,7 +265,7 @@ def edit_instagram_section(request):
         "title": "Edit Instagram Section",
     })
 
-@login_required
+@staff_member_required
 def add_instagram_section(request):
     if InstagramSection.objects.exists():
         messages.info(request, "Instagram section already exists. You can edit it.")
@@ -290,13 +297,14 @@ def add_instagram_section(request):
         'title': 'Add Instagram Section',
     })
 
-@login_required
+# -- -------- Categories ---------
+@staff_member_required
 def category_list(request):
     categories = Category.objects.all()
     return render(request, 'dashboard/category_list.html', {'categories': categories})
 
 
-@login_required
+@staff_member_required
 def add_category(request):
     if request.method == 'POST':
         form = CategoryForm(request.POST)
@@ -309,7 +317,7 @@ def add_category(request):
     return render(request, 'dashboard/category_form.html', {'form': form, 'title': 'Add Category'})
 
 
-@login_required
+@staff_member_required
 def edit_category(request, pk):
     category = get_object_or_404(Category, pk=pk)
     if request.method == 'POST':
@@ -323,7 +331,7 @@ def edit_category(request, pk):
     return render(request, 'dashboard/category_form.html', {'form': form, 'title': 'Edit Category'})
 
 
-@login_required
+@staff_member_required
 def delete_category(request, pk):
     category = get_object_or_404(Category, pk=pk)
     if request.method == 'POST':
@@ -332,13 +340,14 @@ def delete_category(request, pk):
         return redirect('category_list')
     return render(request, 'dashboard/category_confirm_delete.html', {'category': category})
 
-@login_required
+# -- -------- Products ---------
+@staff_member_required
 def product_list(request):
     products = Product.objects.select_related('category').all()
     return render(request, 'dashboard/product_list.html', {'products': products})
 
 
-@login_required
+@staff_member_required
 def add_product(request):
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
@@ -351,7 +360,7 @@ def add_product(request):
     return render(request, 'dashboard/product_form.html', {'form': form, 'title': 'Add Product'})
 
 
-@login_required
+@staff_member_required
 def edit_product(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
@@ -365,7 +374,7 @@ def edit_product(request, pk):
     return render(request, 'dashboard/product_form.html', {'form': form, 'title': 'Edit Product', 'product': product})
 
 
-@login_required
+@staff_member_required
 def delete_product(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
@@ -374,12 +383,13 @@ def delete_product(request, pk):
         return redirect('product_list')
     return render(request, 'dashboard/product_confirm_delete.html', {'product': product})
 
-@login_required
+# -- -------- Coupons ---------
+@staff_member_required
 def coupons_list(request):
     coupons = Coupon.objects.all()
     return render(request, 'dashboard/coupons_list.html', {'coupons': coupons})
 
-@login_required
+@staff_member_required
 def add_coupon(request):
     if request.method == 'POST':
         form = CouponForm(request.POST)
@@ -391,7 +401,7 @@ def add_coupon(request):
         form = CouponForm()
     return render(request, 'dashboard/coupon_form.html', {'form': form, 'title': 'Add Coupon'})
 
-@login_required
+@staff_member_required
 def edit_coupon(request, pk):
     coupon = get_object_or_404(Coupon, pk=pk)
     if request.method == 'POST':
@@ -404,7 +414,7 @@ def edit_coupon(request, pk):
         form = CouponForm(instance=coupon)
     return render(request, 'dashboard/coupon_form.html', {'form': form, 'title': 'Edit Coupon'})
 
-@login_required
+@staff_member_required
 def delete_coupon(request, pk):
     coupon = get_object_or_404(Coupon, pk=pk)
     if request.method == 'POST':
@@ -413,12 +423,13 @@ def delete_coupon(request, pk):
         return redirect('coupons_list')
     return render(request, 'dashboard/coupon_confirm_delete.html', {'coupon': coupon})
 
-@login_required
+# -- -------- Users ---------
+@staff_member_required
 def users_list(request):
     users = User.objects.all()
     return render(request, 'dashboard/users_list.html', {'users': users})
 
-@login_required
+@staff_member_required
 def add_user(request):
     if request.method == 'POST':
         form = UserForm(request.POST)
@@ -430,7 +441,7 @@ def add_user(request):
         form = UserForm()
     return render(request, 'dashboard/user_form.html', {'form': form, 'title': 'Add User'})
 
-@login_required
+@staff_member_required
 def edit_user(request, pk):
     user = get_object_or_404(User, pk=pk)
     if request.method == 'POST':
@@ -443,7 +454,7 @@ def edit_user(request, pk):
         form = UserForm(instance=user)
     return render(request, 'dashboard/user_form.html', {'form': form, 'title': 'Edit User'})
 
-@login_required
+@staff_member_required
 def delete_user(request, pk):
     user = get_object_or_404(User, pk=pk)
     if request.method == 'POST':
@@ -452,12 +463,13 @@ def delete_user(request, pk):
         return redirect('users_list')
     return render(request, 'dashboard/user_confirm_delete.html', {'user': user})
 
-@login_required
+# -- -------- Wishlist Items ---------
+@staff_member_required
 def wishlist_items_list(request):
     items = WishlistItem.objects.select_related('user', 'product').all()
     return render(request, 'dashboard/wishlist_items_list.html', {'items': items})
 
-@login_required
+@staff_member_required
 def delete_wishlist_item(request, pk):
     item = get_object_or_404(WishlistItem, pk=pk)
     if request.method == 'POST':
@@ -466,17 +478,18 @@ def delete_wishlist_item(request, pk):
         return redirect('wishlist_items_list')
     return render(request, 'dashboard/wishlist_item_confirm_delete.html', {'item': item})
 
-@login_required
+# -- -------- Orders ---------
+@staff_member_required
 def order_list(request):
     orders = Order.objects.all().order_by('-created_at')
     return render(request, 'dashboard/order_list.html', {'orders': orders})
 
-@login_required
+@staff_member_required
 def order_detail(request, pk):
     order = get_object_or_404(Order, pk=pk)
     return render(request, 'dashboard/order_detail.html', {'order': order})
 
-@login_required
+@staff_member_required
 def order_delete(request, pk):
     order = get_object_or_404(Order, pk=pk)
     if request.method == 'POST':
@@ -485,12 +498,13 @@ def order_delete(request, pk):
         return redirect('order_list')
     return render(request, 'dashboard/order_confirm_delete.html', {'order': order})
 
-@login_required
+# -- -------- Team Members ---------
+@staff_member_required
 def team_members_list(request):
     members = TeamMember.objects.all()
     return render(request, 'dashboard/team_members_list.html', {'members': members})
 
-@login_required
+@staff_member_required
 def add_team_member(request):
     form = TeamMemberForm(request.POST or None, request.FILES or None)
     if form.is_valid():
@@ -499,7 +513,7 @@ def add_team_member(request):
         return redirect('team_members_list')
     return render(request, 'dashboard/team_member_form.html', {'form': form, 'title': 'Add Team Member'})
 
-@login_required
+@staff_member_required
 def edit_team_member(request, pk):
     member = get_object_or_404(TeamMember, pk=pk)
     form = TeamMemberForm(request.POST or None, request.FILES or None, instance=member)
@@ -509,7 +523,7 @@ def edit_team_member(request, pk):
         return redirect('team_members_list')
     return render(request, 'dashboard/team_member_form.html', {'form': form, 'title': 'Edit Team Member'})
 
-@login_required
+@staff_member_required
 def delete_team_member(request, pk):
     member = get_object_or_404(TeamMember, pk=pk)
     if request.method == 'POST':
@@ -518,12 +532,13 @@ def delete_team_member(request, pk):
         return redirect('team_members_list')
     return render(request, 'dashboard/team_member_confirm_delete.html', {'member': member})
 
-@login_required
+# -- -------- Map Location (Singleton) ---------
+@staff_member_required
 def maplocation_list(request):
     map_location = MapLocation.objects.first()
     return render(request, 'dashboard/maplocation_list.html', {'map_location': map_location, 'title': 'Map Location'})
 
-@login_required
+@staff_member_required
 def maplocation_edit(request, pk=None):
     instance = None
     if pk:
@@ -542,12 +557,13 @@ def maplocation_edit(request, pk=None):
 
     return render(request, 'dashboard/maplocation_form.html', {'form': form, 'title': 'Edit Map Location' if instance else 'Add Map Location'})
 
-@login_required
+# -- -------- Contact Detail (Singleton) ---------
+@staff_member_required
 def contactdetail_list(request):
     contact_detail = ContactDetail.objects.first()
     return render(request, 'dashboard/contactdetail_list.html', {'contact_detail': contact_detail, 'title': 'Contact Detail'})
 
-@login_required
+@staff_member_required
 def contactdetail_edit(request, pk=None):
     instance = None
     if pk:
@@ -566,7 +582,8 @@ def contactdetail_edit(request, pk=None):
 
     return render(request, 'dashboard/contactdetail_form.html', {'form': form, 'title': 'Edit Contact Detail' if instance else 'Add Contact Detail'})
 
-@login_required
+# -- -------- Contact Messages ---------
+@staff_member_required
 def contact_messages_list(request):
     messages_list = ContactMessage.objects.order_by('-submitted_at')
     return render(request, 'dashboard/contact_messages_list.html', {
@@ -574,7 +591,7 @@ def contact_messages_list(request):
         'title': 'Contact Messages'
     })
 
-@login_required
+@staff_member_required
 def contact_message_delete(request, pk):
     message_obj = get_object_or_404(ContactMessage, pk=pk)
     if request.method == 'POST':
@@ -586,7 +603,8 @@ def contact_message_delete(request, pk):
         'title': 'Delete Contact Message'
     })
 
-@login_required
+# ---------- Newsletter Subscribers ---------
+@staff_member_required
 def newsletter_subscribers_list(request):
     subscribers = NewsletterSubscriber.objects.all()
     return render(request, 'dashboard/newsletter_subscribers_list.html', {'subscribers': subscribers})
@@ -601,17 +619,18 @@ def delete_newsletter_subscriber(request, pk):
         'subscriber': subscriber
     })
 
-@login_required
+@staff_member_required
 def logout_view(request):
     logout(request)
-    return redirect('home')  # Replace 'home' with your actual homepage url name
+    return redirect('home')
 
 # -------- Special Offers ---------
-
+@staff_member_required
 def specialoffers_list(request):
     specialoffers = SpecialOffer.objects.all()
     return render(request, 'dashboard/specialoffers_list.html', {'specialoffers': specialoffers})
 
+@staff_member_required
 def add_specialoffer(request):
     if request.method == 'POST':
         form = SpecialOfferForm(request.POST, request.FILES)
@@ -623,6 +642,7 @@ def add_specialoffer(request):
         form = SpecialOfferForm()
     return render(request, 'dashboard/specialoffer_form.html', {'form': form, 'title': 'Add Special Offer'})
 
+@staff_member_required
 def edit_specialoffer(request, pk):
     specialoffer = get_object_or_404(SpecialOffer, pk=pk)
     if request.method == 'POST':
@@ -635,6 +655,7 @@ def edit_specialoffer(request, pk):
         form = SpecialOfferForm(instance=specialoffer)
     return render(request, 'dashboard/specialoffer_form.html', {'form': form, 'title': 'Edit Special Offer'})
 
+@staff_member_required
 def delete_specialoffer(request, pk):
     specialoffer = get_object_or_404(SpecialOffer, pk=pk)
     if request.method == 'POST':
@@ -648,11 +669,12 @@ def delete_specialoffer(request, pk):
 
 
 # -------- Organization Details (Singleton) ---------
-
+@staff_member_required
 def organization_details(request):
     organization = OrganizationDetails.objects.first()
     return render(request, 'dashboard/organizationdetails_detail.html', {'organization': organization})
 
+@staff_member_required
 def add_organization_details(request):
     if OrganizationDetails.objects.exists():
         messages.warning(request, "Organization Details already exist. You can edit them instead.")
@@ -668,6 +690,7 @@ def add_organization_details(request):
         form = OrganizationDetailsForm()
     return render(request, 'dashboard/organizationdetails_form.html', {'form': form, 'title': 'Add Organization Details'})
 
+@staff_member_required
 def edit_organization_details(request):
     organizationdetails = OrganizationDetails.objects.first()
     if not organizationdetails:

@@ -8,12 +8,24 @@
 <p><strong>Name:</strong> {{ order.first_name }} {{ order.last_name }}</p>
 <p><strong>Email:</strong> {{ order.email }}</p>
 <p><strong>Phone:</strong> {{ order.phone }}</p>
-<p><strong>Address:</strong> {{ order.address_line1 }}, {{ order.address_line2 }}, {{ order.city }}, {{ order.state }}, {{ order.zip }}, {{ order.country }}</p>
-<p><strong>Payment Method:</strong> {{ order.payment_method }}</p>
-<p><strong>Coupon Code:</strong> {{ order.coupon_code }}</p>
+<p><strong>Address:</strong> {{ order.address_line1 }}{% if order.address_line2 %}, {{ order.address_line2 }}{% endif %}, {{ order.city }}, {{ order.state }}, {{ order.zip }}, {{ order.country }}</p>
+<p><strong>Payment Method:</strong> {{ order.payment_method|capfirst }}</p>
+<p><strong>Coupon Code:</strong> {{ order.coupon_code|default:"-" }}</p>
 <p><strong>Discount:</strong> रु {{ order.discount_amount }}</p>
 <p><strong>Total Amount:</strong> रु {{ order.total_amount }}</p>
-<p><strong>Notes:</strong> {{ order.notes }}</p>
+
+<p><strong>Delivery Date & Time:</strong>
+    {% if order.delivery_date %}
+        {{ order.delivery_date|date:"Y-m-d" }}
+        {% if order.delivery_time %}
+            at {{ order.delivery_time|time:"H:i" }}
+        {% endif %}
+    {% else %}
+        Not specified
+    {% endif %}
+</p>
+
+<p><strong>Notes:</strong> {{ order.notes|default:"-" }}</p>
 <p><strong>Ordered At:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</p>
 
 <h4 class="mt-4">Items</h4>
@@ -23,6 +35,10 @@
             <th>Product</th>
             <th>Quantity</th>
             <th>Price</th>
+            <th>Eggless</th>
+            <th>Sugarless</th>
+            <th>Size</th>
+            <th>Message</th>
         </tr>
     </thead>
     <tbody>
@@ -31,12 +47,16 @@
             <td>{{ item.product.name }}</td>
             <td>{{ item.quantity }}</td>
             <td>रु {{ item.price }}</td>
+            <td>{% if item.eggless %}Yes{% else %}No{% endif %}</td>
+            <td>{% if item.sugarless %}Yes{% else %}No{% endif %}</td>
+            <td>{{ item.size|default:"-" }}</td>
+            <td>{{ item.message|default:"-" }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="3" class="text-center">No items found.</td></tr>
+        <tr><td colspan="7" class="text-center">No items found.</td></tr>
         {% endfor %}
     </tbody>
 </table>
 
-<a href="{% url 'order_list' %}" class="btn btn-secondary mt-3">Back to Orders</a>
+<a href="{% url 'admin_order_list' %}" class="btn btn-secondary mt-3">Back to Orders</a>
 {% endblock %}

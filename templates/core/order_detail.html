@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load custom_filters %}
+{% load custom_filters %} {# Ensure mul is defined in custom_filters.py #}
 
 {% block title %}Order #{{ order.id }} Details{% endblock %}
 
@@ -36,19 +36,29 @@
                 {% if order.address_line2 %}{{ order.address_line2 }}<br>{% endif %}
                 {{ order.city }}, {{ order.state }} {{ order.zip }}<br>
                 {{ order.country }}<br>
-                Phone: {{ order.phone }}<br>
-                Email: {{ order.email }}
+                <strong>Phone:</strong> {{ order.phone }}<br>
+                <strong>Email:</strong> {{ order.email }}
             </p>
+
+            {% if order.delivery_date or order.delivery_time %}
+                <h4>Delivery Details</h4>
+                <p>
+                    {% if order.delivery_date %}📅 Delivery Date: {{ order.delivery_date }}<br>{% endif %}
+                    {% if order.delivery_time %}⏰ Delivery Time: {{ order.delivery_time|time:"H:i" }}<br>{% endif %}
+                </p>
+            {% endif %}
 
             <h4>Order Notes</h4>
             <p>{{ order.notes|default:"No notes provided." }}</p>
 
             <h4>Payment</h4>
-            <p>Method: {{ order.payment_method|title }}</p>
-            {% if order.coupon_code %}
-              <p>Coupon: {{ order.coupon_code }} (Discount: ₹{{ order.discount_amount }})</p>
-            {% endif %}
-            <p><strong>Total Amount: ₹{{ order.total_amount }}</strong></p>
+            <p>
+                Method: {{ order.payment_method|title }}<br>
+                {% if order.coupon_code %}
+                    Coupon: <strong>{{ order.coupon_code }}</strong> (Discount: ₹{{ order.discount_amount }})<br>
+                {% endif %}
+                <strong>Total Amount: ₹{{ order.total_amount }}</strong>
+            </p>
 
             <h4>Items</h4>
             <div class="table-responsive">
@@ -59,16 +69,26 @@
                             <th>Quantity</th>
                             <th>Price</th>
                             <th>Subtotal</th>
+                            <th>Customizations</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for item in order.items.all %}
-                        <tr>
-                            <td>{{ item.product.name }}</td>
-                            <td>{{ item.quantity }}</td>
-                            <td>₹ {{ item.price }}</td>
-                            <td>₹ {{ item.quantity|mul:item.price }}</td>
-                        </tr>
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>₹ {{ item.price }}</td>
+                                <td>₹ {{ item.quantity|mul:item.price }}</td>
+                                <td>
+                                    {% if item.eggless %}🍳 Eggless<br>{% endif %}
+                                    {% if item.sugarless %}🍬 Sugarless<br>{% endif %}
+                                    {% if item.size %}🎂 Size: {{ item.size }}<br>{% endif %}
+                                    {% if item.message %}💬 "{{ item.message }}"{% endif %}
+                                    {% if not item.eggless and not item.sugarless and not item.size and not item.message %}
+                                        —
+                                    {% endif %}
+                                </td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
