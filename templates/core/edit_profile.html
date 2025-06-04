@@ -1,60 +1,101 @@
 {% extends 'base.html' %}
+
 {% block title %}Edit Profile{% endblock %}
 
 {% block content %}
 <!-- Breadcrumb Begin -->
 <div class="breadcrumb-option">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-6 col-md-6 col-sm-6">
-                <div class="breadcrumb__text">
-                    <h2>Edit Profile</h2>
-                </div>
-            </div>
-            <div class="col-lg-6 col-md-6 col-sm-6">
-                <div class="breadcrumb__links">
-                    <a href="{% url 'home' %}">Home</a>
-                    <a href="{% url 'profile' %}">Profile</a>
-                    <span>Edit</span>
-                </div>
-            </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6 col-md-6 col-sm-6">
+        <div class="breadcrumb__text">
+          <h2>Edit Profile</h2>
         </div>
+      </div>
+      <div class="col-lg-6 col-md-6 col-sm-6">
+        <div class="breadcrumb__links text-end">
+          <a href="{% url 'home' %}">Home</a>
+          <a href="{% url 'profile' %}">Profile</a>
+          <span>Edit</span>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 <!-- Breadcrumb End -->
 
-<!-- Edit Profile Section Begin -->
 <section class="profile-edit spad">
-    <div class="container" style="max-width: 700px;">
-        <div class="profile-edit__form">
-            <h4>Edit Your Information</h4>
-            <form method="post">
-                {% csrf_token %}
-
-                <div class="mb-3">
-                    <label for="id_username" class="form-label">Username</label>
-                    <input type="text" name="username" id="id_username" value="{{ user.username }}" required class="form-control">
-                </div>
-                <div class="mb-3">
-                    <label for="id_email" class="form-label">Email</label>
-                    <input type="email" name="email" id="id_email" value="{{ user.email }}" class="form-control">
-                </div>
-                <div class="mb-3">
-                    <label for="id_first_name" class="form-label">First Name</label>
-                    <input type="text" name="first_name" id="id_first_name" value="{{ user.first_name }}" class="form-control">
-                </div>
-                <div class="mb-3">
-                    <label for="id_last_name" class="form-label">Last Name</label>
-                    <input type="text" name="last_name" id="id_last_name" value="{{ user.last_name }}" class="form-control">
-                </div>
-
-                <div class="d-flex justify-content-start mt-4">
-                    <button type="submit" class="site-btn">Save Changes</button>
-                    <a href="{% url 'profile' %}" class="site-btn btn-outline ms-3">Cancel</a>
-                </div>
-            </form>
+  <div class="container" style="max-width: 960px;">
+    <form method="post" enctype="multipart/form-data" class="bg-white p-4 rounded shadow-sm border">
+      {% csrf_token %}
+      {% with profile=request.user.userprofile %}
+      <div class="row gx-4 gy-3">
+        <!-- Left Column: User Info & Picture -->
+        <div class="col-md-6 border-end">
+          <h4 class="mb-4">User Info</h4>
+          <ul class="list-group list-group-flush mb-4">
+            <li class="list-group-item">
+              <label for="id_username" class="form-label fw-semibold">Username</label>
+              <input type="text" name="username" id="id_username" value="{{ user.username }}" required class="form-control">
+            </li>
+            <li class="list-group-item">
+              <label for="id_first_name" class="form-label fw-semibold">First Name</label>
+              <input type="text" name="first_name" id="id_first_name" value="{{ user.first_name }}" class="form-control">
+            </li>
+            <li class="list-group-item">
+              <label for="id_last_name" class="form-label fw-semibold">Last Name</label>
+              <input type="text" name="last_name" id="id_last_name" value="{{ user.last_name }}" class="form-control">
+            </li>
+            <li class="list-group-item">
+              <label for="id_email" class="form-label fw-semibold">Email</label>
+              <input type="email" name="email" id="id_email" value="{{ user.email }}" class="form-control">
+            </li>
+            <li class="list-group-item">
+              <label class="form-label fw-semibold">Profile Picture</label><br>
+              {% if profile.profile_picture %}
+                <img src="{{ profile.profile_picture.url }}" alt="Current profile picture" class="img-thumbnail mb-2" style="max-width: 150px;">
+              {% else %}
+                <span class="text-muted fst-italic">No profile picture uploaded.</span><br>
+              {% endif %}
+              <input type="file" name="profile_picture" id="id_profile_picture" class="form-control">
+            </li>
+          </ul>
         </div>
-    </div>
+
+        <!-- Right Column: Social Links & Bio -->
+        <div class="col-md-6">
+          <h4 class="mb-4">Social Links & Bio</h4>
+          <ul class="list-group list-group-flush mb-4">
+            <li class="list-group-item">
+              <label for="id_facebook" class="form-label fw-semibold">Facebook</label>
+              <input type="url" name="facebook" id="id_facebook" value="{{ profile.facebook|default_if_none:'' }}" class="form-control" placeholder="https://facebook.com/yourprofile">
+            </li>
+            <li class="list-group-item">
+              <label for="id_twitter" class="form-label fw-semibold">Twitter</label>
+              <input type="url" name="twitter" id="id_twitter" value="{{ profile.twitter|default_if_none:'' }}" class="form-control" placeholder="https://twitter.com/yourprofile">
+            </li>
+            <li class="list-group-item">
+              <label for="id_instagram" class="form-label fw-semibold">Instagram</label>
+              <input type="url" name="instagram" id="id_instagram" value="{{ profile.instagram|default_if_none:'' }}" class="form-control" placeholder="https://instagram.com/yourprofile">
+            </li>
+            <li class="list-group-item">
+              <label for="id_linkedin" class="form-label fw-semibold">LinkedIn</label>
+              <input type="url" name="linkedin" id="id_linkedin" value="{{ profile.linkedin|default_if_none:'' }}" class="form-control" placeholder="https://linkedin.com/in/yourprofile">
+            </li>
+            <li class="list-group-item">
+              <label for="id_bio" class="form-label fw-semibold">Bio</label>
+              <textarea name="bio" id="id_bio" rows="6" class="form-control">{{ profile.bio|default_if_none:'' }}</textarea>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'profile' %}" class="btn btn-outline-secondary ms-3">Cancel</a>
+      </div>
+      {% endwith %}
+    </form>
+  </div>
 </section>
-<!-- Edit Profile Section End -->
 {% endblock %}

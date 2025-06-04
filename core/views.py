@@ -71,17 +71,32 @@ def profile(request):
 
 @login_required
 def edit_profile(request):
+    user = request.user
+    profile = user.userprofile
+
     if request.method == 'POST':
-        user = request.user
+        # Update User fields
         user.username = request.POST.get('username')
         user.email = request.POST.get('email')
         user.first_name = request.POST.get('first_name')
         user.last_name = request.POST.get('last_name')
         user.save()
+
+        # Update UserProfile fields
+        profile.bio = request.POST.get('bio')
+        profile.facebook = request.POST.get('facebook')
+        profile.instagram = request.POST.get('instagram')
+        profile.twitter = request.POST.get('twitter')
+
+        if 'profile_picture' in request.FILES:
+            profile.profile_picture = request.FILES['profile_picture']
+
+        profile.save()
+
         messages.success(request, 'Profile updated successfully.')
         return redirect('profile')
-    
-    return render(request, 'core/edit_profile.html', {'user': request.user})
+
+    return render(request, 'core/edit_profile.html', {'user': user})
 
 @login_required
 def order_list(request):

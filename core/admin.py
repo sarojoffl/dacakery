@@ -3,7 +3,7 @@ from .models import (
     Slider, Category, Product, AboutSection, TeamMember, Testimonial,
     InstagramSection, InstagramImage, MapLocation, ContactDetail, ContactMessage,
     WishlistItem, Order, OrderItem, Coupon, BlogPost, BlogCategory, NewsletterSubscriber,
-    SpecialOffer
+    SpecialOffer, UserProfile
 )
 
 # Register your models here.
@@ -46,3 +46,8 @@ admin.site.register(BlogPost)
 admin.site.register(BlogCategory)
 admin.site.register(NewsletterSubscriber)
 admin.site.register(SpecialOffer)
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'facebook', 'instagram', 'twitter', 'linkedin')
