@@ -2,7 +2,7 @@ from django import forms
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
     InstagramImage, Category, Product, Coupon, TeamMember, MapLocation, ContactDetail,
-    SpecialOffer, OrganizationDetails
+    SpecialOffer, OrganizationDetails, UserProfile
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
@@ -83,6 +83,11 @@ class UserForm(forms.ModelForm):
         else:
             # Password not changed
             return self.instance.password
+        
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['user', 'profile_picture', 'bio', 'facebook', 'instagram', 'twitter', 'linkedin']
         
 class TeamMemberForm(forms.ModelForm):
     class Meta:

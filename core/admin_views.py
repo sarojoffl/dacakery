@@ -7,12 +7,12 @@ from django.contrib.auth import logout
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
     InstagramImage, Category, Product, Coupon, WishlistItem, Order, NewsletterSubscriber,
-    TeamMember, MapLocation, ContactDetail, ContactMessage, SpecialOffer, OrganizationDetails
+    TeamMember, MapLocation, ContactDetail, ContactMessage, SpecialOffer, OrganizationDetails, UserProfile
 )
 from .admin_forms import (
     AdminSliderForm, AboutSectionForm, BlogCategoryForm, BlogPostForm, TestimonialForm,
     InstagramSectionForm, InstagramImageForm, CategoryForm, ProductForm, CouponForm, UserForm, TeamMemberForm,
-    MapLocationForm, ContactDetailForm, SpecialOfferForm, OrganizationDetailsForm
+    MapLocationForm, ContactDetailForm, SpecialOfferForm, OrganizationDetailsForm, UserProfileForm
 )
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
@@ -462,6 +462,33 @@ def delete_user(request, pk):
         messages.success(request, 'User deleted successfully.')
         return redirect('users_list')
     return render(request, 'dashboard/user_confirm_delete.html', {'user': user})
+
+# -- -------- User Profiles ---------
+@staff_member_required
+def userprofiles_list(request):
+    profiles = UserProfile.objects.select_related('user').all()
+    return render(request, 'dashboard/userprofiles_list.html', {'profiles': profiles})
+
+@staff_member_required
+def edit_userprofile(request, pk):
+    profile = get_object_or_404(UserProfile, pk=pk)
+    social_fields = ['facebook', 'instagram', 'twitter', 'linkedin']
+
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'User profile updated successfully.')
+            return redirect('userprofiles_list')
+    else:
+        form = UserProfileForm(instance=profile)
+
+    context = {
+        'form': form,
+        'title': 'Edit User Profile',
+        'social_fields': social_fields,
+    }
+    return render(request, 'dashboard/userprofile_form.html', context)
 
 # -- -------- Wishlist Items ---------
 @staff_member_required

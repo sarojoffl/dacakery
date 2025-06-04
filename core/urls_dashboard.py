@@ -63,6 +63,10 @@ urlpatterns = [
     path('users/edit/<int:pk>/', admin_views.edit_user, name='edit_user'),
     path('users/delete/<int:pk>/', admin_views.delete_user, name='delete_user'),
 
+    # User Profiles
+    path('userprofiles/', admin_views.userprofiles_list, name='userprofiles_list'),
+    path('userprofiles/edit/<int:pk>/', admin_views.edit_userprofile, name='edit_userprofile'),
+
     # Wishlist Items
     path('wishlist-items/', admin_views.wishlist_items_list, name='wishlist_items_list'),
     path('wishlist-items/delete/<int:pk>/', admin_views.delete_wishlist_item, name='delete_wishlist_item'),
