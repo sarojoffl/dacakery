@@ -1,102 +1,116 @@
 {% extends 'base.html' %}
-{% load custom_filters %} {# Ensure mul is defined in custom_filters.py #}
+{% load custom_filters %}
 
 {% block title %}Order #{{ order.id }} Details{% endblock %}
 
 {% block content %}
 <!-- Breadcrumb Begin -->
 <div class="breadcrumb-option">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-6 col-md-6 col-sm-6">
-                <div class="breadcrumb__text">
-                    <h2>Order #{{ order.id }}</h2>
-                </div>
-            </div>
-            <div class="col-lg-6 col-md-6 col-sm-6">
-                <div class="breadcrumb__links">
-                    <a href="{% url 'home' %}">Home</a>
-                    <a href="{% url 'order_list' %}">Orders</a>
-                    <span>Order #{{ order.id }}</span>
-                </div>
-            </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6 col-md-6 col-sm-6">
+        <div class="breadcrumb__text">
+          <h2>Order #{{ order.id }}</h2>
         </div>
+      </div>
+      <div class="col-lg-6 col-md-6 col-sm-6">
+        <div class="breadcrumb__links text-end">
+          <a href="{% url 'home' %}">Home</a>
+          <a href="{% url 'order_list' %}">Orders</a>
+          <span>Order #{{ order.id }}</span>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 <!-- Breadcrumb End -->
 
-<!-- Order Details Begin -->
 <section class="checkout spad">
-    <div class="container">
-        <div class="checkout__form">
-            <h4>Shipping Information</h4>
-            <p>
-                {{ order.first_name }} {{ order.last_name }}<br>
-                {{ order.address_line1 }}<br>
-                {% if order.address_line2 %}{{ order.address_line2 }}<br>{% endif %}
-                {{ order.city }}, {{ order.state }} {{ order.zip }}<br>
-                {{ order.country }}<br>
-                <strong>Phone:</strong> {{ order.phone }}<br>
-                <strong>Email:</strong> {{ order.email }}
-            </p>
-
-            {% if order.delivery_date or order.delivery_time %}
-                <h4>Delivery Details</h4>
-                <p>
-                    {% if order.delivery_date %}📅 Delivery Date: {{ order.delivery_date }}<br>{% endif %}
-                    {% if order.delivery_time %}⏰ Delivery Time: {{ order.delivery_time|time:"H:i" }}<br>{% endif %}
-                </p>
-            {% endif %}
-
-            <h4>Order Notes</h4>
-            <p>{{ order.notes|default:"No notes provided." }}</p>
-
-            <h4>Payment</h4>
-            <p>
-                Method: {{ order.payment_method|title }}<br>
-                {% if order.coupon_code %}
-                    Coupon: <strong>{{ order.coupon_code }}</strong> (Discount: ₹{{ order.discount_amount }})<br>
-                {% endif %}
-                <strong>Total Amount: ₹{{ order.total_amount }}</strong>
-            </p>
-
-            <h4>Items</h4>
-            <div class="table-responsive">
-                <table class="table table-bordered mt-3">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Product</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Subtotal</th>
-                            <th>Customizations</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in order.items.all %}
-                            <tr>
-                                <td>{{ item.product.name }}</td>
-                                <td>{{ item.quantity }}</td>
-                                <td>₹ {{ item.price }}</td>
-                                <td>₹ {{ item.quantity|mul:item.price }}</td>
-                                <td>
-                                    {% if item.eggless %}🍳 Eggless<br>{% endif %}
-                                    {% if item.sugarless %}🍬 Sugarless<br>{% endif %}
-                                    {% if item.size %}🎂 Size: {{ item.size }}<br>{% endif %}
-                                    {% if item.message %}💬 "{{ item.message }}"{% endif %}
-                                    {% if not item.eggless and not item.sugarless and not item.size and not item.message %}
-                                        —
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <a href="{% url 'order_list' %}" class="btn btn-secondary mt-3">Back to Orders</a>
+  <div class="container">
+    <div class="checkout__form bg-white p-4 rounded shadow-sm">
+      <div class="row">
+        <div class="col-md-6">
+          <h4>Customer Info</h4>
+          <ul class="list-group list-group-flush mb-4">
+            <li class="list-group-item"><strong>Name:</strong> {{ order.first_name }} {{ order.last_name }}</li>
+            <li class="list-group-item"><strong>Email:</strong> {{ order.email }}</li>
+            <li class="list-group-item"><strong>Phone:</strong> {{ order.phone }}</li>
+            <li class="list-group-item">
+              <strong>Address:</strong> {{ order.address_line1 }}{% if order.address_line2 %}, {{ order.address_line2 }}{% endif %}, {{ order.city }}, {{ order.state }} {{ order.zip }}, {{ order.country }}
+            </li>
+          </ul>
         </div>
+
+        <div class="col-md-6">
+          <h4>Order Info</h4>
+          <ul class="list-group list-group-flush mb-4">
+            <li class="list-group-item"><strong>Payment Method:</strong> {{ order.payment_method|capfirst }}</li>
+            <li class="list-group-item"><strong>Coupon Code:</strong> {{ order.coupon_code|default:"-" }}</li>
+            <li class="list-group-item"><strong>Discount:</strong> रु{{ order.discount_amount|default:"0" }}</li>
+            <li class="list-group-item"><strong>Total Amount:</strong> रु{{ order.total_amount }}</li>
+            <li class="list-group-item">
+              <strong>Delivery Date & Time:</strong>
+              {% if order.delivery_date %}
+                {{ order.delivery_date|date:"Y-m-d" }}
+                {% if order.delivery_time %} at {{ order.delivery_time|time:"H:i" }}{% endif %}
+              {% else %}
+                Not specified
+              {% endif %}
+            </li>
+            <li class="list-group-item"><strong>Notes:</strong> {{ order.notes|default:"-" }}</li>
+            <li class="list-group-item"><strong>Ordered At:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4 class="mt-5 mb-3">Ordered Items</h4>
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Product</th>
+              <th class="text-center">Quantity</th>
+              <th class="text-end">Price (रु)</th>
+              <th class="text-center">Eggless</th>
+              <th class="text-center">Sugarless</th>
+              <th class="text-center">Size</th>
+              <th>Message</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in order.items.all %}
+              <tr>
+                <td>{{ item.product.name }}</td>
+                <td class="text-center">{{ item.quantity }}</td>
+                <td class="text-end">{{ item.price }}</td>
+                <td class="text-center">
+                  {% if item.eggless %}
+                    <span class="badge bg-success">Yes</span>
+                  {% else %}
+                    <span class="badge bg-secondary">No</span>
+                  {% endif %}
+                </td>
+                <td class="text-center">
+                  {% if item.sugarless %}
+                    <span class="badge bg-success">Yes</span>
+                  {% else %}
+                    <span class="badge bg-secondary">No</span>
+                  {% endif %}
+                </td>
+                <td class="text-center">{{ item.size|default:"-" }}</td>
+                <td>{{ item.message|default:"-" }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="7" class="text-center fst-italic">No items found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <a href="{% url 'order_list' %}" class="btn btn-secondary mt-4">
+        &larr; Back to Orders
+      </a>
     </div>
+  </div>
 </section>
-<!-- Order Details End -->
 {% endblock %}
