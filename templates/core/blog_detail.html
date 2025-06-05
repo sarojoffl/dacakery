@@ -28,6 +28,8 @@
         <div class="row d-flex justify-content-center">
             <div class="col-lg-8">
                 <div class="blog__details__content">
+
+                    <!-- Share Buttons -->
                     <div class="blog__details__share">
                         <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="facebook">
                             <i class="fa fa-facebook"></i>
@@ -43,46 +45,46 @@
                         </a>
                     </div>
 
-                    <!-- Main Blog Content -->
+                    <!-- Blog Content -->
                     <div class="blog__details__text">
                         {{ blog.content|linebreaks }}
                     </div>
 
                     <!-- Tags -->
                     {% if blog.tags.all %}
-                    <div class="blog__details__tags">
-                        <span>Tag</span>
-                        {% for tag in blog.tags.all %}
-                            <a href="#">{{ tag.name }}</a>
-                        {% endfor %}
-                    </div>
+                        <div class="blog__details__tags">
+                            <span>Tag</span>
+                            {% for tag in blog.tags.all %}
+                                <a href="#">{{ tag.name }}</a>
+                            {% endfor %}
+                        </div>
                     {% endif %}
 
-                    <!-- Previous & Next Post Buttons -->
+                    <!-- Prev/Next Buttons -->
                     <div class="blog__details__btns">
                         <div class="row">
                             <div class="col-lg-6 col-md-6 col-sm-6">
                                 {% if prev_blog %}
-                                <div class="blog__details__btns__item">
-                                    <a href="{% url 'blog_detail' prev_blog.id %}">
-                                        <span class="arrow_carrot-left"></span> Previous post
-                                    </a>
-                                </div>
+                                    <div class="blog__details__btns__item">
+                                        <a href="{% url 'blog_detail' prev_blog.id %}">
+                                            <span class="arrow_carrot-left"></span> Previous post
+                                        </a>
+                                    </div>
                                 {% endif %}
                             </div>
                             <div class="col-lg-6 col-md-6 col-sm-6">
                                 {% if next_blog %}
-                                <div class="blog__details__btns__item blog__details__btns__item--next">
-                                    <a href="{% url 'blog_detail' next_blog.id %}">
-                                        Next post <span class="arrow_carrot-right"></span>
-                                    </a>
-                                </div>
+                                    <div class="blog__details__btns__item blog__details__btns__item--next">
+                                        <a href="{% url 'blog_detail' next_blog.id %}">
+                                            Next post <span class="arrow_carrot-right"></span>
+                                        </a>
+                                    </div>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
 
-                    <!-- Author Info -->
+                    <!-- Author Section -->
                     <div class="blog__details__author">
                         <div class="blog__details__author__pic">
                             {% if author_profile and author_profile.profile_picture %}
@@ -117,11 +119,52 @@
                         </div>
                     </div>
 
-                    <!-- Comments -->
+                    <!-- Comments Section -->
                     <div class="blog__details__comment">
-                        <h5>Comments</h5>
-                        <a href="#" class="primary-btn">Leave a comment</a>
-                        <!-- Add your comment system or include from a comments template -->
+                        <h5>{{ comments.count }} Comment{{ comments.count|pluralize }}</h5>
+
+                        {% for comment in comments %}
+                        <div class="blog__details__comment__item {% if comment.is_reply %}blog__details__comment__item--reply{% endif %}">
+                            <div class="blog__details__comment__item__pic">
+                                {% if comment.user and comment.user.userprofile.profile_picture %}
+                                    <img src="{{ comment.user.userprofile.profile_picture.url }}" alt="{{ comment.user.get_full_name|default:comment.user.username }}">
+                                {% else %}
+                                    <img src="{% static 'img/blog/details/comment-default.jpg' %}" alt="{{ comment.user.get_full_name|default:comment.user.username }}">
+                                {% endif %}
+                            </div>
+                            <div class="blog__details__comment__item__text">
+                                <h6>{{ comment.user.get_full_name|default:comment.user.username }}</h6>
+                                <span>{{ comment.created_at|date:"d M Y" }}</span>
+                                <p>{{ comment.comment|linebreaks }}</p>
+                            </div>
+                        </div>
+                        {% empty %}
+                            <p>No comments yet.</p>
+                        {% endfor %}
+
+                        <!-- Comment Form -->
+                        <h5 class="mt-5">Leave a Comment</h5>
+
+                        {% if user.is_authenticated %}
+                            <div class="contact__form">
+                                <form method="POST">
+                                    {% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <textarea name="{{ comment_form.comment.name }}" placeholder="Your comment here..."></textarea>
+                                            {% for error in comment_form.comment.errors %}
+                                                <small class="text-danger d-block">{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-lg-12 mt-2">
+                                            <button type="submit" class="site-btn">Submit</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        {% else %}
+                            <p>You must <a href="{% url 'login' %}">log in</a> to leave a comment.</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>

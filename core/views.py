@@ -4,7 +4,7 @@ from .models import (
     InstagramSection, MapLocation, ContactDetail, Coupon, WishlistItem, Order,
     OrderItem, BlogPost, BlogCategory, NewsletterSubscriber, SpecialOffer
 )
-from .forms import ContactForm, NewsletterForm
+from .forms import ContactForm, BlogCommentForm
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.contrib import messages
@@ -586,14 +586,37 @@ def blog_list(request):
 
 def blog_detail(request, pk):
     blog = get_object_or_404(BlogPost, pk=pk)
-    author_profile = None
-    if blog.author:
-        author_profile = getattr(blog.author, 'userprofile', None)
+
+    blog.views += 1
+    blog.save(update_fields=['views'])
+
+    author_profile = getattr(blog.author, 'userprofile', None) if blog.author else None
+
+    prev_blog = BlogPost.objects.filter(created_at__lt=blog.created_at).order_by('-created_at').first()
+    next_blog = BlogPost.objects.filter(created_at__gt=blog.created_at).order_by('created_at').first()
+
+    comments = blog.comments.all().order_by('-created_at')
+    comment_form = BlogCommentForm()
+
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            comment_form = BlogCommentForm(request.POST)
+            if comment_form.is_valid():
+                new_comment = comment_form.save(commit=False)
+                new_comment.blog = blog
+                new_comment.user = request.user
+                new_comment.save()
+                return redirect('blog_detail', pk=pk)
+        else:
+            return redirect('login')
 
     context = {
         'blog': blog,
         'author_profile': author_profile,
-        # You can add prev_blog, next_blog here if you have logic for it
+        'prev_blog': prev_blog,
+        'next_blog': next_blog,
+        'comments': comments,
+        'comment_form': comment_form,
     }
     return render(request, 'core/blog_detail.html', context)
 
