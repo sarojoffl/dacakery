@@ -45,6 +45,23 @@
           <h4>Order Info</h4>
           <ul class="list-group list-group-flush mb-4">
             <li class="list-group-item"><strong>Payment Method:</strong> {{ order.payment_method|capfirst }}</li>
+            
+            <li class="list-group-item">
+              <strong>Payment Status:</strong>
+              {% if order.status == 'paid' %}
+                <span class="badge bg-success">Paid</span>
+              {% elif order.status == 'pending' %}
+                <span class="badge bg-warning text-dark">Pending</span>
+              {% elif order.status == 'failed' %}
+                <span class="badge bg-danger">Failed</span>
+              {% elif order.status == 'cancelled' %}
+                <span class="badge bg-secondary">Cancelled</span>
+              {% else %}
+                <span class="badge bg-secondary">{{ order.status|capfirst }}</span>
+              {% endif %}
+            </li>
+            
+            <li class="list-group-item"><strong>Payment ID:</strong> {{ order.payment_id|default:"-" }}</li>
             <li class="list-group-item"><strong>Coupon Code:</strong> {{ order.coupon_code|default:"-" }}</li>
             <li class="list-group-item"><strong>Discount:</strong> रु{{ order.discount_amount|default:"0" }}</li>
             <li class="list-group-item"><strong>Total Amount:</strong> रु{{ order.total_amount }}</li>

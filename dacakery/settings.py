@@ -136,3 +136,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
+
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+KHALTI_SECRET_KEY = os.getenv('KHALTI_SECRET_KEY', '')
+KHALTI_INITIATE_URL = 'https://a.khalti.com/api/v2/epayment/initiate/'
+KHALTI_LOOKUP_URL = 'https://a.khalti.com/api/v2/epayment/lookup/'
+KHALTI_RETURN_URL = 'http://127.0.0.1:8000/payment/verify/'

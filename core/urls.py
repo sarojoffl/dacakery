@@ -40,6 +40,8 @@ urlpatterns = [
     path('orders/', views.order_list, name='order_list'),
     path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
 
+    path('payment/verify/', views.verify_payment, name='verify_payment'),
+
     # Blog
     path('blog/', views.blog_list, name='blog_list'),
     path('blog/<int:pk>/', views.blog_detail, name='blog_detail'),

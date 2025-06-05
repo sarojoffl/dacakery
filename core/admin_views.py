@@ -12,7 +12,7 @@ from .models import (
 from .admin_forms import (
     AdminSliderForm, AboutSectionForm, BlogCategoryForm, BlogPostForm, TestimonialForm,
     InstagramSectionForm, InstagramImageForm, CategoryForm, ProductForm, CouponForm, UserForm, TeamMemberForm,
-    MapLocationForm, ContactDetailForm, SpecialOfferForm, OrganizationDetailsForm, UserProfileForm
+    MapLocationForm, ContactDetailForm, SpecialOfferForm, OrganizationDetailsForm, UserProfileForm, AdminOrderForm
 )
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
@@ -515,6 +515,19 @@ def order_list(request):
 def order_detail(request, pk):
     order = get_object_or_404(Order, pk=pk)
     return render(request, 'dashboard/order_detail.html', {'order': order})
+
+@staff_member_required
+def order_edit(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    if request.method == 'POST':
+        form = AdminOrderForm(request.POST, instance=order)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Order updated successfully.')
+            return redirect('admin_order_detail', pk=order.pk)
+    else:
+        form = AdminOrderForm(instance=order)
+    return render(request, 'dashboard/order_form.html', {'form': form, 'title': 'Edit Order'})
 
 @staff_member_required
 def order_delete(request, pk):

@@ -2,7 +2,7 @@ from django import forms
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
     InstagramImage, Category, Product, Coupon, TeamMember, MapLocation, ContactDetail,
-    SpecialOffer, OrganizationDetails, UserProfile
+    SpecialOffer, OrganizationDetails, UserProfile, Order
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
@@ -116,3 +116,10 @@ class OrganizationDetailsForm(forms.ModelForm):
     class Meta:
         model = OrganizationDetails
         fields = '__all__' 
+
+class AdminOrderForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['status', 'delivery_date', 'delivery_time',
+                  'first_name', 'last_name', 'email', 'phone',
+                  'address_line1', 'address_line2', 'city', 'state', 'zip', 'country']

@@ -14,14 +14,15 @@
     {% endfor %}
 {% endif %}
 
-<table class="table table-bordered table-hover">
+<table class="table table-bordered table-hover align-middle">
     <thead class="table-light">
         <tr>
             <th>#</th>
             <th>Customer</th>
             <th>Email</th>
             <th>Total</th>
-            <th>Payment</th>
+            <th>Payment Method</th>
+            <th>Payment Status</th>
             <th>Date</th>
             <th>Actions</th>
         </tr>
@@ -32,8 +33,21 @@
             <td>{{ order.id }}</td>
             <td>{{ order.first_name }} {{ order.last_name }}</td>
             <td>{{ order.email }}</td>
-            <td>रु {{ order.total_amount }}</td>
-            <td>{{ order.payment_method }}</td>
+            <td>रु {{ order.total_amount|floatformat:2 }}</td>
+            <td>{{ order.payment_method|title }}</td>
+            <td>
+                {% if order.status == 'paid' %}
+                    <span class="badge bg-success">Paid</span>
+                {% elif order.status == 'pending' %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+                {% elif order.status == 'failed' %}
+                    <span class="badge bg-danger">Failed</span>
+                {% elif order.status == 'cancelled' %}
+                    <span class="badge bg-secondary">Cancelled</span>
+                {% else %}
+                    <span class="badge bg-secondary">{{ order.status|capfirst }}</span>
+                {% endif %}
+            </td>
             <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
             <td>
                 <a href="{% url 'admin_order_detail' order.id %}" class="btn btn-sm btn-info">View</a>
@@ -41,7 +55,7 @@
             </td>
         </tr>
         {% empty %}
-        <tr><td colspan="7" class="text-center">No orders found.</td></tr>
+        <tr><td colspan="8" class="text-center">No orders found.</td></tr>
         {% endfor %}
     </tbody>
 </table>

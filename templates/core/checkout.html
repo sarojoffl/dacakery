@@ -32,8 +32,7 @@
                 {% csrf_token %}
                 <div class="row">
                     <div class="col-lg-8 col-md-6">
-
-                         {% if messages %}
+                        {% if messages %}
                             {% for message in messages %}
                                 <div class="alert alert-{{ message.tags }}">
                                     {{ message }}
@@ -157,25 +156,38 @@
                                 <li>Subtotal <span>रु {{ total|floatformat:2 }}</span></li>
 
                                 {% if discount_percent %}
-                                    <li><strong>Discount ({{ discount_percent }}%) <span>- रु {{ discount_amount|floatformat:2 }}</span></li>
+                                    <li><strong>Discount ({{ discount_percent }}%) <span>- रु {{ discount_amount|floatformat:2 }}</span></strong></li>
                                 {% endif %}
 
                                 <li><strong>Total</strong> <span><strong>रु {{ final_total|floatformat:2 }}</strong></span></li>
                             </ul>
-                            <div class="checkout__input__checkbox">
-                                <label for="payment">
+
+                            <h4 class="checkout__title">Payment Method</h4>
+
+                            <div class="checkout__input__radio">
+                                <label for="payment_cod">
+                                    <input type="radio" id="payment_cod" name="payment_method" value="cod" checked>
                                     Cash on Delivery
-                                    <input type="checkbox" id="payment" name="payment_method" value="cod" checked>
                                     <span class="checkmark"></span>
                                 </label>
                             </div>
-                            <div class="checkout__input__checkbox">
-                                <label for="paypal">
+
+                            <div class="checkout__input__radio">
+                                <label for="payment_khalti">
+                                    <input type="radio" id="payment_khalti" name="payment_method" value="khalti">
+                                    Pay with Khalti
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+
+                            <div class="checkout__input__radio">
+                                <label for="payment_esewa">
+                                    <input type="radio" id="payment_esewa" name="payment_method" value="esewa" disabled>
                                     Pay with eSewa (Coming Soon)
-                                    <input type="checkbox" id="paypal" disabled>
                                     <span class="checkmark"></span>
                                 </label>
                             </div>
+
                             <button type="submit" class="site-btn">PLACE ORDER</button>
                         </div>
                     </div>

@@ -74,6 +74,7 @@ urlpatterns = [
     # Orders
     path('orders/', admin_views.order_list, name='admin_order_list'),
     path('orders/<int:pk>/', admin_views.order_detail, name='admin_order_detail'),
+    path('orders/edit/<int:pk>/', admin_views.order_edit, name='admin_order_edit'),
     path('orders/delete/<int:pk>/', admin_views.order_delete, name='admin_order_delete'),
 
     # Team Members

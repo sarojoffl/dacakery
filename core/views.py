@@ -17,6 +17,11 @@ from decimal import Decimal
 from django.http import JsonResponse
 from django.utils.timezone import now
 from datetime import date
+import requests
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+from django.conf import settings
+
 
 def user_login(request):
     if request.method == 'POST':
@@ -380,9 +385,16 @@ def apply_coupon(request):
 
     return redirect('cart')
 
+def calculate_item_price(product, size='1', eggless=False, sugarless=False):
+    price = product.price * EXTRA_PRICES['size'].get(size, Decimal('1.0'))
+    if eggless:
+        price += EXTRA_PRICES['eggless']
+    if sugarless:
+        price += EXTRA_PRICES['sugarless']
+    return price
+
 def checkout(request):
     cart = request.session.get('cart', {})
-
     coupon_data = request.session.get('coupon')
     discount_percent = Decimal(str(coupon_data['discount'])) if coupon_data else Decimal('0.0')
     discount_percent = min(discount_percent, Decimal('100.0'))
@@ -395,27 +407,25 @@ def checkout(request):
 
         user = request.user if request.user.is_authenticated else None
 
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        country = request.POST.get('country')
-        address_line1 = request.POST.get('address_line1')
-        address_line2 = request.POST.get('address_line2', '')
-        city = request.POST.get('city')
-        state = request.POST.get('state')
-        zip_code = request.POST.get('zip')
-        phone = request.POST.get('phone')
-        email = request.POST.get('email')
-        notes = request.POST.get('notes', '')
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        country = request.POST.get('country', '').strip()
+        address_line1 = request.POST.get('address_line1', '').strip()
+        address_line2 = request.POST.get('address_line2', '').strip()
+        city = request.POST.get('city', '').strip()
+        state = request.POST.get('state', '').strip()
+        zip_code = request.POST.get('zip', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        email = request.POST.get('email', '').strip()
+        notes = request.POST.get('notes', '').strip()
         payment_method = request.POST.get('payment_method', 'cod')
         delivery_date = request.POST.get('delivery_date')
         delivery_time = request.POST.get('delivery_time')
 
-        # Validate delivery date
         if delivery_date and date.fromisoformat(delivery_date) < date.today():
             messages.error(request, "Delivery date cannot be in the past.")
             return redirect('checkout')
 
-        # Account creation
         create_account = request.POST.get('create_account')
         account_password = request.POST.get('account_password')
 
@@ -440,7 +450,6 @@ def checkout(request):
 
         for product_id, item in cart.items():
             product = get_object_or_404(Product, id=product_id)
-
             if isinstance(item, dict):
                 quantity = int(item.get('quantity', 1))
                 size = item.get('size', '1')
@@ -454,19 +463,14 @@ def checkout(request):
                 sugarless = False
                 message = ''
 
-            base_price = product.price * EXTRA_PRICES['size'].get(size, Decimal('1.0'))
-            if eggless:
-                base_price += EXTRA_PRICES['eggless']
-            if sugarless:
-                base_price += EXTRA_PRICES['sugarless']
-
-            subtotal = base_price * quantity
+            price = calculate_item_price(product, size, eggless, sugarless)
+            subtotal = price * quantity
             total += subtotal
 
             order_items.append({
                 'product': product,
                 'quantity': quantity,
-                'price': base_price,
+                'price': price,
                 'size': size,
                 'eggless': eggless,
                 'sugarless': sugarless,
@@ -478,7 +482,7 @@ def checkout(request):
         discount_amount = (total * discount_percent) / Decimal('100.0')
         final_total = total - discount_amount
 
-        # Create Order
+        # Create order and order items
         order = Order.objects.create(
             user=user,
             first_name=first_name,
@@ -500,7 +504,6 @@ def checkout(request):
             delivery_time=delivery_time,
         )
 
-        # Create OrderItems
         for item in order_items:
             OrderItem.objects.create(
                 order=order,
@@ -513,12 +516,45 @@ def checkout(request):
                 message=item['message'],
             )
 
+        # Clear cart
         request.session['cart'] = {}
         request.session.pop('coupon', None)
 
+        # 🔁 Handle Khalti Payment
+        if payment_method == 'khalti':
+            headers = {
+                'Authorization': f'Key {settings.KHALTI_SECRET_KEY}',
+                'Content-Type': 'application/json',
+            }
+            payload = {
+                'return_url': settings.KHALTI_RETURN_URL,
+                'website_url': 'http://127.0.0.1:8000/',
+                'amount': int(final_total * 100),  # in paisa
+                'purchase_order_id': str(order.id),
+                'purchase_order_name': f'Order {order.id}',
+                'customer_info': {
+                    'name': f'{first_name} {last_name}',
+                    'email': email,
+                    'phone': phone,
+                },
+            }
+
+            response = requests.post(settings.KHALTI_INITIATE_URL, json=payload, headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                payment_url = data.get('payment_url')
+                order.payment_id = data.get('pidx')
+                order.save()
+                return redirect(payment_url)
+            else:
+                print("Khalti Error Response:", response.status_code, response.text)
+                messages.error(request, 'Error initiating payment with Khalti.')
+                return redirect('checkout')
+
+        # ✅ COD or other method
         return redirect('order_success', order_id=order.id)
 
-    # GET: Prepare cart summary for checkout page
+    # For GET request: show cart summary
     cart_items = []
     total = Decimal('0')
     for product_id, item in cart.items():
@@ -535,13 +571,8 @@ def checkout(request):
             eggless = False
             sugarless = False
 
-        base_price = product.price * EXTRA_PRICES['size'].get(size, Decimal('1.0'))
-        if eggless:
-            base_price += EXTRA_PRICES['eggless']
-        if sugarless:
-            base_price += EXTRA_PRICES['sugarless']
-
-        subtotal = base_price * quantity
+        price = calculate_item_price(product, size, eggless, sugarless)
+        subtotal = price * quantity
         total += subtotal
 
         cart_items.append({
@@ -564,6 +595,42 @@ def checkout(request):
         'discount_percent': discount_percent,
         'coupon_code': coupon_code,
     })
+
+@csrf_exempt
+def verify_payment(request):
+    pidx = request.GET.get('pidx')
+    if not pidx:
+        return HttpResponse('Missing pidx', status=400)
+
+    headers = {
+        'Authorization': f'Key {settings.KHALTI_SECRET_KEY}',
+        'Content-Type': 'application/json',
+    }
+    payload = {'pidx': pidx}
+
+    response = requests.post(settings.KHALTI_LOOKUP_URL, json=payload, headers=headers)
+    if response.status_code == 200:
+        data = response.json()
+        print("Khalti verify response data:", data)  # debug print
+
+        status = data.get('status')
+
+        # Find order by payment_id (pidx)
+        try:
+            order = Order.objects.get(payment_id=pidx)
+        except Order.DoesNotExist:
+            return HttpResponse(f'Order with payment ID {pidx} not found', status=400)
+
+        if status == 'Completed':
+            order.status = 'paid'
+            order.save()
+            return redirect('order_success', order_id=order.id)
+        else:
+            order.status = 'failed'
+            order.save()
+            return redirect('order_failed', order_id=order.id)
+    else:
+        return HttpResponse('Error verifying payment', status=500)
 
 def order_success(request, order_id):
     order = get_object_or_404(Order, id=order_id)

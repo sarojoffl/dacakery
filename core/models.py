@@ -166,13 +166,33 @@ class Order(models.Model):
     phone = models.CharField(max_length=20)
     email = models.EmailField()
     notes = models.TextField(blank=True)
-    payment_method = models.CharField(max_length=50, default='cod')
+    
+    PAYMENT_METHOD_CHOICES = [
+        ('cod', 'Cash on Delivery'),
+        ('khalti', 'Khalti'),
+        ('esewa', 'eSewa'),
+    ]
+    payment_method = models.CharField(
+        max_length=50,
+        choices=PAYMENT_METHOD_CHOICES,
+        default='cod'
+    )
+
     coupon_code = models.CharField(max_length=50, blank=True, null=True)
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     delivery_date = models.DateField(null=True, blank=True)
     delivery_time = models.TimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending Payment'),
+        ('paid', 'Paid'),
+        ('failed', 'Payment Failed'),
+        ('cancelled', 'Cancelled'),
+    ]
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    payment_id = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"Order #{self.id} by {self.first_name} {self.last_name}"
@@ -187,7 +207,7 @@ class OrderItem(models.Model):
     eggless = models.BooleanField(default=False)
     sugarless = models.BooleanField(default=False)
     size = models.CharField(max_length=20, blank=True, null=True)
-    message = models.CharField(max_length=255, blank=True)
+    message = models.CharField(max_length=255, blank=True, null=True)
 
     def get_subtotal(self):
         return self.quantity * self.price
