@@ -592,8 +592,8 @@ def blog_detail(request, pk):
 
     author_profile = getattr(blog.author, 'userprofile', None) if blog.author else None
 
-    prev_blog = BlogPost.objects.filter(created_at__lt=blog.created_at).order_by('-created_at').first()
-    next_blog = BlogPost.objects.filter(created_at__gt=blog.created_at).order_by('created_at').first()
+    prev_blog = BlogPost.objects.filter(pk__lt=pk).order_by('-pk').first()
+    next_blog = BlogPost.objects.filter(pk__gt=pk).order_by('pk').first()
 
     comments = blog.comments.all().order_by('-created_at')
     comment_form = BlogCommentForm()

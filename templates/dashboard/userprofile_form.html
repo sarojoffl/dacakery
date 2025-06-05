@@ -13,10 +13,10 @@
         <div class="alert alert-danger">{{ form.non_field_errors }}</div>
     {% endif %}
 
-    <!-- User field as disabled text input -->
+    <!-- User field displayed as readonly input -->
     <div class="mb-3">
         <label for="user_display" class="form-label fw-semibold">{{ form.user.label }}</label>
-        <input type="text" id="user_display" class="form-control" value="{{ form.instance.user.username }}" disabled>
+        <input type="text" id="user_display" class="form-control" value="{{ form.instance.user.username }}" readonly>
     </div>
 
     <div class="mb-3">

@@ -87,7 +87,7 @@ class UserForm(forms.ModelForm):
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ['user', 'profile_picture', 'bio', 'facebook', 'instagram', 'twitter', 'linkedin']
+        exclude = ['user']
         
 class TeamMemberForm(forms.ModelForm):
     class Meta:
