@@ -1430,7 +1430,7 @@ ol {
 .shop__option__search form .nice-select .list {
   margin-top: 0;
   border-radius: 0;
-  width: 100%;
+  width: auto;
 }
 .shop__option__search form .nice-select:before {
   position: absolute;
@@ -1488,7 +1488,13 @@ ol {
   height: 100%;
   padding: 0 15px;
 }
-
+.shop__option__search form .nice-select .current {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
 .shop__option__right {
   text-align: right;
 }
