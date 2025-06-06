@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Payment Failed - Da Cakery{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-lg p-4 border-0 rounded-4 text-center bg-light">
+        <div class="card-body">
+            <img src="{% static 'img/failure.jpg' %}" alt="Payment Failed" class="mb-4" style="width: 100px;">
+            <h2 class="text-danger fw-bold mb-3">Oh no! Your Payment Didn’t Go Through</h2>
+            <p class="lead text-muted mb-4">
+                Something went wrong while processing your payment. Don’t worry, your order is safe with us.
+                Feel free to try again or contact support if the issue persists.
+            </p>
+
+            {% if order %}
+            <div class="mt-4">
+                <h4 class="text-primary mb-3">Order Summary</h4>
+                <ul class="list-group list-group-flush mx-auto text-start" style="max-width: 450px;">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Order ID:</strong> <span>#{{ order.id }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Name:</strong> <span>{{ order.first_name }} {{ order.last_name }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Total Amount:</strong> <span>रु {{ order.total_amount }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Payment Method:</strong> <span>{{ order.payment_method|default:"Cash on Delivery" }}</span>
+                    </li>
+                </ul>
+            </div>
+            {% endif %}
+
+            {% if error_message %}
+            <div class="alert alert-danger mt-4" role="alert">
+                {{ error_message }}
+            </div>
+            {% endif %}
+
+            <div class="d-flex justify-content-center mt-5 gap-3">
+                <a href="{% url 'checkout' %}" class="btn btn-outline-danger px-4 py-2 rounded-pill">
+                    Try Again
+                </a>
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary px-4 py-2 rounded-pill">
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -162,28 +162,25 @@
                                 <li><strong>Total</strong> <span><strong>रु {{ final_total|floatformat:2 }}</strong></span></li>
                             </ul>
 
-                            <h4 class="checkout__title">Payment Method</h4>
-
-                            <div class="checkout__input__radio">
-                                <label for="payment_cod">
-                                    <input type="radio" id="payment_cod" name="payment_method" value="cod" checked>
-                                    Cash on Delivery
+                            <h6 class="checkout__title">Payment Method</h6>
+                            <div class="checkout__input__checkbox">
+                                <label>
+                                    <input type="radio" name="payment_method" value="cod" checked>
+                                    Cash on Delivery (COD)
                                     <span class="checkmark"></span>
                                 </label>
                             </div>
-
-                            <div class="checkout__input__radio">
-                                <label for="payment_khalti">
-                                    <input type="radio" id="payment_khalti" name="payment_method" value="khalti">
-                                    Pay with Khalti
+                            <div class="checkout__input__checkbox">
+                                <label>
+                                    <input type="radio" name="payment_method" value="khalti">
+                                    Khalti
                                     <span class="checkmark"></span>
                                 </label>
                             </div>
-
-                            <div class="checkout__input__radio">
-                                <label for="payment_esewa">
-                                    <input type="radio" id="payment_esewa" name="payment_method" value="esewa" disabled>
-                                    Pay with eSewa (Coming Soon)
+                            <div class="checkout__input__checkbox">
+                                <label>
+                                    <input type="radio" name="payment_method" value="esewa">
+                                    eSewa
                                     <span class="checkmark"></span>
                                 </label>
                             </div>

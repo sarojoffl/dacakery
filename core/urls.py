@@ -36,11 +36,14 @@ urlpatterns = [
 
     # Checkout & Orders
     path('checkout/', views.checkout, name='checkout'),
-    path('success/<int:order_id>/', views.order_success, name='order_success'),
+    path('order/success/<int:order_id>/', views.order_success, name='order_success'),
+    path('order/failed/<int:order_id>/', views.order_failed, name='order_failed'),
     path('orders/', views.order_list, name='order_list'),
     path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
 
-    path('payment/verify/', views.verify_payment, name='verify_payment'),
+    # Payment verification
+    path('payment/khalti/verify/', views.khalti_verify, name='khalti_verify'),
+    path('payment/esewa/verify/<int:oid>/q/<str:status>/', views.esewa_verify, name='esewa_verify'),
 
     # Blog
     path('blog/', views.blog_list, name='blog_list'),

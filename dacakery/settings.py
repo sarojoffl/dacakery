@@ -137,12 +137,22 @@ LOGIN_URL = 'login'
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
 
+SITE_URL = "http://localhost:8000"
+
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 
+# Khalti Configuration
 KHALTI_SECRET_KEY = os.getenv('KHALTI_SECRET_KEY', '')
-KHALTI_INITIATE_URL = 'https://a.khalti.com/api/v2/epayment/initiate/'
-KHALTI_LOOKUP_URL = 'https://a.khalti.com/api/v2/epayment/lookup/'
-KHALTI_RETURN_URL = 'http://127.0.0.1:8000/payment/verify/'
+KHALTI_INITIATE_URL = os.getenv('KHALTI_INITIATE_URL', 'https://a.khalti.com/api/v2/epayment/initiate/')
+KHALTI_LOOKUP_URL = os.getenv('KHALTI_LOOKUP_URL', 'https://a.khalti.com/api/v2/epayment/lookup/')
+KHALTI_RETURN_URL = os.getenv('KHALTI_RETURN_URL', 'http://127.0.0.1:8000/payment/khalti/verify/')
+
+# eSewa Configuration
+ESEWA_MERCHANT_CODE = os.getenv('ESEWA_MERCHANT_CODE', '')
+ESEWA_SECRET_KEY = os.getenv('ESEWA_SECRET_KEY', '')
+ESEWA_PRODUCT_CODE = os.getenv('ESEWA_PRODUCT_CODE', '')
+ESEWA_PAYMENT_URL = os.getenv('ESEWA_PAYMENT_URL', 'https://rc-epay.esewa.com.np/api/epay/main/v2/form')
+ESEWA_RETURN_URL = os.getenv('ESEWA_RETURN_URL', 'http://127.0.0.1:8000/payment/esewa/verify')

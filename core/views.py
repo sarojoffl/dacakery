@@ -1,26 +1,33 @@
+from datetime import date
+import json
+import hmac
+import hashlib
+import base64
+import uuid
+import requests
+
+from decimal import Decimal
+
+from django.conf import settings
+from django.core.paginator import Paginator
+from django.db.models import Q, Count
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.timezone import now
+from django.views.decorators.csrf import csrf_exempt
+
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import User
+
 from .models import (
     Slider, Category, Product, AboutSection, TeamMember, Testimonial,
     InstagramSection, MapLocation, ContactDetail, Coupon, WishlistItem, Order,
     OrderItem, BlogPost, BlogCategory, NewsletterSubscriber, SpecialOffer
 )
 from .forms import ContactForm, BlogCommentForm
-from django.core.paginator import Paginator
-from django.db.models import Q, Count
-from django.contrib import messages
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
-from django.contrib.auth.models import User
-from django.contrib.auth.hashers import make_password
-from decimal import Decimal
-from django.http import JsonResponse
-from django.utils.timezone import now
-from datetime import date
-import requests
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
-from django.conf import settings
 
 
 def user_login(request):
@@ -31,6 +38,7 @@ def user_login(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+            # Redirect admins to dashboard, others to home
             if user.is_staff or user.is_superuser:
                 return redirect('dashboard_home')
             else:
@@ -40,6 +48,7 @@ def user_login(request):
 
     return render(request, 'core/login.html')
 
+
 def register_user(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -47,10 +56,12 @@ def register_user(request):
         password1 = request.POST['password1']
         password2 = request.POST['password2']
 
+        # Password match validation
         if password1 != password2:
             messages.error(request, 'Passwords do not match.')
             return redirect('register')
 
+        # Unique username and email validation
         if User.objects.filter(username=username).exists():
             messages.error(request, 'Username already exists.')
             return redirect('register')
@@ -59,6 +70,7 @@ def register_user(request):
             messages.error(request, 'Email already exists.')
             return redirect('register')
 
+        # Create and save new user
         user = User.objects.create_user(username=username, email=email, password=password1)
         user.save()
         messages.success(request, 'Account created successfully. You can now log in.')
@@ -66,13 +78,16 @@ def register_user(request):
 
     return render(request, 'core/register.html')
 
+
 def logout_view(request):
     logout(request)
     return redirect('home')
 
+
 @login_required
 def profile(request):
     return render(request, 'core/profile.html')
+
 
 @login_required
 def edit_profile(request):
@@ -93,6 +108,7 @@ def edit_profile(request):
         profile.instagram = request.POST.get('instagram')
         profile.twitter = request.POST.get('twitter')
 
+        # Update profile picture if uploaded
         if 'profile_picture' in request.FILES:
             profile.profile_picture = request.FILES['profile_picture']
 
@@ -103,29 +119,37 @@ def edit_profile(request):
 
     return render(request, 'core/edit_profile.html', {'user': user})
 
+
 @login_required
 def order_list(request):
+    # Fetch orders of logged-in user, latest first
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'core/order_details.html', {'orders': orders})
 
+
 @login_required
 def order_detail(request, order_id):
+    # Get specific order belonging to user or 404
     order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'core/order_detail.html', {'order': order})
 
+
 def home(request):
+    # Load homepage sections from DB
     sliders = Slider.objects.all()
     about = AboutSection.objects.first()
     categories = Category.objects.all()
-    products = Product.objects.all()[:8]
+    products = Product.objects.all()[:8]  # Top 8 products
     team_members = TeamMember.objects.all()
     testimonials = Testimonial.objects.all()
     instagram_section = InstagramSection.objects.prefetch_related('images').first()
     map_location = MapLocation.objects.first()
+
+    # Get special offers that are valid or no expiry
     special_offers = SpecialOffer.objects.filter(
         valid_until__gte=now().date()
-    ) | SpecialOffer.objects.filter(valid_until__isnull=True)  # include offers without an expiry
-    
+    ) | SpecialOffer.objects.filter(valid_until__isnull=True)
+
     return render(request, 'core/home.html', {
         'sliders': sliders,
         'about': about,
@@ -138,7 +162,9 @@ def home(request):
         'special_offers': special_offers,
     })
 
+
 def about(request):
+    # About page content
     about = AboutSection.objects.first()
     team_members = TeamMember.objects.all()
     testimonials = Testimonial.objects.all()
@@ -147,6 +173,7 @@ def about(request):
         'team_members': team_members,
         'testimonials': testimonials,
     })
+
 
 def contact(request):
     contact_detail = ContactDetail.objects.first()
@@ -167,18 +194,22 @@ def contact(request):
         'form': form,
     })
 
+
 def shop(request):
     products = Product.objects.all()
     category_id = request.GET.get('category')
     search_query = request.GET.get('search')
     sort_by = request.GET.get('sort')
 
+    # Filter by category
     if category_id:
         products = products.filter(category_id=category_id)
 
+    # Filter by search query
     if search_query:
         products = products.filter(Q(name__icontains=search_query))
 
+    # Sort products
     if sort_by == 'a_to_z':
         products = products.order_by('name')
     elif sort_by == 'price_low_high':
@@ -186,6 +217,7 @@ def shop(request):
     elif sort_by == 'price_high_low':
         products = products.order_by('-price')
 
+    # Pagination: 8 items per page
     paginator = Paginator(products, 8)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -198,7 +230,9 @@ def shop(request):
     }
     return render(request, 'core/shop.html', context)
 
+
 def product_detail(request, slug):
+    # Fetch product and related ones in same category
     product = get_object_or_404(Product, slug=slug)
     related_products = Product.objects.filter(category=product.category).exclude(id=product.id)[:6]
     return render(request, 'core/product_detail.html', {
@@ -206,20 +240,25 @@ def product_detail(request, slug):
         'related_products': related_products
     })
 
+
 @login_required
 def wishlist(request):
+    # Show user's wishlist items
     wishlist_items = WishlistItem.objects.filter(user=request.user)
     return render(request, 'core/wishlist.html', {'wishlist_items': wishlist_items})
+
 
 @login_required
 def add_to_wishlist(request, slug):
     product = get_object_or_404(Product, slug=slug)
     wishlist_item, created = WishlistItem.objects.get_or_create(user=request.user, product=product)
+    # Notify if added or already exists
     if created:
         messages.success(request, f'{product.name} has been added to your wishlist.')
     else:
         messages.info(request, f'{product.name} is already in your wishlist.')
     return redirect('wishlist')
+
 
 @login_required
 def remove_from_wishlist(request, slug):
@@ -232,6 +271,7 @@ def remove_from_wishlist(request, slug):
         messages.error(request, f'{product.name} is not in your wishlist.')
     return redirect('wishlist')
 
+
 EXTRA_PRICES = {
     'eggless': Decimal('150.0'),
     'sugarless': Decimal('100.0'),
@@ -241,6 +281,7 @@ EXTRA_PRICES = {
         '2': Decimal('2.0')
     }
 }
+
 
 def cart(request):
     cart = request.session.get('cart', {})
@@ -253,7 +294,7 @@ def cart(request):
         except Product.DoesNotExist:
             continue
 
-        # Fix here: check if item is dict, else assume quantity as int
+        # Support old format (int quantity) and new dict format
         if isinstance(item, dict):
             quantity = item.get('quantity', 1)
             size = item.get('size', '1')
@@ -261,14 +302,13 @@ def cart(request):
             sugarless = item.get('sugarless', False)
             message = item.get('message')
         else:
-            # Item is just quantity (int)
             quantity = item
-            size = '1'  # default size
+            size = '1'  # default
             eggless = False
             sugarless = False
             message = ''
 
-        # Base price adjustments
+        # Calculate price adjustments
         base_price = product.price * EXTRA_PRICES['size'].get(size, Decimal('1.0'))
 
         if eggless:
@@ -289,6 +329,7 @@ def cart(request):
             'subtotal': subtotal
         })
 
+    # Apply coupon discount if any
     coupon_data = request.session.get('coupon')
     discount_percent = Decimal(str(coupon_data['discount'])) if coupon_data else Decimal('0.0')
     discount_percent = min(discount_percent, Decimal('100.0'))
@@ -304,6 +345,7 @@ def cart(request):
         'coupon_code': coupon_data['code'] if coupon_data else '',
     })
 
+
 def add_to_cart(request, slug):
     if request.method == "POST":
         product = get_object_or_404(Product, slug=slug)
@@ -316,6 +358,7 @@ def add_to_cart(request, slug):
         size = request.POST.get('size')
         message = request.POST.get('message')
 
+        # Add or update product in session cart
         item = {
             'quantity': quantity,
             'eggless': eggless,
@@ -336,56 +379,54 @@ def update_cart(request):
     if request.method == 'POST':
         cart = request.session.get('cart', {})
 
+        # Update quantities or remove items with quantity < 1
         for key, value in request.POST.items():
             if key.startswith('quantity_'):
+                product_id = key.split('_')[1]
                 try:
-                    product_id = key.split('_')[1]
-                    quantity = int(value)
-                    if quantity < 1:
-                        # Remove item if quantity less than 1
-                        if product_id in cart:
-                            del cart[product_id]
+                    qty = int(value)
+                    if qty < 1:
+                        cart.pop(product_id, None)
                     else:
                         if product_id in cart:
-                            # Update quantity inside the cart item dict
-                            cart[product_id]['quantity'] = quantity
-                except (ValueError, IndexError):
+                            cart[product_id]['quantity'] = qty
+                except ValueError:
                     continue
 
         request.session['cart'] = cart
         messages.success(request, 'Cart updated successfully.')
-
     return redirect('cart')
+
 
 def remove_from_cart(request, product_id):
     cart = request.session.get('cart', {})
-    cart.pop(str(product_id), None)
-    request.session['cart'] = cart
+    if product_id in cart:
+        cart.pop(product_id)
+        request.session['cart'] = cart
+        messages.success(request, 'Item removed from cart.')
+    else:
+        messages.error(request, 'Item not found in cart.')
     return redirect('cart')
+
 
 def apply_coupon(request):
     if request.method == 'POST':
-        code = request.POST.get('coupon_code', '').strip()
-        cart = request.session.get('cart', {})
-
-        if not cart:
-            messages.error(request, "Your cart is empty.")
-            return redirect('cart')
-
+        code = request.POST.get('code', '').strip()
         try:
-            coupon = Coupon.objects.get(code__iexact=code, active=True)
+            coupon = Coupon.objects.get(code__iexact=code, valid_until__gte=now().date())
             request.session['coupon'] = {
                 'code': coupon.code,
-                'discount': float(coupon.discount),  # store discount as a float
+                'discount': str(coupon.discount_percentage)
             }
             messages.success(request, f"Coupon '{coupon.code}' applied successfully!")
         except Coupon.DoesNotExist:
             request.session.pop('coupon', None)
-            messages.error(request, "Invalid or expired coupon code.")
+            messages.error(request, 'Invalid or expired coupon code.')
 
     return redirect('cart')
 
 def calculate_item_price(product, size='1', eggless=False, sugarless=False):
+    # Calculate price based on product, size multiplier, and extra options
     price = product.price * EXTRA_PRICES['size'].get(size, Decimal('1.0'))
     if eggless:
         price += EXTRA_PRICES['eggless']
@@ -393,11 +434,24 @@ def calculate_item_price(product, size='1', eggless=False, sugarless=False):
         price += EXTRA_PRICES['sugarless']
     return price
 
+
+def generate_esewa_signature(secret_key, data_dict, signed_fields):
+    # Create HMAC SHA256 signature and encode it in base64 for eSewa payment verification
+    message = ",".join(f"{field}={data_dict[field]}" for field in signed_fields)
+    secret_key_bytes = secret_key.encode('utf-8')
+    message_bytes = message.encode('utf-8')
+
+    signature = hmac.new(secret_key_bytes, message_bytes, hashlib.sha256).digest()
+    signature_b64 = base64.b64encode(signature).decode('utf-8')
+
+    return signature_b64
+
+
 def checkout(request):
     cart = request.session.get('cart', {})
     coupon_data = request.session.get('coupon')
     discount_percent = Decimal(str(coupon_data['discount'])) if coupon_data else Decimal('0.0')
-    discount_percent = min(discount_percent, Decimal('100.0'))
+    discount_percent = min(discount_percent, Decimal('100.0'))  # Cap discount at 100%
     coupon_code = coupon_data['code'] if coupon_data else ''
 
     if request.method == 'POST':
@@ -407,6 +461,7 @@ def checkout(request):
 
         user = request.user if request.user.is_authenticated else None
 
+        # Get customer and order details from POST data
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
         country = request.POST.get('country', '').strip()
@@ -422,10 +477,12 @@ def checkout(request):
         delivery_date = request.POST.get('delivery_date')
         delivery_time = request.POST.get('delivery_time')
 
+        # Validate delivery date (cannot be in the past)
         if delivery_date and date.fromisoformat(delivery_date) < date.today():
             messages.error(request, "Delivery date cannot be in the past.")
             return redirect('checkout')
 
+        # Account creation logic if user opts in
         create_account = request.POST.get('create_account')
         account_password = request.POST.get('account_password')
 
@@ -448,20 +505,14 @@ def checkout(request):
         total = Decimal('0')
         order_items = []
 
+        # Calculate total and prepare order items from cart
         for product_id, item in cart.items():
             product = get_object_or_404(Product, id=product_id)
-            if isinstance(item, dict):
-                quantity = int(item.get('quantity', 1))
-                size = item.get('size', '1')
-                eggless = item.get('eggless', False)
-                sugarless = item.get('sugarless', False)
-                message = item.get('message', '')
-            else:
-                quantity = int(item)
-                size = '1'
-                eggless = False
-                sugarless = False
-                message = ''
+            quantity = int(item.get('quantity', 1)) if isinstance(item, dict) else int(item)
+            size = item.get('size', '1') if isinstance(item, dict) else '1'
+            eggless = item.get('eggless', False) if isinstance(item, dict) else False
+            sugarless = item.get('sugarless', False) if isinstance(item, dict) else False
+            message = item.get('message', '') if isinstance(item, dict) else ''
 
             price = calculate_item_price(product, size, eggless, sugarless)
             subtotal = price * quantity
@@ -482,7 +533,7 @@ def checkout(request):
         discount_amount = (total * discount_percent) / Decimal('100.0')
         final_total = total - discount_amount
 
-        # Create order and order items
+        # Create order in DB
         order = Order.objects.create(
             user=user,
             first_name=first_name,
@@ -504,23 +555,20 @@ def checkout(request):
             delivery_time=delivery_time,
         )
 
+        # Create individual order items in DB
         for item in order_items:
             OrderItem.objects.create(
                 order=order,
                 product=item['product'],
                 quantity=item['quantity'],
                 price=item['price'],
+                size=item['size'],
                 eggless=item['eggless'],
                 sugarless=item['sugarless'],
-                size=item['size'],
                 message=item['message'],
             )
 
-        # Clear cart
-        request.session['cart'] = {}
-        request.session.pop('coupon', None)
-
-        # 🔁 Handle Khalti Payment
+        # Payment method: Khalti
         if payment_method == 'khalti':
             headers = {
                 'Authorization': f'Key {settings.KHALTI_SECRET_KEY}',
@@ -528,8 +576,8 @@ def checkout(request):
             }
             payload = {
                 'return_url': settings.KHALTI_RETURN_URL,
-                'website_url': 'http://127.0.0.1:8000/',
-                'amount': int(final_total * 100),  # in paisa
+                'website_url': settings.SITE_URL,
+                'amount': int(final_total * 100),  # amount in paisa
                 'purchase_order_id': str(order.id),
                 'purchase_order_name': f'Order {order.id}',
                 'customer_info': {
@@ -547,30 +595,47 @@ def checkout(request):
                 order.save()
                 return redirect(payment_url)
             else:
-                print("Khalti Error Response:", response.status_code, response.text)
                 messages.error(request, 'Error initiating payment with Khalti.')
                 return redirect('checkout')
 
-        # ✅ COD or other method
+        # Payment method: eSewa
+        elif payment_method == 'esewa':
+            transaction_uuid = str(uuid.uuid4())
+            base_url = settings.ESEWA_RETURN_URL.rstrip('/')
+            esewa_data = {
+                'amount': str(order.total_amount),
+                'tax_amount': '0',
+                'total_amount': str(order.total_amount),
+                'transaction_uuid': transaction_uuid,
+                'product_code': settings.ESEWA_PRODUCT_CODE,
+                'product_service_charge': '0',
+                'product_delivery_charge': '0',
+                'success_url': f"{base_url}/{order.id}/q/su/",
+                'failure_url': f"{base_url}/{order.id}/q/fu/",
+                'signed_field_names': 'total_amount,transaction_uuid,product_code',
+            }
+
+            # Generate signature for eSewa payment data
+            signed_fields = esewa_data['signed_field_names'].split(',')
+            signature = generate_esewa_signature(settings.ESEWA_SECRET_KEY, esewa_data, signed_fields)
+            esewa_data['signature'] = signature
+
+            return render(request, 'payment/esewa_redirect_v2.html', {'esewa_data': esewa_data})
+
+        # Clear cart and coupon after successful order placement
+        request.session['cart'] = {}
+        request.session.pop('coupon', None)
         return redirect('order_success', order_id=order.id)
 
-    # For GET request: show cart summary
+    # Render checkout page with cart summary if GET request
     cart_items = []
     total = Decimal('0')
     for product_id, item in cart.items():
         product = get_object_or_404(Product, id=product_id)
-
-        if isinstance(item, dict):
-            quantity = int(item.get('quantity', 1))
-            size = item.get('size', '1')
-            eggless = item.get('eggless', False)
-            sugarless = item.get('sugarless', False)
-        else:
-            quantity = int(item)
-            size = '1'
-            eggless = False
-            sugarless = False
-
+        quantity = int(item.get('quantity', 1)) if isinstance(item, dict) else int(item)
+        size = item.get('size', '1') if isinstance(item, dict) else '1'
+        eggless = item.get('eggless', False) if isinstance(item, dict) else False
+        sugarless = item.get('sugarless', False) if isinstance(item, dict) else False
         price = calculate_item_price(product, size, eggless, sugarless)
         subtotal = price * quantity
         total += subtotal
@@ -594,55 +659,94 @@ def checkout(request):
         'discount_amount': discount_amount,
         'discount_percent': discount_percent,
         'coupon_code': coupon_code,
+        'ESEWA_PAYMENT_URL': settings.ESEWA_PAYMENT_URL,
     })
 
+
 @csrf_exempt
-def verify_payment(request):
+def esewa_verify(request, oid, status):
+    order = get_object_or_404(Order, id=oid)
+    refId = request.GET.get('refId')
+
+    # Handle base64 encoded data from eSewa callback
+    if not refId and 'data' in request.GET:
+        try:
+            decoded_data = base64.b64decode(request.GET['data']).decode('utf-8')
+            data_json = json.loads(decoded_data)
+            refId = data_json.get('transaction_uuid')
+            status = 'su' if data_json.get('status') == 'COMPLETE' else 'failed'
+        except Exception:
+            order.status = 'failed'
+            order.save()
+            return redirect('order_failed', order_id=order.id)
+
+    # Mark order as paid if successful
+    if status == 'su' and refId:
+        order.status = 'paid'
+        order.payment_id = refId
+        order.save()
+
+        request.session['cart'] = {}
+        request.session.pop('coupon', None)
+
+        return redirect('order_success', order_id=order.id)
+
+    # Mark order as failed otherwise
+    order.status = 'failed'
+    order.save()
+    return redirect('order_failed', order_id=order.id)
+
+
+@csrf_exempt
+def khalti_verify(request):
     pidx = request.GET.get('pidx')
     if not pidx:
         return HttpResponse('Missing pidx', status=400)
 
     headers = {
         'Authorization': f'Key {settings.KHALTI_SECRET_KEY}',
-        'Content-Type': 'application/json',
     }
-    payload = {'pidx': pidx}
 
-    response = requests.post(settings.KHALTI_LOOKUP_URL, json=payload, headers=headers)
+    payload = {
+        'pidx': pidx
+    }
+
+    response = requests.post(settings.KHALTI_VERIFY_URL, json=payload, headers=headers)
+
+    # Verify Khalti payment and update order status
     if response.status_code == 200:
         data = response.json()
-        print("Khalti verify response data:", data)  # debug print
-
-        status = data.get('status')
-
-        # Find order by payment_id (pidx)
-        try:
-            order = Order.objects.get(payment_id=pidx)
-        except Order.DoesNotExist:
-            return HttpResponse(f'Order with payment ID {pidx} not found', status=400)
-
-        if status == 'Completed':
+        if data.get('status') == 'Completed':
+            order_id = data.get('purchase_order_id')
+            order = get_object_or_404(Order, id=order_id)
             order.status = 'paid'
+            order.payment_id = pidx
             order.save()
+
+            request.session['cart'] = {}
+            request.session.pop('coupon', None)
+
             return redirect('order_success', order_id=order.id)
-        else:
-            order.status = 'failed'
-            order.save()
-            return redirect('order_failed', order_id=order.id)
-    else:
-        return HttpResponse('Error verifying payment', status=500)
+
+    return HttpResponse('Payment verification failed', status=400)
 
 def order_success(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-    return render(request, 'core/success.html', {'order': order})
+    return render(request, 'payment/success.html', {'order': order})
+
+def order_failed(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    return render(request, 'payment/failure.html', {
+        'order': order,
+        'error_message': "Payment verification failed. Please try again or contact support."
+    })
 
 def blog_list(request):
+    # Fetch blogs with related category and order by newest first
     blogs = BlogPost.objects.select_related('category').order_by('-created_at')
-
-    # Annotate categories with blog post counts
+    # Annotate categories with the count of their blog posts
     categories = BlogCategory.objects.annotate(count=Count('blog_posts'))
-
-    recent_blogs = blogs[:5]  # For sidebar
+    recent_blogs = blogs[:5]  # Latest 5 blogs for sidebar
 
     context = {
         'blogs': blogs,
@@ -654,11 +758,13 @@ def blog_list(request):
 def blog_detail(request, pk):
     blog = get_object_or_404(BlogPost, pk=pk)
 
+    # Increment the blog's view count
     blog.views += 1
     blog.save(update_fields=['views'])
 
     author_profile = getattr(blog.author, 'userprofile', None) if blog.author else None
 
+    # Get previous and next blog posts for navigation
     prev_blog = BlogPost.objects.filter(pk__lt=pk).order_by('-pk').first()
     next_blog = BlogPost.objects.filter(pk__gt=pk).order_by('pk').first()
 
@@ -704,9 +810,9 @@ def search_results(request):
     query = request.GET.get('q', '').strip()
     results = []
     if query:
-        # Example: search Products by name or description containing the query (case insensitive)
+        # Search products by name or description (case-insensitive)
         results = Product.objects.filter(name__icontains=query) | Product.objects.filter(description__icontains=query)
-    
+
     context = {
         'query': query,
         'results': results,
