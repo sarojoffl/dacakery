@@ -16,6 +16,7 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Profile"
 
+
 class Slider(models.Model):
     title = models.CharField(max_length=255)
     image = models.ImageField(upload_to='hero/')
@@ -23,7 +24,8 @@ class Slider(models.Model):
 
     def __str__(self):
         return self.title
-    
+
+
 class AboutSection(models.Model):
     title = models.CharField(max_length=255, default="About Cake Shop")
     heading = models.CharField(max_length=255, default="Cakes and bakes from the house of Queens!")
@@ -56,6 +58,7 @@ class Category(models.Model):
             self.slug = slug
         super().save(*args, **kwargs)
 
+
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=255)
@@ -80,6 +83,7 @@ class Product(models.Model):
             self.slug = slug
         super().save(*args, **kwargs)
 
+
 class TeamMember(models.Model):
     name = models.CharField(max_length=100)
     role = models.CharField(max_length=100)
@@ -102,7 +106,8 @@ class Testimonial(models.Model):
 
     def __str__(self):
         return f"{self.author_name} from {self.author_location}"
-    
+
+
 class InstagramSection(models.Model):
     heading = models.CharField(max_length=100)
     subheading = models.CharField(max_length=255)
@@ -111,12 +116,14 @@ class InstagramSection(models.Model):
     def __str__(self):
         return self.instagram_handle
 
+
 class InstagramImage(models.Model):
     section = models.ForeignKey(InstagramSection, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='instagram/')
 
     def __str__(self):
         return f"Image for {self.section.instagram_handle}"
+
 
 class MapLocation(models.Model):
     title = models.CharField(max_length=100)
@@ -127,7 +134,8 @@ class MapLocation(models.Model):
 
     def __str__(self):
         return self.title
-    
+
+
 class ContactDetail(models.Model):
     title = models.CharField(max_length=100, default="Contact With us")
     availability_note = models.CharField(max_length=255, default="Representatives or Advisors are available:")
@@ -138,6 +146,7 @@ class ContactDetail(models.Model):
     def __str__(self):
         return self.title
 
+
 class ContactMessage(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField()
@@ -147,6 +156,7 @@ class ContactMessage(models.Model):
     def __str__(self):
         return f"Message from {self.name}"
 
+
 class WishlistItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -155,18 +165,21 @@ class WishlistItem(models.Model):
 
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    country = models.CharField(max_length=100)
-    address_line1 = models.CharField(max_length=255)
+
+    address = models.CharField(max_length=255)
     address_line2 = models.CharField(max_length=255, blank=True)
+
     city = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
-    zip = models.CharField(max_length=20)
+    province = models.CharField(max_length=100)
+    postal_code = models.CharField(max_length=20)
+
     phone = models.CharField(max_length=20)
     email = models.EmailField()
     notes = models.TextField(blank=True)
-    
+
     PAYMENT_METHOD_CHOICES = [
         ('cod', 'Cash on Delivery'),
         ('khalti', 'Khalti'),
@@ -181,8 +194,10 @@ class Order(models.Model):
     coupon_code = models.CharField(max_length=50, blank=True, null=True)
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
     delivery_date = models.DateField(null=True, blank=True)
     delivery_time = models.TimeField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     STATUS_CHOICES = [
@@ -192,10 +207,12 @@ class Order(models.Model):
         ('cancelled', 'Cancelled'),
     ]
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+
     payment_id = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"Order #{self.id} by {self.first_name} {self.last_name}"
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
@@ -203,7 +220,7 @@ class OrderItem(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
-    # Add these fields
+    # Custom cake options
     eggless = models.BooleanField(default=False)
     sugarless = models.BooleanField(default=False)
     size = models.CharField(max_length=20, blank=True, null=True)
@@ -214,7 +231,8 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
-    
+
+
 class Coupon(models.Model):
     code = models.CharField(max_length=50, unique=True)
     discount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -222,7 +240,8 @@ class Coupon(models.Model):
 
     def __str__(self):
         return self.code
-    
+
+
 class SpecialOffer(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True)
@@ -238,13 +257,14 @@ class SpecialOffer(models.Model):
 
     def __str__(self):
         return self.title
-    
+
+
 class BlogCategory(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    
+
     class Meta:
         verbose_name_plural = "Blog Categories"
-    
+
     def __str__(self):
         return self.name
 
@@ -260,7 +280,8 @@ class BlogPost(models.Model):
 
     def __str__(self):
         return self.title
-    
+
+
 class BlogComment(models.Model):
     blog = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -268,7 +289,8 @@ class BlogComment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Comment by {self.user.get_full_name or self.user.username} on {self.blog.title}"
+        return f"Comment by {self.user.get_full_name() or self.user.username} on {self.blog.title}"
+
 
 class NewsletterSubscriber(models.Model):
     email = models.EmailField(unique=True)
@@ -276,7 +298,8 @@ class NewsletterSubscriber(models.Model):
 
     def __str__(self):
         return self.email
-    
+
+
 class OrganizationDetails(models.Model):
     name = models.CharField(max_length=200)
     address = models.TextField(blank=True)
@@ -288,11 +311,6 @@ class OrganizationDetails(models.Model):
     working_hours_mon_fri = models.CharField(max_length=50, default="08:00 am – 08:30 pm")
     working_hours_sat = models.CharField(max_length=50, default="10:00 am – 16:30 pm")
     working_hours_sun = models.CharField(max_length=50, default="10:00 am – 16:30 pm")
-
-    facebook_url = models.URLField(blank=True, verbose_name="Facebook URL")
-    twitter_url = models.URLField(blank=True, verbose_name="Twitter URL")
-    instagram_url = models.URLField(blank=True, verbose_name="Instagram URL")
-    youtube_url = models.URLField(blank=True, verbose_name="YouTube URL")
 
     def __str__(self):
         return self.name

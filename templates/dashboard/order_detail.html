@@ -23,7 +23,7 @@
         <li class="list-group-item"><strong>Email:</strong> {{ order.email }}</li>
         <li class="list-group-item"><strong>Phone:</strong> {{ order.phone }}</li>
         <li class="list-group-item">
-          <strong>Address:</strong> {{ order.address_line1 }}{% if order.address_line2 %}, {{ order.address_line2 }}{% endif %}, {{ order.city }}, {{ order.state }}, {{ order.zip }}, {{ order.country }}
+          <strong>Address:</strong> {{ order.address }}{% if order.address_line2 %}, {{ order.address_line2 }}{% endif %}, {{ order.city }}, {{ order.province }} {{ order.postal_code }}
         </li>
       </ul>
     </div>
@@ -50,7 +50,7 @@
         <li class="list-group-item"><strong>Payment ID:</strong> {{ order.payment_id|default:"-" }}</li>
 
         <li class="list-group-item"><strong>Coupon Code:</strong> {{ order.coupon_code|default:"-" }}</li>
-        <li class="list-group-item"><strong>Discount:</strong> रु {{ order.discount_amount }}</li>
+        <li class="list-group-item"><strong>Discount:</strong> रु {{ order.discount_amount|default:"0" }}</li>
         <li class="list-group-item"><strong>Total Amount:</strong> रु {{ order.total_amount }}</li>
         <li class="list-group-item">
           <strong>Delivery Date & Time:</strong>
@@ -87,8 +87,20 @@
           <td>{{ item.product.name }}</td>
           <td class="text-center">{{ item.quantity }}</td>
           <td class="text-end">{{ item.price }}</td>
-          <td class="text-center">{% if item.eggless %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}</td>
-          <td class="text-center">{% if item.sugarless %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}</td>
+          <td class="text-center">
+            {% if item.eggless %}
+              <span class="badge bg-success">Yes</span>
+            {% else %}
+              <span class="badge bg-secondary">No</span>
+            {% endif %}
+          </td>
+          <td class="text-center">
+            {% if item.sugarless %}
+              <span class="badge bg-success">Yes</span>
+            {% else %}
+              <span class="badge bg-secondary">No</span>
+            {% endif %}
+          </td>
           <td class="text-center">{{ item.size|default:"-" }}</td>
           <td>{{ item.message|default:"-" }}</td>
         </tr>

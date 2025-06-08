@@ -27,10 +27,16 @@
 <!-- Checkout Section Begin -->
 <section class="checkout spad">
     <div class="container">
+        {% if not cart_items %}
+            <div class="alert alert-warning">
+                Your cart is empty. Please <a href="{% url 'shop' %}">add some cakes</a> before checking out.
+            </div>
+        {% else %}
         <div class="checkout__form">
-            <form method="POST" action="{% url 'checkout' %}">
+            <form method="POST" action="{% url 'checkout' %}" id="checkout-form">
                 {% csrf_token %}
                 <div class="row">
+                    <!-- Left Column -->
                     <div class="col-lg-8 col-md-6">
                         {% if messages %}
                             {% for message in messages %}
@@ -40,73 +46,61 @@
                             {% endfor %}
                         {% endif %}
 
-                        <h6 class="coupon__code">
-                            <span class="icon_tag_alt"></span>
-                            Have a coupon?
-                            {% if coupon_code %}
-                                <strong>Applied: {{ coupon_code }}</strong>
-                            {% else %}
-                                <a href="#">Click here</a> to enter your code
-                            {% endif %}
-                        </h6>
-
-                        <h6 class="checkout__title">Billing Details</h6>
+                        <h6 class="checkout__title">Customer & Delivery Details</h6>
                         <div class="row">
                             <div class="col-lg-6">
                                 <div class="checkout__input">
                                     <p>First Name<span>*</span></p>
-                                    <input type="text" name="first_name" required value="{{ request.user.first_name }}">
+                                    <input type="text" name="first_name" placeholder="John" required value="{{ request.user.first_name }}">
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="checkout__input">
                                     <p>Last Name<span>*</span></p>
-                                    <input type="text" name="last_name" required value="{{ request.user.last_name }}">
+                                    <input type="text" name="last_name" placeholder="Doe" required value="{{ request.user.last_name }}">
                                 </div>
                             </div>
                         </div>
-                        <div class="checkout__input">
-                            <p>Country<span>*</span></p>
-                            <input type="text" name="country" required>
-                        </div>
+
                         <div class="checkout__input">
                             <p>Address<span>*</span></p>
-                            <input type="text" name="address_line1" placeholder="Street Address" class="checkout__input__add" required>
+                            <input type="text" name="address" placeholder="Street Address" class="checkout__input__add" required>
                             <input type="text" name="address_line2" placeholder="Apartment, suite, unit etc (optional)">
                         </div>
                         <div class="checkout__input">
                             <p>Town/City<span>*</span></p>
-                            <input type="text" name="city" required>
+                            <input type="text" name="city" placeholder="Kathmandu" required>
                         </div>
                         <div class="checkout__input">
-                            <p>State<span>*</span></p>
-                            <input type="text" name="state" required>
+                            <p>Province<span>*</span></p>
+                            <input type="text" name="state" placeholder="Bagmati" required>
                         </div>
                         <div class="checkout__input">
                             <p>Postcode / ZIP<span>*</span></p>
-                            <input type="text" name="zip" required>
+                            <input type="text" name="postal_code" placeholder="44600" required>
                         </div>
                         <div class="row">
                             <div class="col-lg-6">
                                 <div class="checkout__input">
                                     <p>Phone<span>*</span></p>
-                                    <input type="text" name="phone" required>
+                                    <input type="text" name="phone" pattern="[0-9]{10}" placeholder="9800000000" required>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="checkout__input">
                                     <p>Email<span>*</span></p>
-                                    <input type="email" name="email" value="{{ request.user.email }}" required>
+                                    <input type="email" name="email" placeholder="you@example.com" value="{{ request.user.email }}" required>
                                 </div>
                             </div>
                         </div>
                         <div class="checkout__input">
                             <p>Delivery Date<span>*</span></p>
-                            <input type="date" name="delivery_date" required>
+                            <input type="date" name="delivery_date" required id="delivery-date">
                         </div>
                         <div class="checkout__input">
                             <p>Delivery Time<span>*</span></p>
-                            <input type="time" name="delivery_time" required>
+                            <input type="time" name="delivery_time" required min="10:00" max="18:00">
+                            <small class="text-muted">Deliveries available from 10:00 AM to 6:00 PM</small>
                         </div>
 
                         {% if not request.user.is_authenticated %}
@@ -122,27 +116,22 @@
                                 <p>Account Password<span>*</span></p>
                                 <input type="password" name="account_password">
                             </div>
-
-                            <script>
-                                document.getElementById('acc').addEventListener('change', function () {
-                                    document.getElementById('account_password_field').style.display = this.checked ? 'block' : 'none';
-                                });
-                            </script>
                         {% endif %}
 
                         <div class="checkout__input__checkbox">
                             <label for="diff-acc">
-                                Note about your order
+                                Add a note about your order
                                 <input type="checkbox" id="diff-acc">
                                 <span class="checkmark"></span>
                             </label>
                         </div>
-                        <div class="checkout__input">
+                        <div class="checkout__input" id="order_notes_field" style="display: none;">
                             <p>Order notes</p>
                             <input type="text" name="notes" placeholder="Notes about your order, e.g. special delivery instructions.">
                         </div>
                     </div>
 
+                    <!-- Right Column -->
                     <div class="col-lg-4 col-md-6">
                         <div class="checkout__order">
                             <h6 class="order__title">Your order</h6>
@@ -154,44 +143,57 @@
                             </ul>
                             <ul class="checkout__total__all">
                                 <li>Subtotal <span>रु {{ total|floatformat:2 }}</span></li>
-
                                 {% if discount_percent %}
                                     <li><strong>Discount ({{ discount_percent }}%) <span>- रु {{ discount_amount|floatformat:2 }}</span></strong></li>
                                 {% endif %}
-
                                 <li><strong>Total</strong> <span><strong>रु {{ final_total|floatformat:2 }}</strong></span></li>
                             </ul>
 
                             <h6 class="checkout__title">Payment Method</h6>
                             <div class="checkout__input__checkbox">
-                                <label>
-                                    <input type="radio" name="payment_method" value="cod" checked>
-                                    Cash on Delivery (COD)
-                                    <span class="checkmark"></span>
-                                </label>
+                                <label><input type="radio" name="payment_method" value="cod" checked> Cash on Delivery (COD)<span class="checkmark"></span></label>
                             </div>
                             <div class="checkout__input__checkbox">
-                                <label>
-                                    <input type="radio" name="payment_method" value="khalti">
-                                    Khalti
-                                    <span class="checkmark"></span>
-                                </label>
+                                <label><input type="radio" name="payment_method" value="khalti"> Khalti<span class="checkmark"></span></label>
                             </div>
                             <div class="checkout__input__checkbox">
-                                <label>
-                                    <input type="radio" name="payment_method" value="esewa">
-                                    eSewa
-                                    <span class="checkmark"></span>
-                                </label>
+                                <label><input type="radio" name="payment_method" value="esewa"> eSewa<span class="checkmark"></span></label>
                             </div>
 
-                            <button type="submit" class="site-btn">PLACE ORDER</button>
+                            <button type="submit" class="site-btn" id="place-order-btn">
+                                <span id="btn-text">PLACE ORDER</span>
+                                <span id="btn-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            </button>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
+        {% endif %}
     </div>
 </section>
+
+<!-- Scripts -->
+<script>
+    const accCheckbox = document.getElementById('acc');
+    if (accCheckbox) {
+        accCheckbox.addEventListener('change', function () {
+            document.getElementById('account_password_field').style.display = this.checked ? 'block' : 'none';
+        });
+    }
+
+    document.getElementById('diff-acc').addEventListener('change', function () {
+        document.getElementById('order_notes_field').style.display = this.checked ? 'block' : 'none';
+    });
+
+    document.getElementById('delivery-date').min = new Date().toISOString().split("T")[0];
+
+    document.getElementById('checkout-form').addEventListener('submit', function () {
+        const btn = document.getElementById('place-order-btn');
+        btn.disabled = true;
+        document.getElementById('btn-text').textContent = 'Processing...';
+        document.getElementById('btn-spinner').classList.remove('d-none');
+    });
+</script>
 <!-- Checkout Section End -->
 {% endblock %}

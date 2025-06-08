@@ -122,4 +122,4 @@ class AdminOrderForm(forms.ModelForm):
         model = Order
         fields = ['status', 'delivery_date', 'delivery_time',
                   'first_name', 'last_name', 'email', 'phone',
-                  'address_line1', 'address_line2', 'city', 'state', 'zip', 'country']
+                  'address', 'address_line2', 'city', 'province', 'postal_code']

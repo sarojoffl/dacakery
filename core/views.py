@@ -464,12 +464,11 @@ def checkout(request):
         # Get customer and order details from POST data
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
-        country = request.POST.get('country', '').strip()
-        address_line1 = request.POST.get('address_line1', '').strip()
+        address = request.POST.get('address', '').strip()
         address_line2 = request.POST.get('address_line2', '').strip()
         city = request.POST.get('city', '').strip()
-        state = request.POST.get('state', '').strip()
-        zip_code = request.POST.get('zip', '').strip()
+        province = request.POST.get('state', '').strip()
+        postal_code = request.POST.get('postal_code', '').strip()
         phone = request.POST.get('phone', '').strip()
         email = request.POST.get('email', '').strip()
         notes = request.POST.get('notes', '').strip()
@@ -538,21 +537,20 @@ def checkout(request):
             user=user,
             first_name=first_name,
             last_name=last_name,
-            country=country,
-            address_line1=address_line1,
+            email=email,
+            phone=phone,
+            address=address,
             address_line2=address_line2,
             city=city,
-            state=state,
-            zip=zip_code,
-            phone=phone,
-            email=email,
+            province=province,
+            postal_code=postal_code,
             notes=notes,
-            payment_method=payment_method,
-            total_amount=final_total,
-            coupon_code=coupon_code,
-            discount_amount=discount_amount,
             delivery_date=delivery_date,
             delivery_time=delivery_time,
+            payment_method=payment_method,
+            coupon_code=coupon_code,
+            discount_amount=discount_amount,
+            total_amount=final_total,
         )
 
         # Create individual order items in DB
