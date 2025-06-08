@@ -4,220 +4,218 @@
 {% block content %}
 <!-- Breadcrumb Begin -->
 <div class="breadcrumb-option">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-6 col-md-6 col-sm-6">
-                <div class="breadcrumb__text">
-                    <h2>Product detail</h2>
-                </div>
-            </div>
-            <div class="col-lg-6 col-md-6 col-sm-6">
-                <div class="breadcrumb__links">
-                    <a href="{% url 'home' %}">Home</a>
-                    <a href="{% url 'shop' %}">Shop</a>
-                    <span>{{ product.name }}</span>
-                </div>
-            </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6 col-md-6">
+        <div class="breadcrumb__text">
+          <h2>Product detail</h2>
         </div>
+      </div>
+      <div class="col-lg-6 col-md-6">
+        <div class="breadcrumb__links">
+          <a href="{% url 'home' %}">Home</a>
+          <a href="{% url 'shop' %}">Shop</a>
+          <span>{{ product.name }}</span>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 <!-- Breadcrumb End -->
 
 <!-- Shop Details Section Begin -->
 <section class="product-details spad">
-    <div class="container">
+  <div class="container">
 
-        <!-- Image -->
-        <div class="row mb-4">
-            <div class="product__details__img">
-                <div class="product__details__big__img">
-                    <img class="big_img" src="{{ product.image.url }}" alt="{{ product.name }}">
-                </div>
-            </div>
+    <!-- Product Image Display -->
+    <div class="row justify-content-center mb-5">
+      <div class="col-md-10 col-lg-8">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-light">
+          <div class="bg-white p-4 text-center">
+            <img src="{{ product.image.url }}" alt="{{ product.name|default:'Product Image' }}"
+                 class="img-fluid rounded-3 product-display-img"
+                 style="max-height: 550px; object-fit: cover;">
+          </div>
         </div>
-
-        <!-- Product Info + Form -->
-        <div class="row">
-            <!-- Left: Product Info -->
-            <div class="col-md-6">
-                <div class="product__details__text">
-                    <div class="product__label">{{ product.category.name }}</div>
-                    <h4>{{ product.name }}</h4>
-                    <h5>रु <span id="dynamic-price">{{ product.price }}</span></h5>
-                    <input type="hidden" id="base-price" value="{{ product.price }}">
-                    <p>{{ product.description }}</p>
-                    <ul>
-                        <li>SKU: <span>{{ product.id }}</span></li>
-                        <li>Category: <span>{{ product.category.name }}</span></li>
-                        <li>Tags: <span>{{ product.tags }}</span></li>
-                        <li>Stock:
-                            <span>
-                                {% if product.in_stock %}
-                                    In stock
-                                {% else %}
-                                    Out of stock
-                                {% endif %}
-                            </span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Right: Customization Form -->
-            <div class="col-md-6">
-                <div class="product__details__option">
-                    <div class="row mb-4">
-                        <div class="col-12 text-center">
-                            {% if user.is_authenticated %}
-                                <a href="{% url 'add_to_wishlist' product.slug %}" class="heart__btn d-inline-block" title="Add to Wishlist">
-                                    <span class="icon_heart_alt"></span> Add to Wishlist
-                                </a>
-                            {% else %}
-                                <a href="{% url 'login' %}?next={{ request.path }}" class="heart__btn d-inline-block" title="Login to use Wishlist">
-                                    <span class="icon_heart_alt"></span> Login to Wishlist
-                                </a>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    {% if product.in_stock %}
-                    <form action="{% url 'add_to_cart' product.slug %}" method="POST">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label><strong>Options:</strong></label><br>
-                            {% if extra_options %}
-                                {% for extra in extra_options %}
-                                    <label>
-                                        <input type="checkbox" 
-                                               name="{{ extra.option.name|lower }}" 
-                                               id="{{ extra.option.name|lower }}" 
-                                               data-price="{{ extra.price }}">
-                                        {{ extra.option.name }} (+रु {{ extra.price }})
-                                    </label><br>
-                                {% endfor %}
-                            {% else %}
-                                <span>No extra options available.</span>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-3" style="display: flex; align-items: center; gap: 10px;">
-                            <label for="size" style="margin-bottom: 0;"><strong>Size:</strong></label>
-                            <select name="size" id="size" class="form-control" required style="flex: 1;">
-                                <option value="">Select Size</option>
-                                {% if size_options %}
-                                    {% for size in size_options %}
-                                        <option value="{{ size.option.name|lower }}" data-price-multiplier="{{ size.price }}">
-                                            {{ size.option.name }}
-                                        </option>
-                                    {% endfor %}
-                                {% else %}
-                                    <option value="1" data-price-multiplier="1">Default</option>
-                                {% endif %}
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="message"><strong>Custom Message on Cake:</strong></label>
-                            <input type="text" name="message" maxlength="100" class="form-control" placeholder="Happy Birthday!">
-                        </div>
-
-                        <div class="quantity mb-3">
-                            <div class="pro-qty">
-                                <input type="number" name="quantity" value="1" min="1">
-                            </div>
-                        </div>
-
-                        <button type="submit" class="primary-btn">Add to cart</button>
-                    </form>
-                    {% else %}
-                        <button class="primary-btn" disabled style="background-color: #ccc; cursor: not-allowed;">
-                            Out of Stock
-                        </button>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+
+    <!-- Product Info + Form -->
+    <div class="row">
+      <!-- Left: Product Info -->
+      <div class="col-md-6">
+        <div class="product__details__text">
+          <div class="product__label">{{ product.category.name }}</div>
+          <h4>{{ product.name }}</h4>
+          <h5>रु <span id="dynamic-price">{{ product.price }}</span></h5>
+          <input type="hidden" id="base-price" value="{{ product.price }}">
+          <p>{{ product.description }}</p>
+          <ul>
+            <li>SKU: <span>{{ product.id }}</span></li>
+            <li>Category: <span>{{ product.category.name }}</span></li>
+            <li>Tags: <span>{{ product.tags }}</span></li>
+            <li>Stock:
+              <span>{% if product.in_stock %}In stock{% else %}Out of stock{% endif %}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Right: Customization Form -->
+      <div class="col-md-6">
+        <div class="product__details__option">
+          <div class="row mb-4">
+            <div class="col-12 text-center">
+              {% if user.is_authenticated %}
+                <a href="{% url 'add_to_wishlist' product.slug %}" class="heart__btn d-inline-block" title="Add to Wishlist">
+                  <span class="icon_heart_alt"></span> Add to Wishlist
+                </a>
+              {% else %}
+                <a href="{% url 'login' %}?next={{ request.path }}" class="heart__btn d-inline-block" title="Login to use Wishlist">
+                  <span class="icon_heart_alt"></span> Login to Wishlist
+                </a>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if product.in_stock %}
+            <form action="{% url 'add_to_cart' product.slug %}" method="POST">
+              {% csrf_token %}
+
+              <!-- Extra Options -->
+              <div class="mb-3">
+                <label><strong>Options:</strong></label><br>
+                {% if extra_options %}
+                  {% for extra in extra_options %}
+                    <label>
+                      <input type="checkbox"
+                             name="{{ extra.option.name|lower }}"
+                             id="{{ extra.option.name|lower }}"
+                             data-price="{{ extra.price }}">
+                      {{ extra.option.name }} (+रु {{ extra.price }})
+                    </label><br>
+                  {% endfor %}
+                {% else %}
+                  <span>No extra options available.</span>
+                {% endif %}
+              </div>
+
+              <!-- Size Selection -->
+              <div class="mb-3 d-flex align-items-center gap-2">
+                <label for="size" class="mb-0"><strong>Size:</strong></label>
+                <select name="size" id="size" class="form-control" required style="flex: 1;">
+                  <option value="">Select Size</option>
+                  {% if size_options %}
+                    {% for size in size_options %}
+                      <option value="{{ size.option.name|lower }}" data-price-multiplier="{{ size.price }}">
+                        {{ size.option.name }}
+                      </option>
+                    {% endfor %}
+                  {% else %}
+                    <option value="default" data-price-multiplier="1">Default</option>
+                  {% endif %}
+                </select>
+              </div>
+
+              <!-- Custom Message -->
+              <div class="mb-3">
+                <label for="message"><strong>Custom Message on Cake:</strong></label>
+                <input type="text" name="message" maxlength="100" class="form-control" placeholder="Happy Birthday!">
+              </div>
+
+              <!-- Quantity -->
+              <div class="quantity mb-3">
+                <div class="pro-qty">
+                  <input type="number" name="quantity" value="1" min="1" aria-label="Quantity">
+                </div>
+              </div>
+
+              <!-- Submit -->
+              <button type="submit" class="primary-btn">Add to cart</button>
+            </form>
+          {% else %}
+            <button class="primary-btn" disabled style="background-color: #ccc; cursor: not-allowed;">
+              Out of Stock
+            </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 <!-- Shop Details Section End -->
 
 {% if related_products %}
 <!-- Related Products Section Begin -->
 <section class="related-products spad">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12 text-center">
-                <div class="section-title">
-                    <h2>Related Products</h2>
-                </div>
-            </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <div class="section-title">
+          <h2>Related Products</h2>
         </div>
-        <div class="row">
-            <div class="related__products__slider owl-carousel">
-                {% for rel in related_products %}
-                    <div class="col-lg-3">
-                        <div class="product__item">
-                            <div class="product__item__pic set-bg" data-setbg="{{ rel.image.url }}">
-                                <div class="product__label">
-                                    <span>{{ rel.category.name }}</span>
-                                </div>
-                            </div>
-                            <div class="product__item__text">
-                                <h6><a href="{% url 'product_detail' slug=rel.slug %}">{{ rel.name }}</a></h6>
-                                <div class="product__item__price">रु {{ rel.price }}</div>
-                                <div class="cart_add">
-                                    {% if rel.in_stock %}
-                                        <form action="{% url 'add_to_cart' rel.slug %}" method="POST">
-                                            {% csrf_token %}
-                                            <button type="submit">Add to cart</button>
-                                        </form>
-                                    {% else %}
-                                        <button disabled style="background-color: #ccc; cursor: not-allowed;">Out of Stock</button>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
+      </div>
     </div>
+    <div class="row">
+      <div class="related__products__slider owl-carousel">
+        {% for rel in related_products %}
+          <div class="col-lg-3">
+            <div class="product__item">
+              <div class="product__item__pic set-bg" data-setbg="{{ rel.image.url }}">
+                <div class="product__label">
+                  <span>{{ rel.category.name }}</span>
+                </div>
+              </div>
+              <div class="product__item__text">
+                <h6><a href="{% url 'product_detail' slug=rel.slug %}">{{ rel.name }}</a></h6>
+                <div class="product__item__price">रु {{ rel.price }}</div>
+                <div class="cart_add">
+                  {% if rel.in_stock %}
+                    <form action="{% url 'add_to_cart' rel.slug %}" method="POST">
+                      {% csrf_token %}
+                      <button type="submit">Add to cart</button>
+                    </form>
+                  {% else %}
+                    <button disabled style="background-color: #ccc; cursor: not-allowed;">Out of Stock</button>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 </section>
 <!-- Related Products Section End -->
 {% endif %}
 
 {% block extra_scripts %}
-{{ block.super }}
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const basePrice = parseFloat(document.getElementById('base-price').value);
-    const priceDisplay = document.getElementById('dynamic-price');
+  {{ block.super }}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const basePrice = parseFloat(document.getElementById('base-price').value);
+      const priceDisplay = document.getElementById('dynamic-price');
+      const sizeSelect = document.getElementById('size');
+      const extraCheckboxes = document.querySelectorAll('input[type="checkbox"][data-price]');
 
-    const sizeSelect = document.getElementById('size');
-    const extraCheckboxes = document.querySelectorAll('input[type="checkbox"][data-price]');
+      function updatePrice() {
+        let sizeMultiplier = parseFloat(sizeSelect.selectedOptions[0]?.dataset.priceMultiplier || 1);
+        let finalPrice = basePrice * sizeMultiplier;
 
-    function updatePrice() {
-      let selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
-      let sizeMultiplier = parseFloat(selectedOption.dataset.priceMultiplier) || 1;
+        extraCheckboxes.forEach(cb => {
+          if (cb.checked) {
+            finalPrice += parseFloat(cb.dataset.price);
+          }
+        });
 
-      let finalPrice = basePrice * sizeMultiplier;
+        priceDisplay.textContent = finalPrice.toFixed(2);
+      }
 
-      extraCheckboxes.forEach(cb => {
-        if (cb.checked) {
-          finalPrice += parseFloat(cb.dataset.price);
-        }
-      });
-
-      priceDisplay.textContent = finalPrice.toFixed(2);
-    }
-
-    sizeSelect.addEventListener('change', updatePrice);
-    extraCheckboxes.forEach(cb => cb.addEventListener('change', updatePrice));
-
-    // Initialize price on load
-    updatePrice();
-  });
-</script>
+      sizeSelect.addEventListener('change', updatePrice);
+      extraCheckboxes.forEach(cb => cb.addEventListener('change', updatePrice));
+      updatePrice();
+    });
+  </script>
 {% endblock %}
-
 {% endblock %}

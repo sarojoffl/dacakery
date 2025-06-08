@@ -356,7 +356,11 @@ def add_to_cart(request, slug):
         quantity = int(request.POST.get('quantity', 1))
         eggless = request.POST.get('eggless') == 'on'
         sugarless = request.POST.get('sugarless') == 'on'
+
         size = request.POST.get('size')
+        if not size:
+            size = 'base'  # default size if none selected
+
         message = request.POST.get('message', '').strip()
 
         item = {

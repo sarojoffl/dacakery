@@ -1579,6 +1579,15 @@ ol {
   padding-bottom: 0;
 }
 
+.product-display-img {
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.product-display-img:hover {
+    transform: scale(1.03);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
 .product__details__big__img {
   width: calc(84% - 20px);
   float: left;
