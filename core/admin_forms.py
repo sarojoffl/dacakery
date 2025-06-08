@@ -2,7 +2,7 @@ from django import forms
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
     InstagramImage, Category, Product, Coupon, TeamMember, MapLocation, ContactDetail,
-    SpecialOffer, OrganizationDetails, UserProfile, Order
+    SpecialOffer, OrganizationDetails, UserProfile, Order,ProductOption, ProductOptionPrice
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
@@ -63,6 +63,16 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = ['category', 'name', 'description', 'in_stock', 'tags', 'price', 'image']
+
+class ProductOptionForm(forms.ModelForm):
+    class Meta:
+        model = ProductOption
+        fields = ['name', 'type', 'default_price']
+
+class ProductOptionPriceForm(forms.ModelForm):
+    class Meta:
+        model = ProductOptionPrice
+        fields = ['product', 'option', 'price']
 
 class CouponForm(forms.ModelForm):
     class Meta:

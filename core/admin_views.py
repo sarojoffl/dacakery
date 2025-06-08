@@ -7,12 +7,14 @@ from django.contrib.auth import logout
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
     InstagramImage, Category, Product, Coupon, WishlistItem, Order, NewsletterSubscriber,
-    TeamMember, MapLocation, ContactDetail, ContactMessage, SpecialOffer, OrganizationDetails, UserProfile
+    TeamMember, MapLocation, ContactDetail, ContactMessage, SpecialOffer, OrganizationDetails, UserProfile,
+    ProductOption, ProductOptionPrice
 )
 from .admin_forms import (
     AdminSliderForm, AboutSectionForm, BlogCategoryForm, BlogPostForm, TestimonialForm,
     InstagramSectionForm, InstagramImageForm, CategoryForm, ProductForm, CouponForm, UserForm, TeamMemberForm,
-    MapLocationForm, ContactDetailForm, SpecialOfferForm, OrganizationDetailsForm, UserProfileForm, AdminOrderForm
+    MapLocationForm, ContactDetailForm, SpecialOfferForm, OrganizationDetailsForm, UserProfileForm, AdminOrderForm,
+    ProductOptionForm, ProductOptionPriceForm
 )
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
@@ -382,6 +384,69 @@ def delete_product(request, pk):
         messages.success(request, 'Product deleted successfully.')
         return redirect('product_list')
     return render(request, 'dashboard/product_confirm_delete.html', {'product': product})
+
+# ----- ProductOption Views -----
+
+def product_option_list(request):
+    options = ProductOption.objects.all()
+    return render(request, 'dashboard/product_option_list.html', {'options': options})
+
+def product_option_create(request):
+    form = ProductOptionForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Product option created successfully!")
+        return redirect('product_option_list')
+    return render(request, 'dashboard/product_option_form.html', {'form': form, 'title': 'Add Product Option'})
+
+def product_option_update(request, pk):
+    option = get_object_or_404(ProductOption, pk=pk)
+    form = ProductOptionForm(request.POST or None, instance=option)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Product option updated successfully!")
+        return redirect('product_option_list')
+    return render(request, 'dashboard/product_option_form.html', {'form': form, 'title': 'Edit Product Option'})
+
+def product_option_delete(request, pk):
+    option = get_object_or_404(ProductOption, pk=pk)
+    if request.method == 'POST':
+        option.delete()
+        messages.success(request, "Product option deleted.")
+        return redirect('product_option_list')
+    return render(request, 'dashboard/delete_confirm.html', {'object': option, 'cancel_url': 'product_option_list'})
+
+
+# ----- ProductOptionPrice Views -----
+
+def product_option_price_list(request):
+    prices = ProductOptionPrice.objects.select_related('product', 'option')
+    return render(request, 'dashboard/product_option_price_list.html', {'prices': prices})
+
+def product_option_price_create(request):
+    form = ProductOptionPriceForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Product option price created!")
+        return redirect('product_option_price_list')
+    return render(request, 'dashboard/product_option_price_form.html', {'form': form, 'title': 'Add Option Price'})
+
+def product_option_price_update(request, pk):
+    price = get_object_or_404(ProductOptionPrice, pk=pk)
+    form = ProductOptionPriceForm(request.POST or None, instance=price)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Product option price updated!")
+        return redirect('product_option_price_list')
+    return render(request, 'dashboard/product_option_price_form.html', {'form': form, 'title': 'Edit Option Price'})
+
+def product_option_price_delete(request, pk):
+    price = get_object_or_404(ProductOptionPrice, pk=pk)
+    if request.method == 'POST':
+        price.delete()
+        messages.success(request, "Product option price deleted.")
+        return redirect('product_option_price_list')
+    return render(request, 'dashboard/delete_confirm.html', {'object': price, 'cancel_url': 'product_option_price_list'})
 
 # -- -------- Coupons ---------
 @staff_member_required

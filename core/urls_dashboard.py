@@ -50,6 +50,18 @@ urlpatterns = [
     path('products/add/', admin_views.add_product, name='add_product'),
     path('products/edit/<int:pk>/', admin_views.edit_product, name='edit_product'),
     path('products/delete/<int:pk>/', admin_views.delete_product, name='delete_product'),
+    
+    # Product Option
+    path('dashboard/product-options/', admin_views.product_option_list, name='product_option_list'),
+    path('dashboard/product-options/add/', admin_views.product_option_create, name='product_option_create'),
+    path('dashboard/product-options/<int:pk>/edit/', admin_views.product_option_update, name='product_option_update'),
+    path('dashboard/product-options/<int:pk>/delete/', admin_views.product_option_delete, name='product_option_delete'),
+
+    # Product Option Price
+    path('dashboard/product-option-prices/', admin_views.product_option_price_list, name='product_option_price_list'),
+    path('dashboard/product-option-prices/add/', admin_views.product_option_price_create, name='product_option_price_create'),
+    path('dashboard/product-option-prices/<int:pk>/edit/', admin_views.product_option_price_update, name='product_option_price_update'),
+    path('dashboard/product-option-prices/<int:pk>/delete/', admin_views.product_option_price_delete, name='product_option_price_delete'),
 
     # Coupons
     path('coupons/', admin_views.coupons_list, name='coupons_list'),

@@ -26,17 +26,17 @@
 <!-- Shop Details Section Begin -->
 <section class="product-details spad">
     <div class="container">
-        
-        <!-- 🔼 Image + Thumbnails at the top -->
+
+        <!-- Image -->
         <div class="row mb-4">
-                <div class="product__details__img">
-                    <div class="product__details__big__img">
-                        <img class="big_img" src="{{ product.image.url }}" alt="{{ product.name }}">
-                    </div>
+            <div class="product__details__img">
+                <div class="product__details__big__img">
+                    <img class="big_img" src="{{ product.image.url }}" alt="{{ product.name }}">
                 </div>
+            </div>
         </div>
 
-        <!-- 🔽 Product Info (Left) + Form (Right) -->
+        <!-- Product Info + Form -->
         <div class="row">
             <!-- Left: Product Info -->
             <div class="col-md-6">
@@ -81,34 +81,54 @@
                     </div>
 
                     {% if product.in_stock %}
-                <form action="{% url 'add_to_cart' product.slug %}" method="POST">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label><strong>Options:</strong></label><br>
-                        <label><input type="checkbox" name="eggless" id="eggless"> Eggless (+रु 150)</label>
-                        <label><input type="checkbox" name="sugarless" id="sugarless"> Sugarless (+रु 100)</label>
-                    </div>
-                    <div class="mb-3" style="display: flex; align-items: center; gap: 10px;">
-                        <label for="size" style="margin-bottom: 0;"><strong>Size:</strong></label>
-                        <select name="size" id="size" class="form-control" required style="flex: 1;">
-                            <option value="">Select Size</option>
-                            <option value="0.5">Small</option>
-                            <option value="1">Medium</option>
-                            <option value="2">Large</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="message"><strong>Custom Message on Cake:</strong></label>
-                        <input type="text" name="message" maxlength="100" class="form-control" placeholder="Happy Birthday!">
-                    </div>
-                    <div class="quantity mb-3">
-                        <div class="pro-qty">
-                            <input type="number" name="quantity" value="1" min="1">
+                    <form action="{% url 'add_to_cart' product.slug %}" method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label><strong>Options:</strong></label><br>
+                            {% if extra_options %}
+                                {% for extra in extra_options %}
+                                    <label>
+                                        <input type="checkbox" 
+                                               name="{{ extra.option.name|lower }}" 
+                                               id="{{ extra.option.name|lower }}" 
+                                               data-price="{{ extra.price }}">
+                                        {{ extra.option.name }} (+रु {{ extra.price }})
+                                    </label><br>
+                                {% endfor %}
+                            {% else %}
+                                <span>No extra options available.</span>
+                            {% endif %}
                         </div>
-                    </div>
-                    <button type="submit" class="primary-btn">Add to cart</button>
-                </form>
 
+                        <div class="mb-3" style="display: flex; align-items: center; gap: 10px;">
+                            <label for="size" style="margin-bottom: 0;"><strong>Size:</strong></label>
+                            <select name="size" id="size" class="form-control" required style="flex: 1;">
+                                <option value="">Select Size</option>
+                                {% if size_options %}
+                                    {% for size in size_options %}
+                                        <option value="{{ size.option.name|lower }}" data-price-multiplier="{{ size.price }}">
+                                            {{ size.option.name }}
+                                        </option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option value="1" data-price-multiplier="1">Default</option>
+                                {% endif %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="message"><strong>Custom Message on Cake:</strong></label>
+                            <input type="text" name="message" maxlength="100" class="form-control" placeholder="Happy Birthday!">
+                        </div>
+
+                        <div class="quantity mb-3">
+                            <div class="pro-qty">
+                                <input type="number" name="quantity" value="1" min="1">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="primary-btn">Add to cart</button>
+                    </form>
                     {% else %}
                         <button class="primary-btn" disabled style="background-color: #ccc; cursor: not-allowed;">
                             Out of Stock
@@ -170,51 +190,31 @@
 {{ block.super }}
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    const EXTRA_PRICES = {
-      eggless: 150.0,
-      sugarless: 100.0,
-      size: {
-        '0.5': 0.5,
-        '1': 1.0,
-        '2': 2.0
-      }
-    };
-
     const basePrice = parseFloat(document.getElementById('base-price').value);
     const priceDisplay = document.getElementById('dynamic-price');
 
     const sizeSelect = document.getElementById('size');
-    const egglessCheckbox = document.getElementById('eggless');
-    const sugarlessCheckbox = document.getElementById('sugarless');
+    const extraCheckboxes = document.querySelectorAll('input[type="checkbox"][data-price]');
 
     function updatePrice() {
-      console.log('Updating price...');
-      const selectedSize = sizeSelect.value;
-      const sizeMultiplier = EXTRA_PRICES.size[selectedSize] || 1.0;
+      let selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
+      let sizeMultiplier = parseFloat(selectedOption.dataset.priceMultiplier) || 1;
 
       let finalPrice = basePrice * sizeMultiplier;
 
-      if (egglessCheckbox.checked) finalPrice += EXTRA_PRICES.eggless;
-      if (sugarlessCheckbox.checked) finalPrice += EXTRA_PRICES.sugarless;
+      extraCheckboxes.forEach(cb => {
+        if (cb.checked) {
+          finalPrice += parseFloat(cb.dataset.price);
+        }
+      });
 
       priceDisplay.textContent = finalPrice.toFixed(2);
     }
 
-    sizeSelect.addEventListener('change', () => {
-      console.log('Size changed:', sizeSelect.value);
-      updatePrice();
-    });
+    sizeSelect.addEventListener('change', updatePrice);
+    extraCheckboxes.forEach(cb => cb.addEventListener('change', updatePrice));
 
-    egglessCheckbox.addEventListener('change', () => {
-      console.log('Eggless changed:', egglessCheckbox.checked);
-      updatePrice();
-    });
-
-    sugarlessCheckbox.addEventListener('change', () => {
-      console.log('Sugarless changed:', sugarlessCheckbox.checked);
-      updatePrice();
-    });
-
+    // Initialize price on load
     updatePrice();
   });
 </script>

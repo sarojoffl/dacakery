@@ -25,7 +25,8 @@ from django.contrib.auth.models import User
 from .models import (
     Slider, Category, Product, AboutSection, TeamMember, Testimonial,
     InstagramSection, MapLocation, ContactDetail, Coupon, WishlistItem, Order,
-    OrderItem, BlogPost, BlogCategory, NewsletterSubscriber, SpecialOffer
+    OrderItem, BlogPost, BlogCategory, NewsletterSubscriber, SpecialOffer,
+    ProductOption, ProductOptionPrice
 )
 from .forms import ContactForm, BlogCommentForm
 
@@ -232,12 +233,30 @@ def shop(request):
 
 
 def product_detail(request, slug):
-    # Fetch product and related ones in same category
     product = get_object_or_404(Product, slug=slug)
     related_products = Product.objects.filter(category=product.category).exclude(id=product.id)[:6]
+
+    # Get all ProductOptionPrice entries for this product
+    option_prices = ProductOptionPrice.objects.filter(product=product).select_related('option')
+    option_price_dict = {op.option.id: op.price for op in option_prices}
+
+    size_options = []
+    extra_options = []
+
+    for option in ProductOption.objects.all():
+        price = option_price_dict.get(option.id, option.default_price)
+        option_data = {'option': option, 'price': price}
+
+        if option.type == 'size':
+            size_options.append(option_data)
+        elif option.type == 'extra':
+            extra_options.append(option_data)
+
     return render(request, 'core/product_detail.html', {
         'product': product,
-        'related_products': related_products
+        'related_products': related_products,
+        'size_options': size_options,
+        'extra_options': extra_options,
     })
 
 
@@ -271,18 +290,6 @@ def remove_from_wishlist(request, slug):
         messages.error(request, f'{product.name} is not in your wishlist.')
     return redirect('wishlist')
 
-
-EXTRA_PRICES = {
-    'eggless': Decimal('150.0'),
-    'sugarless': Decimal('100.0'),
-    'size': {
-        '0.5': Decimal('0.5'),
-        '1': Decimal('1.0'),
-        '2': Decimal('2.0')
-    }
-}
-
-
 def cart(request):
     cart = request.session.get('cart', {})
     cart_items = []
@@ -309,14 +316,8 @@ def cart(request):
             message = ''
 
         # Calculate price adjustments
-        base_price = product.price * EXTRA_PRICES['size'].get(size, Decimal('1.0'))
-
-        if eggless:
-            base_price += EXTRA_PRICES['eggless']
-        if sugarless:
-            base_price += EXTRA_PRICES['sugarless']
-
-        subtotal = base_price * quantity
+        price = calculate_item_price(product, size=size, eggless=eggless, sugarless=sugarless)
+        subtotal = price * quantity
         total += subtotal
 
         cart_items.append({
@@ -356,9 +357,8 @@ def add_to_cart(request, slug):
         eggless = request.POST.get('eggless') == 'on'
         sugarless = request.POST.get('sugarless') == 'on'
         size = request.POST.get('size')
-        message = request.POST.get('message')
+        message = request.POST.get('message', '').strip()
 
-        # Add or update product in session cart
         item = {
             'quantity': quantity,
             'eggless': eggless,
@@ -428,13 +428,29 @@ def apply_coupon(request):
 
     return redirect('cart')
 
-def calculate_item_price(product, size='1', eggless=False, sugarless=False):
-    # Calculate price based on product, size multiplier, and extra options
-    price = product.price * EXTRA_PRICES['size'].get(size, Decimal('1.0'))
+
+def get_option_price(product, option_name, option_type):
+    try:
+        option = ProductOption.objects.get(name=option_name, type=option_type)
+    except ProductOption.DoesNotExist:
+        return 0  # Option doesn't exist at all
+
+    try:
+        # Try product-specific price override
+        option_price = ProductOptionPrice.objects.get(product=product, option=option)
+        return option_price.price
+    except ProductOptionPrice.DoesNotExist:
+        # Fallback to default price from ProductOption
+        return option.default_price or 0
+
+def calculate_item_price(product, size=None, eggless=False, sugarless=False):
+    price = product.price
+    if size:
+        price += get_option_price(product, size, 'size')
     if eggless:
-        price += EXTRA_PRICES['eggless']
+        price += get_option_price(product, 'eggless', 'extra')
     if sugarless:
-        price += EXTRA_PRICES['sugarless']
+        price += get_option_price(product, 'sugarless', 'extra')
     return price
 
 
@@ -507,11 +523,10 @@ def checkout(request):
         total = Decimal('0')
         order_items = []
 
-        # Calculate total and prepare order items from cart
         for product_id, item in cart.items():
             product = get_object_or_404(Product, id=product_id)
             quantity = int(item.get('quantity', 1)) if isinstance(item, dict) else int(item)
-            size = item.get('size', '1') if isinstance(item, dict) else '1'
+            size = item.get('size') if isinstance(item, dict) else None
             eggless = item.get('eggless', False) if isinstance(item, dict) else False
             sugarless = item.get('sugarless', False) if isinstance(item, dict) else False
             message = item.get('message', '') if isinstance(item, dict) else ''
@@ -631,12 +646,14 @@ def checkout(request):
     # Render checkout page with cart summary if GET request
     cart_items = []
     total = Decimal('0')
+
     for product_id, item in cart.items():
         product = get_object_or_404(Product, id=product_id)
         quantity = int(item.get('quantity', 1)) if isinstance(item, dict) else int(item)
-        size = item.get('size', '1') if isinstance(item, dict) else '1'
+        size = item.get('size') if isinstance(item, dict) else None
         eggless = item.get('eggless', False) if isinstance(item, dict) else False
         sugarless = item.get('sugarless', False) if isinstance(item, dict) else False
+
         price = calculate_item_price(product, size, eggless, sugarless)
         subtotal = price * quantity
         total += subtotal

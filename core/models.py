@@ -1,13 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
+from django.utils.timezone import now
 
+
+# -------------------------
+# User & Profile
+# -------------------------
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     bio = models.TextField(blank=True)
-
-    # Popular social media links
     facebook = models.URLField(blank=True)
     instagram = models.URLField(blank=True)
     twitter = models.URLField(blank=True)
@@ -17,6 +20,9 @@ class UserProfile(models.Model):
         return f"{self.user.username}'s Profile"
 
 
+# -------------------------
+# Home Page Content
+# -------------------------
 class Slider(models.Model):
     title = models.CharField(max_length=255)
     image = models.ImageField(upload_to='hero/')
@@ -30,7 +36,6 @@ class AboutSection(models.Model):
     title = models.CharField(max_length=255, default="About Cake Shop")
     heading = models.CharField(max_length=255, default="Cakes and bakes from the house of Queens!")
     description = models.TextField()
-
     cakes_baked = models.PositiveIntegerField(default=0)
     cakes_delivered = models.PositiveIntegerField(default=0)
     happy_customers = models.PositiveIntegerField(default=0)
@@ -40,6 +45,9 @@ class AboutSection(models.Model):
         return self.title
 
 
+# -------------------------
+# Product & Categories
+# -------------------------
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, blank=True)
@@ -65,7 +73,7 @@ class Product(models.Model):
     description = models.TextField()
     in_stock = models.BooleanField(default=True)
     tags = models.CharField(max_length=255, blank=True)
-    price = models.DecimalField(max_digits=8, decimal_places=2)
+    price = models.DecimalField(max_digits=8, decimal_places=2)  # base price
     image = models.ImageField(upload_to='products/')
     slug = models.SlugField(unique=True, blank=True)
 
@@ -84,6 +92,38 @@ class Product(models.Model):
         super().save(*args, **kwargs)
 
 
+class ProductOption(models.Model):
+    OPTION_TYPES = (
+        ('size', 'Size'),
+        ('extra', 'Extra'),
+    )
+
+    name = models.CharField(max_length=50)
+    type = models.CharField(max_length=10, choices=OPTION_TYPES)
+    default_price = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+
+    class Meta:
+        unique_together = ('name', 'type')
+
+    def __str__(self):
+        return f"{self.name} ({self.get_type_display()})"
+
+
+class ProductOptionPrice(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='option_prices')
+    option = models.ForeignKey(ProductOption, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=8, decimal_places=2)  # option price for this product
+
+    class Meta:
+        unique_together = ('product', 'option')
+
+    def __str__(self):
+        return f"{self.product.name} - {self.option.name}: Rs. {self.price}"
+
+
+# -------------------------
+# Team & Testimonials
+# -------------------------
 class TeamMember(models.Model):
     name = models.CharField(max_length=100)
     role = models.CharField(max_length=100)
@@ -101,13 +141,16 @@ class Testimonial(models.Model):
     author_name = models.CharField(max_length=100)
     author_location = models.CharField(max_length=100)
     author_image = models.ImageField(upload_to='testimonial/')
-    rating = models.FloatField(default=5)  # e.g. 1 to 5 stars
+    rating = models.FloatField(default=5)
     comment = models.TextField()
 
     def __str__(self):
         return f"{self.author_name} from {self.author_location}"
 
 
+# -------------------------
+# Instagram Section
+# -------------------------
 class InstagramSection(models.Model):
     heading = models.CharField(max_length=100)
     subheading = models.CharField(max_length=255)
@@ -125,6 +168,9 @@ class InstagramImage(models.Model):
         return f"Image for {self.section.instagram_handle}"
 
 
+# -------------------------
+# Contact & Location
+# -------------------------
 class MapLocation(models.Model):
     title = models.CharField(max_length=100)
     address = models.TextField()
@@ -157,25 +203,27 @@ class ContactMessage(models.Model):
         return f"Message from {self.name}"
 
 
+# -------------------------
+# Wishlist
+# -------------------------
 class WishlistItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     added_at = models.DateTimeField(auto_now_add=True)
 
 
+# -------------------------
+# Orders
+# -------------------------
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-
     address = models.CharField(max_length=255)
     address_line2 = models.CharField(max_length=255, blank=True)
-
     city = models.CharField(max_length=100)
     province = models.CharField(max_length=100)
     postal_code = models.CharField(max_length=20)
-
     phone = models.CharField(max_length=20)
     email = models.EmailField()
     notes = models.TextField(blank=True)
@@ -185,19 +233,13 @@ class Order(models.Model):
         ('khalti', 'Khalti'),
         ('esewa', 'eSewa'),
     ]
-    payment_method = models.CharField(
-        max_length=50,
-        choices=PAYMENT_METHOD_CHOICES,
-        default='cod'
-    )
+    payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES, default='cod')
 
     coupon_code = models.CharField(max_length=50, blank=True, null=True)
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
     delivery_date = models.DateField(null=True, blank=True)
     delivery_time = models.TimeField(null=True, blank=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     STATUS_CHOICES = [
@@ -207,7 +249,6 @@ class Order(models.Model):
         ('cancelled', 'Cancelled'),
     ]
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-
     payment_id = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
@@ -219,8 +260,6 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-
-    # Custom cake options
     eggless = models.BooleanField(default=False)
     sugarless = models.BooleanField(default=False)
     size = models.CharField(max_length=20, blank=True, null=True)
@@ -233,6 +272,9 @@ class OrderItem(models.Model):
         return f"{self.quantity} x {self.product.name}"
 
 
+# -------------------------
+# Coupons & Offers
+# -------------------------
 class Coupon(models.Model):
     code = models.CharField(max_length=50, unique=True)
     discount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -250,15 +292,15 @@ class SpecialOffer(models.Model):
     coupon = models.ForeignKey(Coupon, null=True, blank=True, on_delete=models.SET_NULL)
 
     def is_active(self):
-        from django.utils.timezone import now
-        if self.valid_until:
-            return self.valid_until >= now().date()
-        return True
+        return self.valid_until >= now().date() if self.valid_until else True
 
     def __str__(self):
         return self.title
 
 
+# -------------------------
+# Blog
+# -------------------------
 class BlogCategory(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
@@ -289,9 +331,12 @@ class BlogComment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Comment by {self.user.get_full_name() or self.user.username} on {self.blog.title}"
+        return f"Comment by {self.user.get_full_name or self.user.username} on {self.blog.title}"
 
 
+# -------------------------
+# Newsletter
+# -------------------------
 class NewsletterSubscriber(models.Model):
     email = models.EmailField(unique=True)
     subscribed_at = models.DateTimeField(auto_now_add=True)
@@ -300,6 +345,9 @@ class NewsletterSubscriber(models.Model):
         return self.email
 
 
+# -------------------------
+# Organization Info
+# -------------------------
 class OrganizationDetails(models.Model):
     name = models.CharField(max_length=200)
     address = models.TextField(blank=True)
@@ -307,10 +355,13 @@ class OrganizationDetails(models.Model):
     email = models.EmailField(blank=True)
     logo = models.ImageField(upload_to='organization_logos/', blank=True, null=True)
     description = models.TextField(blank=True)
-
     working_hours_mon_fri = models.CharField(max_length=50, default="08:00 am – 08:30 pm")
     working_hours_sat = models.CharField(max_length=50, default="10:00 am – 16:30 pm")
     working_hours_sun = models.CharField(max_length=50, default="10:00 am – 16:30 pm")
+    facebook_url = models.URLField(blank=True, verbose_name="Facebook URL")
+    twitter_url = models.URLField(blank=True, verbose_name="Twitter URL")
+    instagram_url = models.URLField(blank=True, verbose_name="Instagram URL")
+    youtube_url = models.URLField(blank=True, verbose_name="YouTube URL")
 
     def __str__(self):
         return self.name
