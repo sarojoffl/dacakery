@@ -1,28 +1,27 @@
 {% extends 'base.html' %}
 {% block title %}Da Cakery - Blog{% endblock %}
-
 {% load static %}
-
 {% block content %}
-    <!-- Breadcrumb Begin -->
-    <div class="breadcrumb-option">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-6 col-md-6 col-sm-6">
-                    <div class="breadcrumb__text">
-                        <h2>Blog</h2>
-                    </div>
+
+<!-- Breadcrumb Begin -->
+<div class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                <div class="breadcrumb__text">
+                    <h2>Blog</h2>
                 </div>
-                <div class="col-lg-6 col-md-6 col-sm-6">
-                    <div class="breadcrumb__links">
-                        <a href="{% url 'home' %}">Home</a>
-                        <span>Blog</span>
-                    </div>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                <div class="breadcrumb__links">
+                    <a href="{% url 'home' %}">Home</a>
+                    <span>Blog</span>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Breadcrumb End -->
+</div>
+<!-- Breadcrumb End -->
 
 <!-- Blog Section Begin -->
 <section class="blog spad">
@@ -48,14 +47,46 @@
                     </div>
                 </div>
                 {% endfor %}
+
+                <!-- Pagination Begin -->
+                <div class="shop__last__option mt-5">
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 col-sm-6">
+                            <div class="shop__pagination">
+                                {% if page_obj.has_previous %}
+                                    <a href="?page={{ page_obj.previous_page_number }}">&lt;</a>
+                                {% endif %}
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <a class="active" href="?page={{ num }}">{{ num }}</a>
+                                    {% else %}
+                                        <a href="?page={{ num }}">{{ num }}</a>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if page_obj.has_next %}
+                                    <a href="?page={{ page_obj.next_page_number }}">&gt;</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6">
+                            <div class="shop__last__text">
+                                <p>Showing {{ page_obj.start_index }} - {{ page_obj.end_index }} of {{ total_results }} results</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Pagination End -->
+
             </div>
 
+            <!-- Sidebar -->
             <div class="col-lg-4">
                 <div class="blog__sidebar">
+
                     <div class="blog__sidebar__item">
                         <h5>Popular posts</h5>
                         <div class="blog__sidebar__recent">
-                            {% for blog in recent_blogs %}
+                            {% for blog in popular_blogs %}
                             <a href="{% url 'blog_detail' blog.id %}" class="blog__sidebar__recent__item">
                                 <div class="blog__sidebar__recent__item__pic">
                                     <img src="{{ blog.image.url }}" alt="" style="width:90px; height:90px; object-fit:cover;">
@@ -75,9 +106,7 @@
                             <ul>
                                 {% for cat in categories %}
                                     <li>
-                                        <a href="#">
-                                            {{ cat.name }} <span>{{ cat.count }}</span>
-                                        </a>
+                                        <a href="?category={{ cat.id }}">{{ cat.name }} <span>{{ cat.count }}</span></a>
                                     </li>
                                 {% endfor %}
                             </ul>
@@ -98,8 +127,11 @@
                             <button type="submit" class="site-btn">Subscribe</button>
                         </form>
                     </div>
+
                 </div>
             </div>
+            <!-- End Sidebar -->
+
         </div>
     </div>
 </section>

@@ -33,12 +33,6 @@
             </div>
             {% endif %}
 
-            {% if error_message %}
-            <div class="alert alert-danger mt-4" role="alert">
-                {{ error_message }}
-            </div>
-            {% endif %}
-
             <div class="d-flex justify-content-center mt-5 gap-3">
                 <a href="{% url 'checkout' %}" class="btn btn-outline-danger px-4 py-2 rounded-pill">
                     Try Again

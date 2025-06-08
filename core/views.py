@@ -9,7 +9,7 @@ import requests
 from decimal import Decimal
 
 from django.conf import settings
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Count
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -400,12 +400,15 @@ def update_cart(request):
 
 def remove_from_cart(request, product_id):
     cart = request.session.get('cart', {})
-    if product_id in cart:
-        cart.pop(product_id)
+    product_id_str = str(product_id)  # 👈 Fix: convert to string
+
+    if product_id_str in cart:
+        cart.pop(product_id_str)
         request.session['cart'] = cart
         messages.success(request, 'Item removed from cart.')
     else:
         messages.error(request, 'Item not found in cart.')
+
     return redirect('cart')
 
 
@@ -701,32 +704,39 @@ def khalti_verify(request):
     if not pidx:
         return HttpResponse('Missing pidx', status=400)
 
+    try:
+        order = Order.objects.get(payment_id=pidx)
+    except Order.DoesNotExist:
+        return HttpResponse(f'Order with payment ID {pidx} not found', status=400)
+
     headers = {
         'Authorization': f'Key {settings.KHALTI_SECRET_KEY}',
+        'Content-Type': 'application/json',
     }
+    payload = {'pidx': pidx}
 
-    payload = {
-        'pidx': pidx
-    }
-
-    response = requests.post(settings.KHALTI_VERIFY_URL, json=payload, headers=headers)
-
-    # Verify Khalti payment and update order status
+    response = requests.post(settings.KHALTI_LOOKUP_URL, json=payload, headers=headers)
     if response.status_code == 200:
         data = response.json()
-        if data.get('status') == 'Completed':
-            order_id = data.get('purchase_order_id')
-            order = get_object_or_404(Order, id=order_id)
+        status = data.get('status')
+
+        if status == 'Completed':
             order.status = 'paid'
-            order.payment_id = pidx
             order.save()
 
+            # Clear cart and coupon after successful payment
             request.session['cart'] = {}
             request.session.pop('coupon', None)
 
             return redirect('order_success', order_id=order.id)
-
-    return HttpResponse('Payment verification failed', status=400)
+        else:
+            order.status = 'failed'
+            order.save()
+            return redirect('order_failed', order_id=order.id)
+    else:
+        order.status = 'failed'
+        order.save()
+        return redirect('order_failed', order_id=order.id)
 
 def order_success(request, order_id):
     order = get_object_or_404(Order, id=order_id)
@@ -734,22 +744,33 @@ def order_success(request, order_id):
 
 def order_failed(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-    return render(request, 'payment/failure.html', {
-        'order': order,
-        'error_message': "Payment verification failed. Please try again or contact support."
-    })
+    return render(request, 'payment/failure.html', {'order': order})
 
 def blog_list(request):
-    # Fetch blogs with related category and order by newest first
+    category_id = request.GET.get('category')
+    
     blogs = BlogPost.objects.select_related('category').order_by('-created_at')
-    # Annotate categories with the count of their blog posts
+    
+    if category_id:
+        blogs = blogs.filter(category_id=category_id)
+
     categories = BlogCategory.objects.annotate(count=Count('blog_posts'))
-    recent_blogs = blogs[:5]  # Latest 5 blogs for sidebar
+    popular_blogs = BlogPost.objects.order_by('-views')[:5]
+
+    paginator = Paginator(blogs, 3)
+    page_number = request.GET.get('page')
+    try:
+        page_obj = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.get_page(1)
+    except EmptyPage:
+        page_obj = paginator.get_page(paginator.num_pages)
 
     context = {
-        'blogs': blogs,
-        'recent_blogs': recent_blogs,
+        'blogs': page_obj,
+        'popular_blogs': popular_blogs,
         'categories': categories,
+        'page_obj': page_obj,
     }
     return render(request, 'core/blog.html', context)
 
