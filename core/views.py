@@ -416,21 +416,36 @@ def remove_from_cart(request, product_id):
     return redirect('cart')
 
 
+from django.utils.timezone import now
+
 def apply_coupon(request):
     if request.method == 'POST':
-        code = request.POST.get('code', '').strip()
+        code = request.POST.get('coupon_code', '').strip()
+        cart = request.session.get('cart', {})
+
+        if not cart:
+            messages.error(request, "Your cart is empty.")
+            return redirect('cart')
+
         try:
-            coupon = Coupon.objects.get(code__iexact=code, valid_until__gte=now().date())
+            coupon = Coupon.objects.filter(
+                code__iexact=code,
+                active=True,
+                specialoffer__valid_until__gte=now().date()
+            ).distinct().get()
+
             request.session['coupon'] = {
                 'code': coupon.code,
-                'discount': str(coupon.discount_percentage)
+                'discount': float(coupon.discount),
             }
             messages.success(request, f"Coupon '{coupon.code}' applied successfully!")
+
         except Coupon.DoesNotExist:
             request.session.pop('coupon', None)
-            messages.error(request, 'Invalid or expired coupon code.')
+            messages.error(request, "Invalid or expired coupon code.")
 
     return redirect('cart')
+
 
 
 def get_option_price(product, option_name, option_type):
