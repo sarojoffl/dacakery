@@ -23,6 +23,10 @@
             <th>#</th>
             <th>Code</th>
             <th>Discount</th>
+            <th>Max Discount</th>
+            <th>Min Cart Value</th>
+            <th>Usage Limit</th>
+            <th>Valid Until</th>
             <th>Active</th>
             <th>Actions</th>
         </tr>
@@ -32,7 +36,35 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ coupon.code }}</td>
-            <td>{{ coupon.discount }}</td>
+            <td>{{ coupon.discount }}%</td>
+            <td>
+                {% if coupon.max_discount_amount %}
+                    ${{ coupon.max_discount_amount }}
+                {% else %}
+                    N/A
+                {% endif %}
+            </td>
+            <td>
+                {% if coupon.min_cart_value %}
+                    ${{ coupon.min_cart_value }}
+                {% else %}
+                    N/A
+                {% endif %}
+            </td>
+            <td>
+                {% if coupon.usage_limit %}
+                    {{ coupon.usage_limit }}
+                {% else %}
+                    Unlimited
+                {% endif %}
+            </td>
+            <td>
+                {% if coupon.valid_until %}
+                    {{ coupon.valid_until|date:"M d, Y" }}
+                {% else %}
+                    No Expiry
+                {% endif %}
+            </td>
             <td>
                 {% if coupon.active %}
                     <span class="badge bg-success">Active</span>
@@ -47,7 +79,7 @@
         </tr>
         {% empty %}
         <tr>
-            <td colspan="5" class="text-center">No coupons found.</td>
+            <td colspan="9" class="text-center">No coupons found.</td>
         </tr>
         {% endfor %}
     </tbody>

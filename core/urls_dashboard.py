@@ -113,11 +113,11 @@ urlpatterns = [
     path('newsletter-subscribers/', admin_views.newsletter_subscribers_list, name='newsletter_subscribers_list'),
     path('newsletter-subscribers/delete/<int:pk>/', admin_views.delete_newsletter_subscriber, name='delete_newsletter_subscriber'),
 
-    # Special Offers
-    path('specialoffers/', admin_views.specialoffers_list, name='specialoffers_list'),
-    path('specialoffers/add/', admin_views.add_specialoffer, name='specialoffer_add'),
-    path('specialoffers/edit/<int:pk>/', admin_views.edit_specialoffer, name='specialoffer_edit'),
-    path('specialoffers/delete/<int:pk>/', admin_views.delete_specialoffer, name='specialoffer_delete'),
+    # Flash Sales
+    path('flashsales/', admin_views.flashsales_list, name='flashsales_list'),
+    path('flashsales/add/', admin_views.add_flashsale, name='flashsale_add'),
+    path('flashsales/edit/<int:pk>/', admin_views.edit_flashsale, name='flashsale_edit'),
+    path('flashsales/delete/<int:pk>/', admin_views.delete_flashsale, name='flashsale_delete'),
 
     # Organization Details (Singleton)
     path('organizationdetails/add/', admin_views.add_organization_details, name='add_organization_details'),

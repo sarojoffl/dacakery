@@ -73,6 +73,10 @@
                                 {% if product.in_stock %}
                                     <form method="post" action="{% url 'add_to_cart' product.slug %}">
                                         {% csrf_token %}
+                                        {# Ensure 'size' is always sent, defaulting to 'default' #}
+                                        <input type="hidden" name="size" value="default"> 
+                                        {# If there's no quantity input on this form, add a default quantity #}
+                                        <input type="hidden" name="quantity" value="1"> 
                                         <button type="submit">Add to Cart</button>
                                     </form>
                                 {% else %}

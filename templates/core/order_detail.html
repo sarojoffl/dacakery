@@ -32,9 +32,15 @@
         <div class="col-md-6">
           <h4>Customer Info</h4>
           <ul class="list-group list-group-flush mb-4">
-            <li class="list-group-item"><strong>Name:</strong> {{ order.first_name }} {{ order.last_name }}</li>
-            <li class="list-group-item"><strong>Email:</strong> {{ order.email }}</li>
-            <li class="list-group-item"><strong>Phone:</strong> {{ order.phone }}</li>
+            <li class="list-group-item">
+              <strong>Name:</strong> {{ order.first_name }} {{ order.last_name }}
+            </li>
+            <li class="list-group-item">
+              <strong>Email:</strong> {{ order.email }}
+            </li>
+            <li class="list-group-item">
+              <strong>Phone:</strong> {{ order.phone }}
+            </li>
             <li class="list-group-item">
               <strong>Address:</strong> {{ order.address }}{% if order.address_line2 %}, {{ order.address_line2 }}{% endif %}, {{ order.city }}, {{ order.province }} {{ order.postal_code }}
             </li>
@@ -44,7 +50,9 @@
         <div class="col-md-6">
           <h4>Order Info</h4>
           <ul class="list-group list-group-flush mb-4">
-            <li class="list-group-item"><strong>Payment Method:</strong> {{ order.payment_method|capfirst }}</li>
+            <li class="list-group-item">
+              <strong>Payment Method:</strong> {{ order.payment_method|capfirst }}
+            </li>
             
             <li class="list-group-item">
               <strong>Payment Status:</strong>
@@ -60,22 +68,54 @@
                 <span class="badge bg-secondary">{{ order.status|capfirst }}</span>
               {% endif %}
             </li>
-            
-            <li class="list-group-item"><strong>Payment ID:</strong> {{ order.payment_id|default:"-" }}</li>
-            <li class="list-group-item"><strong>Coupon Code:</strong> {{ order.coupon_code|default:"-" }}</li>
-            <li class="list-group-item"><strong>Discount:</strong> रु{{ order.discount_amount|default:"0" }}</li>
-            <li class="list-group-item"><strong>Total Amount:</strong> रु{{ order.total_amount }}</li>
+
+            {% if order.payment_id %}
+            <li class="list-group-item">
+              <strong>Payment ID:</strong> {{ order.payment_id }}
+            </li>
+            {% endif %}
+
+            {% if order.coupon_code %}
+            <li class="list-group-item">
+              <strong>Coupon Code:</strong> {{ order.coupon_code }}
+            </li>
+            {% endif %}
+
+            {% if order.discount_amount and order.discount_amount > 0 %}
+              <li class="list-group-item">
+                <strong>Coupon Discount:</strong> रु {{ order.discount_amount }}
+              </li>
+            {% endif %}
+
+            {% if order.flash_discount and order.flash_discount > 0 %}
+              <li class="list-group-item">
+                <strong>Flash Discount:</strong> रु {{ order.flash_discount }}
+              </li>
+            {% endif %}
+
+            <li class="list-group-item">
+              <strong>Total Amount:</strong> रु {{ order.total_amount }}
+            </li>
+
+            {% if order.delivery_date %}
             <li class="list-group-item">
               <strong>Delivery Date & Time:</strong>
-              {% if order.delivery_date %}
-                {{ order.delivery_date|date:"Y-m-d" }}
-                {% if order.delivery_time %} at {{ order.delivery_time|time:"H:i" }}{% endif %}
-              {% else %}
-                Not specified
-              {% endif %}
+              {{ order.delivery_date|date:"Y-m-d" }}
+              {% if order.delivery_time %} at {{ order.delivery_time|time:"H:i" }}{% endif %}
             </li>
-            <li class="list-group-item"><strong>Notes:</strong> {{ order.notes|default:"-" }}</li>
-            <li class="list-group-item"><strong>Ordered At:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</li>
+            {% endif %}
+
+            {% if order.notes %}
+            <li class="list-group-item">
+              <strong>Notes:</strong> {{ order.notes }}
+            </li>
+            {% endif %}
+
+            {% if order.created_at %}
+            <li class="list-group-item">
+              <strong>Ordered At:</strong> {{ order.created_at|date:"Y-m-d H:i" }}
+            </li>
+            {% endif %}
           </ul>
         </div>
       </div>
@@ -118,7 +158,9 @@
                 <td>{{ item.message|default:"-" }}</td>
               </tr>
             {% empty %}
-              <tr><td colspan="7" class="text-center fst-italic">No items found.</td></tr>
+              <tr>
+                <td colspan="7" class="text-center fst-italic">No items found.</td>
+              </tr>
             {% endfor %}
           </tbody>
         </table>

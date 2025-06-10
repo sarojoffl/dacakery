@@ -47,8 +47,13 @@
         <div class="product__details__text">
           <div class="product__label">{{ product.category.name }}</div>
           <h4>{{ product.name }}</h4>
-          <h5>रु <span id="dynamic-price">{{ product.price }}</span></h5>
-          <input type="hidden" id="base-price" value="{{ product.price }}">
+          <h5>रु <span id="dynamic-price">{{ current_price }}</span></h5>
+          <input type="hidden" id="base-price" value="{{ current_price }}">
+          {% if current_price != product.price %}
+            <p class="text-muted" style="text-decoration: line-through;">
+              Original Price: रु {{ product.price }}
+            </p>
+          {% endif %}
           <p>{{ product.description }}</p>
           <ul>
             <li>SKU: <span>{{ product.id }}</span></li>
@@ -63,82 +68,77 @@
 
       <!-- Right: Customization Form -->
       <div class="col-md-6">
-        <div class="product__details__option">
+      <div class="product__details__option">
           <div class="row mb-4">
-            <div class="col-12 text-center">
-              {% if user.is_authenticated %}
-                <a href="{% url 'add_to_wishlist' product.slug %}" class="heart__btn d-inline-block" title="Add to Wishlist">
-                  <span class="icon_heart_alt"></span> Add to Wishlist
-                </a>
-              {% else %}
-                <a href="{% url 'login' %}?next={{ request.path }}" class="heart__btn d-inline-block" title="Login to use Wishlist">
-                  <span class="icon_heart_alt"></span> Login to Wishlist
-                </a>
-              {% endif %}
-            </div>
+              <div class="col-12 text-center">
+                  {% if user.is_authenticated %}
+                      <a href="{% url 'add_to_wishlist' product.slug %}" class="heart__btn d-inline-block" title="Add to Wishlist">
+                          <span class="icon_heart_alt"></span> Add to Wishlist
+                      </a>
+                  {% else %}
+                      <a href="{% url 'login' %}?next={{ request.path }}" class="heart__btn d-inline-block" title="Login to use Wishlist">
+                          <span class="icon_heart_alt"></span> Login to Wishlist
+                      </a>
+                  {% endif %}
+              </div>
           </div>
 
           {% if product.in_stock %}
-            <form action="{% url 'add_to_cart' product.slug %}" method="POST">
-              {% csrf_token %}
+              <form action="{% url 'add_to_cart' product.slug %}" method="POST">
+                  {% csrf_token %}
 
-              <!-- Extra Options -->
-              <div class="mb-3">
-                <label><strong>Options:</strong></label><br>
-                {% if extra_options %}
-                  {% for extra in extra_options %}
-                    <label>
-                      <input type="checkbox"
-                             name="{{ extra.option.name|lower }}"
-                             id="{{ extra.option.name|lower }}"
-                             data-price="{{ extra.price }}">
-                      {{ extra.option.name }} (+रु {{ extra.price }})
-                    </label><br>
-                  {% endfor %}
-                {% else %}
-                  <span>No extra options available.</span>
-                {% endif %}
-              </div>
+                  <div class="mb-3">
+                      <label><strong>Options:</strong></label><br>
+                      {% if extra_options %}
+                          {% for extra in extra_options %}
+                              <label>
+                                  <input type="checkbox"
+                                        name="{{ extra.option.name|lower }}"
+                                        id="{{ extra.option.name|lower }}"
+                                        data-price="{{ extra.price }}">
+                                  {{ extra.option.name }} (+रु {{ extra.price }})
+                              </label><br>
+                          {% endfor %}
+                      {% else %}
+                          <span>No extra options available.</span>
+                      {% endif %}
+                  </div>
 
-              <!-- Size Selection -->
-              <div class="mb-3 d-flex align-items-center gap-2">
-                <label for="size" class="mb-0"><strong>Size:</strong></label>
-                <select name="size" id="size" class="form-control" required style="flex: 1;">
-                  <option value="">Select Size</option>
-                  {% if size_options %}
-                    {% for size in size_options %}
-                      <option value="{{ size.option.name|lower }}" data-price-multiplier="{{ size.price }}">
-                        {{ size.option.name }}
-                      </option>
-                    {% endfor %}
-                  {% else %}
-                    <option value="default" data-price-multiplier="1">Default</option>
-                  {% endif %}
-                </select>
-              </div>
+                  <div class="mb-3 d-flex align-items-center gap-2">
+                      <label for="size" class="mb-0"><strong>Size:</strong></label>
+                      <select name="size" id="size" class="form-control" required style="flex: 1;">
+                          <option value="">Select Size</option>
+                          {% if size_options %}
+                              {% for size in size_options %}
+                                  <option value="{{ size.option.name|lower }}" data-price-multiplier="{{ size.price }}">
+                                      {{ size.option.name }}
+                                  </option>
+                              {% endfor %}
+                          {% else %}
+                              <option value="default" selected>Default</option> 
+                          {% endif %}
+                      </select>
+                  </div>
 
-              <!-- Custom Message -->
-              <div class="mb-3">
-                <label for="message"><strong>Custom Message on Cake:</strong></label>
-                <input type="text" name="message" maxlength="100" class="form-control" placeholder="Happy Birthday!">
-              </div>
+                  <div class="mb-3">
+                      <label for="message"><strong>Custom Message on Cake:</strong></label>
+                      <input type="text" name="message" maxlength="100" class="form-control" placeholder="Happy Birthday!">
+                  </div>
 
-              <!-- Quantity -->
-              <div class="quantity mb-3">
-                <div class="pro-qty">
-                  <input type="number" name="quantity" value="1" min="1" aria-label="Quantity">
-                </div>
-              </div>
+                  <div class="quantity mb-3">
+                      <div class="pro-qty">
+                          <input type="number" name="quantity" value="1" min="1" aria-label="Quantity">
+                      </div>
+                  </div>
 
-              <!-- Submit -->
-              <button type="submit" class="primary-btn">Add to cart</button>
-            </form>
+                  <button type="submit" class="primary-btn">Add to cart</button>
+              </form>
           {% else %}
-            <button class="primary-btn" disabled style="background-color: #ccc; cursor: not-allowed;">
-              Out of Stock
-            </button>
+              <button class="primary-btn" disabled style="background-color: #ccc; cursor: not-allowed;">
+                  Out of Stock
+              </button>
           {% endif %}
-        </div>
+      </div>
       </div>
     </div>
   </div>

@@ -2,7 +2,6 @@
 {% block title %}Da Cakery - Shopping Cart{% endblock %}
 
 {% block content %}
-<!-- Breadcrumb Begin -->
 <div class="breadcrumb-option">
     <div class="container">
         <div class="row">
@@ -20,9 +19,6 @@
         </div>
     </div>
 </div>
-<!-- Breadcrumb End -->
-
-<!-- Shopping Cart Section Begin -->
 <section class="shopping-cart spad">
     <div class="container">
         <div class="row">
@@ -50,40 +46,47 @@
                             </thead>
                             <tbody>
                                 {% for item in cart_items %}
-                                <tr>
-                                    <td class="product__cart__item">
-                                        <div class="product__cart__item__pic">
-                                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" style="width:90px; height:90px; object-fit:cover;">
-                                        </div>
-                                        <div class="product__cart__item__text">
-                                            <h6>{{ item.product.name }}</h6>
-                                            <h5>रु {{ item.product.price }}</h5>
-                                        </div>
-                                    </td>
-                                    <td class="px-3">
-                                        {% if item.eggless %}<div>✔ Eggless</div>{% endif %}
-                                        {% if item.sugarless %}<div>✔ Sugarless</div>{% endif %}
-                                        <div>Size: {{ item.size }}</div>
-                                        {% if item.message %}
-                                            <div>Message: "{{ item.message }}"</div>
-                                        {% endif %}
-                                    </td>
-                                    <td class="quantity__item px-3">
-                                        <div class="quantity">
-                                            <div class="pro-qty">
-                                                <input type="number" name="quantity_{{ item.product.id }}" value="{{ item.quantity }}" min="1">
+                                    <tr>
+                                        <td class="product__cart__item">
+                                            <div class="product__cart__item__pic">
+                                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" style="width:90px; height:90px; object-fit:cover;">
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td class="cart__price">रु {{ item.subtotal }}</td>
-                                    <td class="cart__close">
-                                        <a href="{% url 'remove_from_cart' item.product.id %}">
-                                            <span class="icon_close"></span>
-                                        </a>
-                                    </td>
-                                </tr>
+                                            <div class="product__cart__item__text">
+                                                <h6>{{ item.product.name }}</h6>
+                                                {% if item.product.get_current_price != item.product.price %}
+                                                    <h6><del>रु {{ item.product.price }}</del></h6>
+                                                {% endif %}
+                                                <h5>रु {{ item.product.get_current_price }}</h5>
+                                            </div>
+                                        </td>
+                                        <td class="px-3">
+                                            {% if item.eggless %}<div>✔ Eggless</div>{% endif %}
+                                            {% if item.sugarless %}<div>✔ Sugarless</div>{% endif %}
+                                            <div>Size: {{ item.size }}</div>
+                                            {% if item.message %}
+                                                <div>Message: "{{ item.message }}"</div>
+                                            {% endif %}
+                                        </td>
+                                        <td class="quantity__item px-3">
+                                            <div class="quantity">
+                                                <div class="pro-qty">
+                                                    {# UPDATED: Use item.item_key for the name attribute #}
+                                                    <input type="number" name="quantity_{{ item.item_key }}" value="{{ item.quantity }}" min="1">
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="cart__price">रु {{ item.subtotal }}</td>
+                                        <td class="cart__close">
+                                            {# UPDATED: Use item.item_key for the remove URL #}
+                                            <a href="{% url 'remove_from_cart' item.item_key %}">
+                                                <span class="icon_close"></span>
+                                            </a>
+                                        </td>
+                                    </tr>
                                 {% empty %}
-                                <tr><td colspan="5">Your cart is empty.</td></tr>
+                                    <tr>
+                                        <td colspan="5">Your cart is empty.</td>
+                                    </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -117,8 +120,8 @@
                     <h6>Cart total</h6>
                     <ul>
                         <li>Subtotal <span>रु {{ total }}</span></li>
-                        {% if discount_percent %}
-                            <li><strong>Discount ({{ discount_percent }}%) <span>-रु {{ discount }}</span></strong></li>
+                        {% if discount_percent and discount_percent > 0 %}
+                            <li><strong>Coupon Discount ({{ discount_percent }}%) <span>-रु {{ discount }}</span></strong></li>
                         {% endif %}
                         <li>Total <span>रु {{ discounted_total }}</span></li>
                     </ul>
@@ -128,5 +131,4 @@
         </div>
     </div>
 </section>
-<!-- Shopping Cart Section End -->
 {% endblock %}

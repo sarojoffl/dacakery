@@ -2,7 +2,8 @@ from django import forms
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
     InstagramImage, Category, Product, Coupon, TeamMember, MapLocation, ContactDetail,
-    SpecialOffer, OrganizationDetails, UserProfile, Order,ProductOption, ProductOptionPrice
+    FlashSale, OrganizationDetails, UserProfile, Order,ProductOption, ProductOptionPrice,
+    FlashSaleItem
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
@@ -77,7 +78,18 @@ class ProductOptionPriceForm(forms.ModelForm):
 class CouponForm(forms.ModelForm):
     class Meta:
         model = Coupon
-        fields = ['code', 'discount', 'active']
+        fields = [
+            'code', 
+            'discount', 
+            'max_discount_amount', 
+            'min_cart_value',
+            'usage_limit',
+            'valid_until', 
+            'active'
+        ]
+        widgets = {
+            'valid_until': forms.DateInput(attrs={'type': 'date'}),
+        }
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=False, help_text="Leave blank to keep the current password.")
@@ -114,13 +126,35 @@ class ContactDetailForm(forms.ModelForm):
         model = ContactDetail
         fields = '__all__'
 
-class SpecialOfferForm(forms.ModelForm):
+
+class FlashSaleForm(forms.ModelForm):
     class Meta:
-        model = SpecialOffer
-        fields = ['title', 'description', 'image', 'valid_until', 'coupon']
+        model = FlashSale
+        fields = ['title', 'start_time', 'end_time', 'banner_image', 'description']
         widgets = {
-            'valid_until': forms.DateInput(attrs={'type': 'date'}),
+            'start_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'end_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'description': forms.Textarea(attrs={'rows': 4}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(FlashSaleForm, self).__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-control'
+        self.fields['banner_image'].widget.attrs['class'] = 'form-control-file'
+
+class FlashSaleItemForm(forms.ModelForm):
+    class Meta:
+        model = FlashSaleItem
+        fields = ['product', 'discounted_price']
+        widgets = {
+            'discounted_price': forms.NumberInput(attrs={'step': '0.01', 'min': '0'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(FlashSaleItemForm, self).__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-control'
 
 class OrganizationDetailsForm(forms.ModelForm):
     class Meta:

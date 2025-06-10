@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django.utils.timezone import now
+from decimal import Decimal
 
 
 # -------------------------
@@ -73,7 +74,7 @@ class Product(models.Model):
     description = models.TextField()
     in_stock = models.BooleanField(default=True)
     tags = models.CharField(max_length=255, blank=True)
-    price = models.DecimalField(max_digits=8, decimal_places=2)  # base price
+    price = models.DecimalField(max_digits=8, decimal_places=2)
     image = models.ImageField(upload_to='products/')
     slug = models.SlugField(unique=True, blank=True)
 
@@ -90,6 +91,16 @@ class Product(models.Model):
                 counter += 1
             self.slug = slug
         super().save(*args, **kwargs)
+
+    def get_current_price(self):
+        active_flash_items = self.flashsaleitem_set.filter(
+            offer__start_time__lte=now(),
+            offer__end_time__gte=now()
+        ).select_related('offer')
+
+        if active_flash_items.exists():
+            return active_flash_items.first().discounted_price
+        return self.price
 
 
 class ProductOption(models.Model):
@@ -237,6 +248,7 @@ class Order(models.Model):
 
     coupon_code = models.CharField(max_length=50, blank=True, null=True)
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    flash_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     delivery_date = models.DateField(null=True, blank=True)
     delivery_time = models.TimeField(null=True, blank=True)
@@ -275,28 +287,83 @@ class OrderItem(models.Model):
 # -------------------------
 # Coupons & Offers
 # -------------------------
+from django.db.models import F
+
 class Coupon(models.Model):
     code = models.CharField(max_length=50, unique=True)
-    discount = models.DecimalField(max_digits=10, decimal_places=2)
+    discount = models.DecimalField(max_digits=5, decimal_places=2, help_text="Discount percentage, e.g., 10.00 for 10%")
+    max_discount_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True,
+        help_text="Maximum discount amount in currency (optional)"
+    )
+    min_cart_value = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True,
+        help_text="Minimum cart value to apply coupon (optional)"
+    )
+    usage_limit = models.PositiveIntegerField(blank=True, null=True, help_text="Maximum number of times this coupon can be used")
+    times_used = models.PositiveIntegerField(default=0, help_text="How many times this coupon has been used")
+    valid_until = models.DateField(blank=True, null=True, help_text="Expiry date of the coupon")
     active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.code
 
+    def is_valid(self):
+        """Helper method to check if the coupon is valid (active and not expired)."""
+        if not self.active:
+            return False
+        if self.valid_until and self.valid_until < now().date():
+            return False
+        return True
 
-class SpecialOffer(models.Model):
+    def can_use(self):
+        """Helper method to check usage limit."""
+        if self.usage_limit is not None and self.times_used >= self.usage_limit:
+            return False
+        return True
+
+    def increment_usage(self):
+        """Atomically increment usage count."""
+        Coupon.objects.filter(id=self.id).update(times_used=F('times_used') + 1)
+        self.refresh_from_db()
+
+
+class FlashSale(models.Model):
     title = models.CharField(max_length=100)
+    start_time = models.DateTimeField(null=True, blank=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+    banner_image = models.ImageField(upload_to='flash_sales/')
     description = models.TextField(blank=True)
-    image = models.ImageField(upload_to='offers/')
-    valid_until = models.DateField(null=True, blank=True)
-    coupon = models.ForeignKey(Coupon, null=True, blank=True, on_delete=models.SET_NULL)
 
     def is_active(self):
-        return self.valid_until >= now().date() if self.valid_until else True
+        now_time = now()
+        return self.start_time <= now_time <= self.end_time
 
     def __str__(self):
         return self.title
 
+
+class FlashSaleItem(models.Model):
+    offer = models.ForeignKey(FlashSale, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey('Product', on_delete=models.CASCADE)
+    discounted_price = models.DecimalField(max_digits=8, decimal_places=2)
+
+    class Meta:
+        unique_together = ('offer', 'product')
+
+    @property
+    def discount_percentage(self):
+        """Calculates the discount percentage based on original and discounted price."""
+        if self.product and self.product.price and self.discounted_price is not None:
+            if self.product.price > 0:
+                original_price = self.product.price
+                discount = original_price - self.discounted_price
+                return (discount / original_price) * Decimal('100')
+        return Decimal('0')
+
+    def __str__(self):
+        return f"{self.product.name} in {self.offer.title} - Rs. {self.discounted_price}"
+    
 
 # -------------------------
 # Blog

@@ -7,14 +7,14 @@ from django.contrib.auth import logout
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
     InstagramImage, Category, Product, Coupon, WishlistItem, Order, NewsletterSubscriber,
-    TeamMember, MapLocation, ContactDetail, ContactMessage, SpecialOffer, OrganizationDetails, UserProfile,
-    ProductOption, ProductOptionPrice
+    TeamMember, MapLocation, ContactDetail, ContactMessage, FlashSale, OrganizationDetails, UserProfile,
+    ProductOption, ProductOptionPrice, FlashSaleItem
 )
 from .admin_forms import (
     AdminSliderForm, AboutSectionForm, BlogCategoryForm, BlogPostForm, TestimonialForm,
     InstagramSectionForm, InstagramImageForm, CategoryForm, ProductForm, CouponForm, UserForm, TeamMemberForm,
-    MapLocationForm, ContactDetailForm, SpecialOfferForm, OrganizationDetailsForm, UserProfileForm, AdminOrderForm,
-    ProductOptionForm, ProductOptionPriceForm
+    MapLocationForm, ContactDetailForm, FlashSaleForm, OrganizationDetailsForm, UserProfileForm, AdminOrderForm,
+    ProductOptionForm, ProductOptionPriceForm, FlashSaleItemForm
 )
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
@@ -729,47 +729,47 @@ def logout_view(request):
     logout(request)
     return redirect('home')
 
-# -------- Special Offers ---------
+# -------- Flash Sales ---------
 @staff_member_required
-def specialoffers_list(request):
-    specialoffers = SpecialOffer.objects.all()
-    return render(request, 'dashboard/specialoffers_list.html', {'specialoffers': specialoffers})
+def flashsales_list(request):
+    flashsales = FlashSale.objects.all()
+    return render(request, 'dashboard/flashsales_list.html', {'flashsales': flashsales})
 
 @staff_member_required
-def add_specialoffer(request):
+def add_flashsale(request):
     if request.method == 'POST':
-        form = SpecialOfferForm(request.POST, request.FILES)
+        form = FlashSaleForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, "Special Offer added successfully!")
-            return redirect('specialoffers_list')
+            messages.success(request, "Flash Sale added successfully!")
+            return redirect('flashsales_list')
     else:
-        form = SpecialOfferForm()
-    return render(request, 'dashboard/specialoffer_form.html', {'form': form, 'title': 'Add Special Offer'})
+        form = FlashSaleForm()
+    return render(request, 'dashboard/flashsale_form.html', {'form': form, 'title': 'Add Flash Sale'})
 
 @staff_member_required
-def edit_specialoffer(request, pk):
-    specialoffer = get_object_or_404(SpecialOffer, pk=pk)
+def edit_flashsale(request, pk):
+    flashsale = get_object_or_404(FlashSale, pk=pk)
     if request.method == 'POST':
-        form = SpecialOfferForm(request.POST, request.FILES, instance=specialoffer)
+        form = FlashSaleForm(request.POST, request.FILES, instance=flashsale)
         if form.is_valid():
             form.save()
-            messages.success(request, "Special Offer updated successfully!")
-            return redirect('specialoffers_list')
+            messages.success(request, "Flash Sale updated successfully!")
+            return redirect('flashsales_list')
     else:
-        form = SpecialOfferForm(instance=specialoffer)
-    return render(request, 'dashboard/specialoffer_form.html', {'form': form, 'title': 'Edit Special Offer'})
+        form = FlashSaleForm(instance=flashsale)
+    return render(request, 'dashboard/flashsale_form.html', {'form': form, 'title': 'Edit Flash Sale'})
 
 @staff_member_required
-def delete_specialoffer(request, pk):
-    specialoffer = get_object_or_404(SpecialOffer, pk=pk)
+def delete_flashsale(request, pk):
+    flashsale = get_object_or_404(FlashSale, pk=pk)
     if request.method == 'POST':
-        specialoffer.delete()
-        messages.success(request, "Special Offer deleted successfully!")
-        return redirect('specialoffers_list')
-    return render(request, 'dashboard/specialoffer_confirm_delete.html', {
-        'specialoffer': specialoffer,
-        'title': 'Delete Special Offer'
+        flashsale.delete()
+        messages.success(request, "Flash Sale deleted successfully!")
+        return redirect('flashsales_list')
+    return render(request, 'dashboard/flashsale_confirm_delete.html', {
+        'flashsale': flashsale,
+        'title': 'Delete Flash Sale'
     })
 
 

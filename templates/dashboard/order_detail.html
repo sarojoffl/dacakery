@@ -19,18 +19,27 @@
     <div class="col-md-6">
       <h5>Customer Info</h5>
       <ul class="list-group list-group-flush">
-        <li class="list-group-item"><strong>Name:</strong> {{ order.first_name }} {{ order.last_name }}</li>
-        <li class="list-group-item"><strong>Email:</strong> {{ order.email }}</li>
-        <li class="list-group-item"><strong>Phone:</strong> {{ order.phone }}</li>
+        <li class="list-group-item">
+          <strong>Name:</strong> {{ order.first_name }} {{ order.last_name }}
+        </li>
+        <li class="list-group-item">
+          <strong>Email:</strong> {{ order.email }}
+        </li>
+        <li class="list-group-item">
+          <strong>Phone:</strong> {{ order.phone }}
+        </li>
         <li class="list-group-item">
           <strong>Address:</strong> {{ order.address }}{% if order.address_line2 %}, {{ order.address_line2 }}{% endif %}, {{ order.city }}, {{ order.province }} {{ order.postal_code }}
         </li>
       </ul>
     </div>
+
     <div class="col-md-6">
       <h5>Order Info</h5>
       <ul class="list-group list-group-flush">
-        <li class="list-group-item"><strong>Payment Method:</strong> {{ order.payment_method|capfirst }}</li>
+        <li class="list-group-item">
+          <strong>Payment Method:</strong> {{ order.payment_method|capfirst }}
+        </li>
 
         <li class="list-group-item">
           <strong>Payment Status:</strong>
@@ -47,22 +56,53 @@
           {% endif %}
         </li>
 
-        <li class="list-group-item"><strong>Payment ID:</strong> {{ order.payment_id|default:"-" }}</li>
+        {% if order.payment_id %}
+          <li class="list-group-item">
+            <strong>Payment ID:</strong> {{ order.payment_id }}
+          </li>
+        {% endif %}
 
-        <li class="list-group-item"><strong>Coupon Code:</strong> {{ order.coupon_code|default:"-" }}</li>
-        <li class="list-group-item"><strong>Discount:</strong> रु {{ order.discount_amount|default:"0" }}</li>
-        <li class="list-group-item"><strong>Total Amount:</strong> रु {{ order.total_amount }}</li>
+        {% if order.coupon_code %}
+          <li class="list-group-item">
+            <strong>Coupon Code:</strong> {{ order.coupon_code }}
+          </li>
+        {% endif %}
+
+        {% if order.discount_amount and order.discount_amount > 0 %}
+          <li class="list-group-item">
+            <strong>Coupon Discount:</strong> रु {{ order.discount_amount }}
+          </li>
+        {% endif %}
+
+        {% if order.flash_discount and order.flash_discount > 0 %}
+          <li class="list-group-item">
+            <strong>Flash Discount:</strong> रु {{ order.flash_discount }}
+          </li>
+        {% endif %}
+
         <li class="list-group-item">
-          <strong>Delivery Date & Time:</strong>
-          {% if order.delivery_date %}
+          <strong>Total Amount:</strong> रु {{ order.total_amount }}
+        </li>
+
+        {% if order.delivery_date %}
+          <li class="list-group-item">
+            <strong>Delivery Date & Time:</strong>
             {{ order.delivery_date|date:"Y-m-d" }}
             {% if order.delivery_time %} at {{ order.delivery_time|time:"H:i" }}{% endif %}
-          {% else %}
-            Not specified
-          {% endif %}
-        </li>
-        <li class="list-group-item"><strong>Notes:</strong> {{ order.notes|default:"-" }}</li>
-        <li class="list-group-item"><strong>Ordered At:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</li>
+          </li>
+        {% endif %}
+
+        {% if order.notes %}
+          <li class="list-group-item">
+            <strong>Notes:</strong> {{ order.notes }}
+          </li>
+        {% endif %}
+
+        {% if order.created_at %}
+          <li class="list-group-item">
+            <strong>Ordered At:</strong> {{ order.created_at|date:"Y-m-d H:i" }}
+          </li>
+        {% endif %}
       </ul>
     </div>
   </div>
@@ -83,29 +123,31 @@
       </thead>
       <tbody>
         {% for item in order.items.all %}
-        <tr>
-          <td>{{ item.product.name }}</td>
-          <td class="text-center">{{ item.quantity }}</td>
-          <td class="text-end">{{ item.price }}</td>
-          <td class="text-center">
-            {% if item.eggless %}
-              <span class="badge bg-success">Yes</span>
-            {% else %}
-              <span class="badge bg-secondary">No</span>
-            {% endif %}
-          </td>
-          <td class="text-center">
-            {% if item.sugarless %}
-              <span class="badge bg-success">Yes</span>
-            {% else %}
-              <span class="badge bg-secondary">No</span>
-            {% endif %}
-          </td>
-          <td class="text-center">{{ item.size|default:"-" }}</td>
-          <td>{{ item.message|default:"-" }}</td>
-        </tr>
+          <tr>
+            <td>{{ item.product.name }}</td>
+            <td class="text-center">{{ item.quantity }}</td>
+            <td class="text-end">{{ item.price }}</td>
+            <td class="text-center">
+              {% if item.eggless %}
+                <span class="badge bg-success">Yes</span>
+              {% else %}
+                <span class="badge bg-secondary">No</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              {% if item.sugarless %}
+                <span class="badge bg-success">Yes</span>
+              {% else %}
+                <span class="badge bg-secondary">No</span>
+              {% endif %}
+            </td>
+            <td class="text-center">{{ item.size|default:"-" }}</td>
+            <td>{{ item.message|default:"-" }}</td>
+          </tr>
         {% empty %}
-        <tr><td colspan="7" class="text-center fst-italic">No items found.</td></tr>
+          <tr>
+            <td colspan="7" class="text-center fst-italic">No items found.</td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>

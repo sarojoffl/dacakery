@@ -17,6 +17,7 @@ from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 
 from django.contrib import messages
+from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
@@ -25,7 +26,7 @@ from django.contrib.auth.models import User
 from .models import (
     Slider, Category, Product, AboutSection, TeamMember, Testimonial,
     InstagramSection, MapLocation, ContactDetail, Coupon, WishlistItem, Order,
-    OrderItem, BlogPost, BlogCategory, NewsletterSubscriber, SpecialOffer,
+    OrderItem, BlogPost, BlogCategory, NewsletterSubscriber, FlashSale,
     ProductOption, ProductOptionPrice
 )
 from .forms import ContactForm, BlogCommentForm
@@ -146,10 +147,9 @@ def home(request):
     instagram_section = InstagramSection.objects.prefetch_related('images').first()
     map_location = MapLocation.objects.first()
 
-    # Get special offers that are valid or no expiry
-    special_offers = SpecialOffer.objects.filter(
-        valid_until__gte=now().date()
-    ) | SpecialOffer.objects.filter(valid_until__isnull=True)
+    # Get only active flash sales
+    current_time = now()
+    flashsales = FlashSale.objects.filter(start_time__lte=current_time, end_time__gte=current_time).prefetch_related('items__product')
 
     return render(request, 'core/home.html', {
         'sliders': sliders,
@@ -160,7 +160,7 @@ def home(request):
         'testimonials': testimonials,
         'instagram_section': instagram_section,
         'map_location': map_location,
-        'special_offers': special_offers,
+        'flashsales': flashsales,
     })
 
 
@@ -252,11 +252,14 @@ def product_detail(request, slug):
         elif option.type == 'extra':
             extra_options.append(option_data)
 
+    current_price = product.get_current_price()
+
     return render(request, 'core/product_detail.html', {
         'product': product,
         'related_products': related_products,
         'size_options': size_options,
         'extra_options': extra_options,
+        'current_price': current_price,
     })
 
 
@@ -294,31 +297,40 @@ def cart(request):
     cart = request.session.get('cart', {})
     cart_items = []
     total = Decimal('0')
+    flash_discount = Decimal('0')
 
-    for product_id, item in cart.items():
+    # Iterate over item_key and item_details to process cart contents
+    for item_key, item_details in list(cart.items()): 
+        product_id = item_details.get('product_id')
+
+        if not product_id:
+            messages.error(request, f"Invalid item in cart. Removing: {item_key}")
+            del request.session['cart'][item_key]
+            request.session.modified = True 
+            continue 
+
         try:
             product = Product.objects.get(id=product_id)
         except Product.DoesNotExist:
-            continue
+            messages.warning(request, f"A product in your cart (ID: {product_id}) no longer exists and has been removed.")
+            del request.session['cart'][item_key]
+            request.session.modified = True
+            continue 
 
-        # Support old format (int quantity) and new dict format
-        if isinstance(item, dict):
-            quantity = item.get('quantity', 1)
-            size = item.get('size', '1')
-            eggless = item.get('eggless', False)
-            sugarless = item.get('sugarless', False)
-            message = item.get('message')
-        else:
-            quantity = item
-            size = '1'  # default
-            eggless = False
-            sugarless = False
-            message = ''
+        quantity = item_details.get('quantity', 1)
+        size = item_details.get('size', '1')
+        eggless = item_details.get('eggless', False)
+        sugarless = item_details.get('sugarless', False)
+        message = item_details.get('message')
 
-        # Calculate price adjustments
         price = calculate_item_price(product, size=size, eggless=eggless, sugarless=sugarless)
         subtotal = price * quantity
         total += subtotal
+
+        original_price = product.price or Decimal('0')
+        current_price = product.get_current_price() or Decimal('0')
+        item_flash_discount = max(original_price - current_price, Decimal('0')) * quantity
+        flash_discount += item_flash_discount
 
         cart_items.append({
             'product': product,
@@ -327,23 +339,62 @@ def cart(request):
             'sugarless': sugarless,
             'size': size,
             'message': message,
-            'subtotal': subtotal
+            'subtotal': subtotal,
+            'item_key': item_key 
         })
 
-    # Apply coupon discount if any
+    request.session['cart_total'] = str(total)
+
     coupon_data = request.session.get('coupon')
-    discount_percent = Decimal(str(coupon_data['discount'])) if coupon_data else Decimal('0.0')
-    discount_percent = min(discount_percent, Decimal('100.0'))
-    discount = (total * discount_percent) / Decimal('100.0')
-    discounted_total = total - discount
+    applied_discount = Decimal('0.0')
+    coupon_code_display = ''
+
+    if coupon_data:
+        try:
+            coupon = Coupon.objects.get(code__iexact=coupon_data['code'])
+
+            if not coupon.active:
+                messages.warning(request, f"Coupon '{coupon.code}' is no longer active and has been removed.")
+                request.session.pop('coupon', None)
+                coupon_data = None 
+            elif coupon.valid_until and coupon.valid_until < timezone.now().date():
+                messages.warning(request, f"Coupon '{coupon.code}' has expired and has been removed.")
+                request.session.pop('coupon', None)
+                coupon_data = None
+            elif coupon.usage_limit is not None and coupon.times_used >= coupon.usage_limit:
+                messages.warning(request, f"Coupon '{coupon.code}' has reached its usage limit and has been removed.")
+                request.session.pop('coupon', None)
+                coupon_data = None
+            elif coupon.min_cart_value is not None and total < coupon.min_cart_value:
+                messages.warning(request, f"Coupon '{coupon.code}' requires a minimum cart value of रु {coupon.min_cart_value}. It has been removed.")
+                request.session.pop('coupon', None)
+                coupon_data = None
+            else:
+                coupon_code_display = coupon.code
+                discount_percent = Decimal(str(coupon.discount))
+                applied_discount = (total * discount_percent) / Decimal('100.0')
+
+                if coupon.max_discount_amount is not None:
+                    max_discount_amount = Decimal(str(coupon.max_discount_amount))
+                    applied_discount = min(applied_discount, max_discount_amount)
+
+        except Coupon.DoesNotExist:
+            messages.warning(request, "Applied coupon code is invalid or no longer exists. It has been removed.")
+            request.session.pop('coupon', None)
+            coupon_data = None
+
+    discounted_total = total - applied_discount
+
+    request.session['flash_discount'] = str(flash_discount)
 
     return render(request, 'core/shoping_cart.html', {
         'cart_items': cart_items,
         'total': total,
-        'discount': discount,
-        'discount_percent': discount_percent,
+        'flash_discount': flash_discount,
+        'discount': applied_discount,
+        'discount_percent': Decimal(str(coupon_data['discount'])) if coupon_data else Decimal('0.0'),
         'discounted_total': discounted_total,
-        'coupon_code': coupon_data['code'] if coupon_data else '',
+        'coupon_code': coupon_code_display,
     })
 
 
@@ -352,28 +403,42 @@ def add_to_cart(request, slug):
         product = get_object_or_404(Product, slug=slug)
         cart = request.session.get('cart', {})
 
-        product_id = str(product.id)
         quantity = int(request.POST.get('quantity', 1))
         eggless = request.POST.get('eggless') == 'on'
         sugarless = request.POST.get('sugarless') == 'on'
-
         size = request.POST.get('size')
-        if not size:
-            size = 'base'  # default size if none selected
-
         message = request.POST.get('message', '').strip()
 
-        item = {
+        # Consistent fallback: If no size is provided from the form, use 'default'
+        if not size:
+            size = 'default' 
+
+        # Create a unique key to differentiate product configurations
+        item_key = f"{product.id}-{size}-{eggless}-{sugarless}"
+
+        new_item_details = {
             'quantity': quantity,
             'eggless': eggless,
             'sugarless': sugarless,
             'size': size,
-            'message': message
+            'message': message,
+            'product_id': str(product.id)
         }
 
-        cart[product_id] = item
+        if item_key in cart:
+            cart[item_key]['quantity'] += quantity
+            if message:
+                 cart[item_key]['message'] = message
+            messages.info(request, f"Quantity for '{product.name}' ({size}) updated in cart!")
+        else:
+            cart[item_key] = new_item_details
+            messages.success(request, f"'{product.name}' ({size}) added to cart!")
+
         request.session['cart'] = cart
-        messages.success(request, f"{product.name} added to cart!")
+        if 'coupon' in request.session:
+            messages.info(request, "Cart contents changed. Coupon may need re-evaluation.")
+            request.session.pop('coupon', None)
+
         return redirect('cart')
     else:
         return redirect('product_detail', slug=slug)
@@ -383,66 +448,101 @@ def update_cart(request):
     if request.method == 'POST':
         cart = request.session.get('cart', {})
 
-        # Update quantities or remove items with quantity < 1
+        cart_changed_significantly = False 
+
         for key, value in request.POST.items():
             if key.startswith('quantity_'):
                 product_id = key.split('_')[1]
                 try:
                     qty = int(value)
-                    if qty < 1:
-                        cart.pop(product_id, None)
-                    else:
-                        if product_id in cart:
+                    if product_id in cart:
+                        current_qty = cart[product_id].get('quantity', 1)
+                        if qty < 1:
+                            cart.pop(product_id, None)
+                            if current_qty > 0:
+                                cart_changed_significantly = True
+                        elif qty != current_qty:
                             cart[product_id]['quantity'] = qty
+                            cart_changed_significantly = True
                 except ValueError:
                     continue
 
         request.session['cart'] = cart
+
+        if cart_changed_significantly:
+            if 'coupon' in request.session:
+                # Use messages.info to let the user know the coupon might be re-evaluated
+                messages.info(request, "Cart updated. Coupon re-evaluation needed.") 
+            request.session.pop('coupon', None)
+
         messages.success(request, 'Cart updated successfully.')
     return redirect('cart')
 
 
-def remove_from_cart(request, product_id):
+def remove_from_cart(request, item_key):
     cart = request.session.get('cart', {})
-    product_id_str = str(product_id)  # 👈 Fix: convert to string
 
-    if product_id_str in cart:
-        cart.pop(product_id_str)
+    if item_key in cart:
+        cart.pop(item_key)
         request.session['cart'] = cart
+        # Invalidate coupon as cart contents have changed
+        if 'coupon' in request.session:
+            messages.info(request, "Cart contents changed. Coupon may need re-evaluation.")
+            request.session.pop('coupon', None)
+        request.session.modified = True
         messages.success(request, 'Item removed from cart.')
     else:
         messages.error(request, 'Item not found in cart.')
 
     return redirect('cart')
 
-
-from django.utils.timezone import now
-
 def apply_coupon(request):
     if request.method == 'POST':
         code = request.POST.get('coupon_code', '').strip()
         cart = request.session.get('cart', {})
+        cart_total = Decimal(request.session.get('cart_total', '0.00')) 
 
         if not cart:
             messages.error(request, "Your cart is empty.")
             return redirect('cart')
 
         try:
-            coupon = Coupon.objects.filter(
-                code__iexact=code,
-                active=True,
-                specialoffer__valid_until__gte=now().date()
-            ).distinct().get()
+            coupon = Coupon.objects.get(code__iexact=code)
 
+            # Check if coupon is active and valid date
+            if not coupon.active:
+                messages.error(request, "This coupon is no longer active.")
+                request.session.pop('coupon', None)
+                return redirect('cart')
+
+            if coupon.valid_until and coupon.valid_until < timezone.now().date(): # Use timezone.now()
+                messages.error(request, "This coupon has expired.")
+                request.session.pop('coupon', None)
+                return redirect('cart')
+
+            # Check usage limits
+            if coupon.usage_limit is not None and coupon.times_used >= coupon.usage_limit:
+                messages.error(request, "This coupon has reached its usage limit.")
+                request.session.pop('coupon', None)
+                return redirect('cart')
+
+            # Check minimum cart value
+            if coupon.min_cart_value is not None and cart_total < coupon.min_cart_value:
+                messages.error(request, f"Minimum cart value for this coupon is रु {coupon.min_cart_value}.")
+                request.session.pop('coupon', None)
+                return redirect('cart')
+
+            # Passed all checks — apply coupon
             request.session['coupon'] = {
                 'code': coupon.code,
                 'discount': float(coupon.discount),
+                'max_discount_amount': float(coupon.max_discount_amount) if coupon.max_discount_amount else None,
             }
             messages.success(request, f"Coupon '{coupon.code}' applied successfully!")
 
         except Coupon.DoesNotExist:
             request.session.pop('coupon', None)
-            messages.error(request, "Invalid or expired coupon code.")
+            messages.error(request, "Invalid coupon code.")
 
     return redirect('cart')
 
@@ -463,7 +563,7 @@ def get_option_price(product, option_name, option_type):
         return option.default_price or 0
 
 def calculate_item_price(product, size=None, eggless=False, sugarless=False):
-    price = product.price
+    price = product.get_current_price() or Decimal('0.00')
     if size:
         price += get_option_price(product, size, 'size')
     if eggless:
@@ -542,13 +642,21 @@ def checkout(request):
         total = Decimal('0')
         order_items = []
 
-        for product_id, item in cart.items():
-            product = get_object_or_404(Product, id=product_id)
-            quantity = int(item.get('quantity', 1)) if isinstance(item, dict) else int(item)
-            size = item.get('size') if isinstance(item, dict) else None
-            eggless = item.get('eggless', False) if isinstance(item, dict) else False
-            sugarless = item.get('sugarless', False) if isinstance(item, dict) else False
-            message = item.get('message', '') if isinstance(item, dict) else ''
+        for item_key, item_details in cart.items(): # Iterate over item_key and its details
+            product_id = item_details.get('product_id') # Extract product_id from the details
+            if not product_id:
+                # Handle cases where product_id might be missing (shouldn't happen with current add_to_cart)
+                messages.error(request, f"Corrupted cart item detected. Removing: {item_key}")
+                del request.session['cart'][item_key]
+                request.session.modified = True
+                continue
+            
+            product = get_object_or_404(Product, id=product_id) # Use the extracted product_id
+            quantity = int(item_details.get('quantity', 1))
+            size = item_details.get('size')
+            eggless = item_details.get('eggless', False)
+            sugarless = item_details.get('sugarless', False)
+            message = item_details.get('message', '')
 
             price = calculate_item_price(product, size, eggless, sugarless)
             subtotal = price * quantity
@@ -569,6 +677,8 @@ def checkout(request):
         discount_amount = (total * discount_percent) / Decimal('100.0')
         final_total = total - discount_amount
 
+        flash_discount = Decimal(request.session.get('flash_discount', '0'))
+
         # Create order in DB
         order = Order.objects.create(
             user=user,
@@ -587,8 +697,12 @@ def checkout(request):
             payment_method=payment_method,
             coupon_code=coupon_code,
             discount_amount=discount_amount,
+            flash_discount=flash_discount,
             total_amount=final_total,
         )
+
+        if 'flash_discount' in request.session:
+            del request.session['flash_discount']
 
         # Create individual order items in DB
         for item in order_items:
@@ -657,21 +771,35 @@ def checkout(request):
 
             return render(request, 'payment/esewa_redirect_v2.html', {'esewa_data': esewa_data})
 
-        # Clear cart and coupon after successful order placement
+        # Clear cart and coupon after successful order placement (for COD)
         request.session['cart'] = {}
         request.session.pop('coupon', None)
+
+        # After order creation for COD:
+        if payment_method == 'cod' and coupon_code:
+            try:
+                coupon = Coupon.objects.get(code=coupon_code)
+                coupon.increment_usage()
+            except Coupon.DoesNotExist:
+                pass  # Handle error logging
+
         return redirect('order_success', order_id=order.id)
 
     # Render checkout page with cart summary if GET request
     cart_items = []
     total = Decimal('0')
 
-    for product_id, item in cart.items():
-        product = get_object_or_404(Product, id=product_id)
-        quantity = int(item.get('quantity', 1)) if isinstance(item, dict) else int(item)
-        size = item.get('size') if isinstance(item, dict) else None
-        eggless = item.get('eggless', False) if isinstance(item, dict) else False
-        sugarless = item.get('sugarless', False) if isinstance(item, dict) else False
+    for item_key, item_details in cart.items(): # Iterate over item_key and its details
+        product_id = item_details.get('product_id') # Extract product_id from the details
+        if not product_id:
+            messages.error(request, f"Invalid item '{item_key}' found in your cart. Please clear your cart or re-add items.")
+            continue # Skip this invalid item for display
+        
+        product = get_object_or_404(Product, id=product_id) # Use the extracted product_id
+        quantity = int(item_details.get('quantity', 1))
+        size = item_details.get('size')
+        eggless = item_details.get('eggless', False)
+        sugarless = item_details.get('sugarless', False)
 
         price = calculate_item_price(product, size, eggless, sugarless)
         subtotal = price * quantity
@@ -725,6 +853,14 @@ def esewa_verify(request, oid, status):
 
         request.session['cart'] = {}
         request.session.pop('coupon', None)
+        
+        if status == 'su' and order.status == 'paid':
+            if order.coupon_code:
+                try:
+                    coupon = Coupon.objects.get(code=order.coupon_code)
+                    coupon.increment_usage()
+                except Coupon.DoesNotExist:
+                    pass
 
         return redirect('order_success', order_id=order.id)
 
@@ -763,6 +899,14 @@ def khalti_verify(request):
             # Clear cart and coupon after successful payment
             request.session['cart'] = {}
             request.session.pop('coupon', None)
+
+            if status == 'Completed':
+                if order.coupon_code:
+                    try:
+                        coupon = Coupon.objects.get(code=order.coupon_code)
+                        coupon.increment_usage()
+                    except Coupon.DoesNotExist:
+                        pass
 
             return redirect('order_success', order_id=order.id)
         else:

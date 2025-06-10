@@ -3,7 +3,7 @@ from .models import (
     Slider, Category, Product, AboutSection, TeamMember, Testimonial,
     InstagramSection, InstagramImage, MapLocation, ContactDetail, ContactMessage,
     WishlistItem, Order, OrderItem, Coupon, BlogPost, BlogCategory, NewsletterSubscriber,
-    SpecialOffer, UserProfile, ProductOption, ProductOptionPrice
+    FlashSale, UserProfile, ProductOption, ProductOptionPrice, FlashSaleItem
 )
 
 # Register your models here.
@@ -45,7 +45,8 @@ admin.site.register(Coupon)
 admin.site.register(BlogPost)
 admin.site.register(BlogCategory)
 admin.site.register(NewsletterSubscriber)
-admin.site.register(SpecialOffer)
+admin.site.register(FlashSale)
+admin.site.register(FlashSaleItem)
 
 
 @admin.register(UserProfile)

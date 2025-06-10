@@ -26,42 +26,64 @@
 
 {% include 'partials/about_section.html' %}
 
-<!-- Special Offer Section Begin -->
-<section class="special-offer spad">
+{% if flashsales %}
+<section class="flash-sales spad">
     <div class="container">
         <div class="section-title">
-            <span>Special Offers</span>
-            <h2>Don't Miss Out On Our Exclusive Deals!</h2>
+            <span>Limited Time Offer</span>
+            <h2>Flash Sales</h2>
         </div>
+
+        {% for sale in flashsales %}
+        <div class="flashsale-banner mb-5 text-center">
+            <img src="{{ sale.banner_image.url }}" alt="{{ sale.title }}" class="img-fluid rounded mb-3" style="max-height: 300px; object-fit: cover;">
+            <h3 class="mb-2">{{ sale.title }}</h3>
+            <p class="mb-1">{{ sale.description|linebreaksbr }}</p>
+            <small class="text-muted">Valid from {{ sale.start_time|date:"M d, Y H:i" }} to {{ sale.end_time|date:"M d, Y H:i" }}</small>
+        </div>
+
         <div class="row">
-            {% for offer in special_offers %}
-            <div class="col-lg-4 col-md-6">
-                <div class="special-offer__item">
-                    <div class="special-offer__item__pic set-bg" data-setbg="{{ offer.image.url }}">
-                        {% if offer.valid_until %}
-                        <div class="offer__validity">
-                            Valid Until: {{ offer.valid_until|date:"M d, Y" }}
+            {% for item in sale.items.all %}
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="product__item">
+                    <div class="product__item__pic set-bg" data-setbg="{{ item.product.image.url }}">
+                        <div class="product__label">
+                            <span>Sale! -{{ item.discount_percentage|floatformat:0 }}%</span>
                         </div>
-                        {% endif %}
                     </div>
-                    <div class="special-offer__item__text">
-                        <h5>{{ offer.title }}</h5>
-                        <p>{{ offer.description|truncatewords:20 }}</p>
-                        {% if offer.coupon %}
-                        <div class="offer__coupon">
-                            Coupon Code: <strong>{{ offer.coupon.code }}</strong>
+                    <div class="product__item__text">
+                        <h6><a href="{% url 'product_detail' slug=item.product.slug %}">{{ item.product.name }}</a></h6>
+                        <div class="product__item__price">
+                            <del class="text-muted small">रु {{ item.product.price }}</del>
+                            <span class="fw-bold text-danger ms-2">रु {{ item.discounted_price }}</span>
                         </div>
-                        {% endif %}
+                        <div class="cart_add">
+                            {% if item.product.in_stock %}
+                            <form action="{% url 'add_to_cart' item.product.slug %}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit">Add to Cart</button>
+                            </form>
+                            {% else %}
+                            <button disabled>
+                                Out of Stock
+                            </button>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
             {% empty %}
-            <p>No special offers available at the moment. Please check back later!</p>
+            <p class="text-muted">No discounted products available in this flash sale.</p>
             {% endfor %}
         </div>
+
+        {% if not forloop.last %}
+        <hr class="my-5">
+        {% endif %}
+        {% endfor %}
     </div>
 </section>
-<!-- Special Offer Section End -->
+{% endif %}
 
 <!-- Product Section Begin -->
 <section class="product spad">
