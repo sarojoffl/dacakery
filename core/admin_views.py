@@ -772,6 +772,42 @@ def delete_flashsale(request, pk):
         'title': 'Delete Flash Sale'
     })
 
+# -------- Flash Sale Items ---------
+def admin_flashsaleitem_list(request):
+    items = FlashSaleItem.objects.select_related('offer', 'product').all()
+    context = {'items': items}
+    return render(request, 'dashboard/flashsaleitem_list.html', context)
+
+def admin_flashsaleitem_add(request):
+    if request.method == 'POST':
+        form = FlashSaleItemForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Flash sale item added successfully!')
+            return redirect('flashsaleitem_list')
+    else:
+        form = FlashSaleItemForm()
+    return render(request, 'dashboard/flashsaleitem_form.html', {'form': form})
+
+def admin_flashsaleitem_edit(request, pk):
+    item = get_object_or_404(FlashSaleItem, pk=pk)
+    if request.method == 'POST':
+        form = FlashSaleItemForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Flash sale item updated successfully!')
+            return redirect('flashsaleitem_list')
+    else:
+        form = FlashSaleItemForm(instance=item)
+    return render(request, 'dashboard/flashsaleitem_form.html', {'form': form, 'item': item})
+
+def admin_flashsaleitem_delete(request, pk):
+    item = get_object_or_404(FlashSaleItem, pk=pk)
+    if request.method == 'POST':
+        item.delete()
+        messages.success(request, 'Flash sale item deleted successfully! 🗑️')
+        return redirect('flashsaleitem_list')
+    return render(request, 'dashboard/flashsaleitem_confirm_delete.html', {'item': item})
 
 # -------- Organization Details (Singleton) ---------
 @staff_member_required

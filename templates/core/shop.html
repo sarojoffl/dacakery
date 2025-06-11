@@ -68,7 +68,16 @@
                         </div>
                         <div class="product__item__text">
                             <h6><a href="{% url 'product_detail' product.slug %}">{{ product.name }}</a></h6>
-                            <div class="product__item__price">रु {{ product.price }}</div>
+                            <div class="product__item__price">
+                                {% with current_price=product.get_current_price %}
+                                    {% if current_price != product.price %}
+                                        <span class="fw-bold text-danger">रु {{ current_price }}</span>
+                                        <del class="text-muted small ms-2">रु {{ product.price }}</del>
+                                    {% else %}
+                                        <span class="fw-bold text-dark">रु {{ product.price }}</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
                             <div class="cart_add">
                                 {% if product.in_stock %}
                                     <form method="post" action="{% url 'add_to_cart' product.slug %}">

@@ -119,6 +119,12 @@ urlpatterns = [
     path('flashsales/edit/<int:pk>/', admin_views.edit_flashsale, name='flashsale_edit'),
     path('flashsales/delete/<int:pk>/', admin_views.delete_flashsale, name='flashsale_delete'),
 
+    # Flash Sale Items
+    path('dashboard/flashsale-items/', admin_views.admin_flashsaleitem_list, name='flashsaleitem_list'),
+    path('dashboard/flashsale-items/add/', admin_views.admin_flashsaleitem_add, name='flashsaleitem_add'),
+    path('dashboard/flashsale-items/<int:pk>/edit/', admin_views.admin_flashsaleitem_edit, name='flashsaleitem_edit'),
+    path('dashboard/flashsale-items/<int:pk>/delete/', admin_views.admin_flashsaleitem_delete, name='flashsaleitem_delete'),
+
     # Organization Details (Singleton)
     path('organizationdetails/add/', admin_views.add_organization_details, name='add_organization_details'),
     path('organizationdetails/edit/', admin_views.edit_organization_details, name='edit_organization_details'),
