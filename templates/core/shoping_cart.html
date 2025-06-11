@@ -108,14 +108,20 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="cart__discount">
-                    <h6>Discount codes</h6>
-                    <form method="POST" action="{% url 'apply_coupon' %}">
-                        {% csrf_token %}
-                        <input type="text" name="coupon_code" placeholder="Coupon code">
-                        <button type="submit">Apply</button>
-                    </form>
-                </div>
+                {% if show_coupon_section %}
+                    <div class="cart__discount">
+                        <h6>Discount codes</h6>
+                        {% if coupon_code %}
+                            <p>Coupon <strong>{{ coupon_code }}</strong> applied.</p>
+                        {% else %}
+                            <form method="POST" action="{% url 'apply_coupon' %}">
+                                {% csrf_token %}
+                                <input type="text" name="coupon_code" placeholder="Coupon code">
+                                <button type="submit">Apply</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                {% endif %}
                 <div class="cart__total">
                     <h6>Cart total</h6>
                     <ul>

@@ -387,9 +387,17 @@ def cart(request):
 
     request.session['flash_discount'] = str(flash_discount)
 
+    coupons = Coupon.objects.filter(active=True)
+    show_coupon_section = False
+    for coupon in coupons:
+        if coupon.min_cart_value is None or total >= coupon.min_cart_value:
+            show_coupon_section = True
+            break
+    
     return render(request, 'core/shoping_cart.html', {
         'cart_items': cart_items,
         'total': total,
+        'show_coupon_section': show_coupon_section,
         'flash_discount': flash_discount,
         'discount': applied_discount,
         'discount_percent': Decimal(str(coupon_data['discount'])) if coupon_data else Decimal('0.0'),
