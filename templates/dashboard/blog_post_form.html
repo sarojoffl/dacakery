@@ -9,6 +9,8 @@
 <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
     {% csrf_token %}
 
+    {{ form.media }}
+
     {% if form.non_field_errors %}
         <div class="alert alert-danger">{{ form.non_field_errors }}</div>
     {% endif %}
@@ -17,10 +19,14 @@
         <div class="mb-3">
             <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
 
-            {% if field.errors %}
-                {{ field|add_class:"form-control is-invalid" }}
+            {% if field.name == "content" %}
+                {{ field }}  {# CKEditor widget, no extra classes #}
             {% else %}
-                {{ field|add_class:"form-control" }}
+                {% if field.errors %}
+                    {{ field|add_class:"form-control is-invalid" }}
+                {% else %}
+                    {{ field|add_class:"form-control" }}
+                {% endif %}
             {% endif %}
 
             {% if field.help_text %}
@@ -31,7 +37,6 @@
                 <div class="text-danger">{{ field.errors }}</div>
             {% endif %}
 
-            {# Image preview for image field #}
             {% if field.name == "image" and field.value %}
                 <div class="mt-2">
                     <label class="form-label d-block fw-light text-muted">Current Image:</label>

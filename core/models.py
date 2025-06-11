@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django.utils.timezone import now
 from decimal import Decimal
+from ckeditor.fields import RichTextField
 
 
 # -------------------------
@@ -391,7 +392,7 @@ class BlogCategory(models.Model):
 
 class BlogPost(models.Model):
     title = models.CharField(max_length=200)
-    content = models.TextField()
+    content = RichTextField()
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='blog_posts')
     image = models.ImageField(upload_to='blog_images/')
     views = models.PositiveIntegerField(default=0)

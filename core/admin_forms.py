@@ -32,6 +32,8 @@ class BlogCategoryForm(forms.ModelForm):
         fields = ['name']
 
 class BlogPostForm(forms.ModelForm):
+    content = forms.CharField(widget=CKEditorWidget())
+
     class Meta:
         model = BlogPost
         fields = ['title', 'content', 'author', 'image', 'category']

@@ -423,9 +423,8 @@ def add_to_cart(request, slug):
         size = request.POST.get('size')
         message = request.POST.get('message', '').strip()
 
-        # Consistent fallback: If no size is provided from the form, use 'default'
         if not size:
-            size = 'default' 
+            size = 'Medium'
 
         # Create a unique key to differentiate product configurations
         item_key = f"{product.id}-{size}-{eggless}-{sugarless}"
@@ -573,26 +572,29 @@ def apply_coupon(request):
 
 def get_option_price(product, option_name, option_type):
     try:
-        option = ProductOption.objects.get(name=option_name, type=option_type)
+        option = ProductOption.objects.get(name__iexact=option_name, type=option_type)
     except ProductOption.DoesNotExist:
-        return 0  # Option doesn't exist at all
+        return Decimal('1.00') if option_type == 'size' else Decimal('0.00')
 
     try:
-        # Try product-specific price override
         option_price = ProductOptionPrice.objects.get(product=product, option=option)
         return option_price.price
     except ProductOptionPrice.DoesNotExist:
-        # Fallback to default price from ProductOption
-        return option.default_price or 0
+        return option.default_price or (Decimal('1.00') if option_type == 'size' else Decimal('0.00'))
+
 
 def calculate_item_price(product, size=None, eggless=False, sugarless=False):
     price = product.get_current_price() or Decimal('0.00')
+
     if size:
-        price += get_option_price(product, size, 'size')
+        price *= get_option_price(product, size, 'size')
+
     if eggless:
-        price += get_option_price(product, 'eggless', 'extra')
+        price += get_option_price(product, 'Eggless', 'extra')
+
     if sugarless:
-        price += get_option_price(product, 'sugarless', 'extra')
+        price += get_option_price(product, 'Sugarless', 'extra')
+
     return price
 
 
