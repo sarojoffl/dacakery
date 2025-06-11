@@ -19,6 +19,7 @@
         </div>
     </div>
 </div>
+
 <section class="shopping-cart spad">
     <div class="container">
         <div class="row">
@@ -70,14 +71,12 @@
                                         <td class="quantity__item px-3">
                                             <div class="quantity">
                                                 <div class="pro-qty">
-                                                    {# UPDATED: Use item.item_key for the name attribute #}
                                                     <input type="number" name="quantity_{{ item.item_key }}" value="{{ item.quantity }}" min="1">
                                                 </div>
                                             </div>
                                         </td>
                                         <td class="cart__price">रु {{ item.subtotal }}</td>
                                         <td class="cart__close">
-                                            {# UPDATED: Use item.item_key for the remove URL #}
                                             <a href="{% url 'remove_from_cart' item.item_key %}">
                                                 <span class="icon_close"></span>
                                             </a>
@@ -109,19 +108,43 @@
 
             <div class="col-lg-4">
                 {% if show_coupon_section %}
-                    <div class="cart__discount">
+                    <div class="cart__discount mb-3">
+
+                        {% if available_coupons %}
+                            <div class="mb-3">
+                                <p><strong>Available Coupons:</strong></p>
+                                <ul class="list-unstyled" style="margin: 0;">
+                                    {% for coupon in available_coupons %}
+                                        <li style="margin-bottom: 8px; color: #444;">
+                                            <div class="available-coupon" 
+                                                data-code="{{ coupon.code }}"
+                                                style="cursor: pointer; background-color: #f3f3f3; padding: 10px 15px; border: 1px dashed #ddd; border-radius: 4px;">
+                                                <strong>{{ coupon.code }}</strong> – रु {{ coupon.discount }}% off
+                                                {% if coupon.min_cart_value %}
+                                                    (Min रु {{ coupon.min_cart_value }})
+                                                {% endif %}
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
                         <h6>Discount codes</h6>
+
                         {% if coupon_code %}
-                            <p>Coupon <strong>{{ coupon_code }}</strong> applied.</p>
+                            <p>Coupon <strong>{{ coupon_code }}</strong> applied ✅</p>
                         {% else %}
                             <form method="POST" action="{% url 'apply_coupon' %}">
                                 {% csrf_token %}
-                                <input type="text" name="coupon_code" placeholder="Coupon code">
+                                <input type="text" name="coupon_code" placeholder="Coupon code" id="coupon_input">
                                 <button type="submit">Apply</button>
                             </form>
                         {% endif %}
+
                     </div>
                 {% endif %}
+
                 <div class="cart__total">
                     <h6>Cart total</h6>
                     <ul>
@@ -137,4 +160,20 @@
         </div>
     </div>
 </section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const couponItems = document.querySelectorAll(".available-coupon");
+    const input = document.querySelector("#coupon_input");
+    couponItems.forEach(item => {
+        item.addEventListener("click", function () {
+            const code = this.getAttribute("data-code");
+            if (input) {
+                input.value = code;
+                input.focus();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

@@ -27,7 +27,7 @@ from .models import (
     Slider, Category, Product, AboutSection, TeamMember, Testimonial,
     InstagramSection, MapLocation, ContactDetail, Coupon, WishlistItem, Order,
     OrderItem, BlogPost, BlogCategory, NewsletterSubscriber, FlashSale,
-    ProductOption, ProductOptionPrice
+    ProductOption, ProductOptionPrice, CouponUsage
 )
 from .forms import ContactForm, BlogCommentForm
 
@@ -393,11 +393,17 @@ def cart(request):
         if coupon.min_cart_value is None or total >= coupon.min_cart_value:
             show_coupon_section = True
             break
+
+    # Fetch all active coupons and filter by min_cart_value
+    available_coupons = Coupon.objects.filter(active=True).filter(
+        Q(min_cart_value__isnull=True) | Q(min_cart_value__lte=total)
+    )
     
     return render(request, 'core/shoping_cart.html', {
         'cart_items': cart_items,
         'total': total,
         'show_coupon_section': show_coupon_section,
+        'available_coupons': available_coupons,
         'flash_discount': flash_discount,
         'discount': applied_discount,
         'discount_percent': Decimal(str(coupon_data['discount'])) if coupon_data else Decimal('0.0'),
@@ -508,11 +514,15 @@ def apply_coupon(request):
     if request.method == 'POST':
         code = request.POST.get('coupon_code', '').strip()
         cart = request.session.get('cart', {})
-        cart_total = Decimal(request.session.get('cart_total', '0.00')) 
+        cart_total = Decimal(request.session.get('cart_total', '0.00'))
 
         if not cart:
             messages.error(request, "Your cart is empty.")
             return redirect('cart')
+
+        if not request.user.is_authenticated:
+            messages.error(request, "Please log in to use a coupon.")
+            return redirect('login')  # Or wherever your login page is
 
         try:
             coupon = Coupon.objects.get(code__iexact=code)
@@ -523,12 +533,12 @@ def apply_coupon(request):
                 request.session.pop('coupon', None)
                 return redirect('cart')
 
-            if coupon.valid_until and coupon.valid_until < timezone.now().date(): # Use timezone.now()
+            if coupon.valid_until and coupon.valid_until < timezone.now().date():
                 messages.error(request, "This coupon has expired.")
                 request.session.pop('coupon', None)
                 return redirect('cart')
 
-            # Check usage limits
+            # Check overall usage limit
             if coupon.usage_limit is not None and coupon.times_used >= coupon.usage_limit:
                 messages.error(request, "This coupon has reached its usage limit.")
                 request.session.pop('coupon', None)
@@ -540,7 +550,13 @@ def apply_coupon(request):
                 request.session.pop('coupon', None)
                 return redirect('cart')
 
-            # Passed all checks — apply coupon
+            # Check if user has already used this coupon
+            if CouponUsage.objects.filter(user=request.user, coupon=coupon).exists():
+                messages.error(request, "You have already used this coupon.")
+                request.session.pop('coupon', None)
+                return redirect('cart')
+
+            # Passed all checks — apply coupon in session
             request.session['coupon'] = {
                 'code': coupon.code,
                 'discount': float(coupon.discount),
@@ -553,7 +569,6 @@ def apply_coupon(request):
             messages.error(request, "Invalid coupon code.")
 
     return redirect('cart')
-
 
 
 def get_option_price(product, option_name, option_type):
@@ -788,8 +803,13 @@ def checkout(request):
             try:
                 coupon = Coupon.objects.get(code=coupon_code)
                 coupon.increment_usage()
+                CouponUsage.objects.create(
+                    user=user,
+                    coupon=coupon,
+                    order=order
+                )
             except Coupon.DoesNotExist:
-                pass  # Handle error logging
+                pass  # handle logging or ignore
 
         return redirect('order_success', order_id=order.id)
 
@@ -867,6 +887,11 @@ def esewa_verify(request, oid, status):
                 try:
                     coupon = Coupon.objects.get(code=order.coupon_code)
                     coupon.increment_usage()
+                    CouponUsage.objects.create(
+                        user=order.user,
+                        coupon=coupon,
+                        order=order
+                    )
                 except Coupon.DoesNotExist:
                     pass
 
@@ -913,6 +938,11 @@ def khalti_verify(request):
                     try:
                         coupon = Coupon.objects.get(code=order.coupon_code)
                         coupon.increment_usage()
+                        CouponUsage.objects.create(
+                            user=order.user,
+                            coupon=coupon,
+                            order=order
+                        )
                     except Coupon.DoesNotExist:
                         pass
 

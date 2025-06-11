@@ -84,6 +84,7 @@ class CouponForm(forms.ModelForm):
             'max_discount_amount', 
             'min_cart_value',
             'usage_limit',
+            'times_used',
             'valid_until', 
             'active'
         ]

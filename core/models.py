@@ -327,6 +327,17 @@ class Coupon(models.Model):
         Coupon.objects.filter(id=self.id).update(times_used=F('times_used') + 1)
         self.refresh_from_db()
 
+class CouponUsage(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    used_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'coupon')  # Prevent duplicate use
+
+    def __str__(self):
+        return f"{self.user.email} used {self.coupon.code}"
 
 class FlashSale(models.Model):
     title = models.CharField(max_length=100)

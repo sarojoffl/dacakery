@@ -1884,6 +1884,18 @@ ol {
   display: inline-block;
 }
 
+.available-coupon {
+    cursor: pointer;
+    background-color: #f3f3f3;
+    padding: 10px 15px;
+    border: 1px dashed #ddd;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+.available-coupon:hover {
+    background-color: #f8e5d7;
+}
+
 .cart__discount {
   margin-bottom: 60px;
 }

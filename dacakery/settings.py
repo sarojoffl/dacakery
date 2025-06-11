@@ -156,3 +156,13 @@ ESEWA_SECRET_KEY = os.getenv('ESEWA_SECRET_KEY', '')
 ESEWA_PRODUCT_CODE = os.getenv('ESEWA_PRODUCT_CODE', '')
 ESEWA_PAYMENT_URL = os.getenv('ESEWA_PAYMENT_URL', 'https://rc-epay.esewa.com.np/api/epay/main/v2/form')
 ESEWA_RETURN_URL = os.getenv('ESEWA_RETURN_URL', 'http://127.0.0.1:8000/payment/esewa/verify')
+
+from django.contrib.messages import constants as messages
+
+MESSAGE_TAGS = {
+    messages.DEBUG: 'secondary',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+    messages.ERROR: 'danger',
+}

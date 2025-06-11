@@ -26,6 +26,7 @@
             <th>Max Discount</th>
             <th>Min Cart Value</th>
             <th>Usage Limit</th>
+            <th>Times Used</th>
             <th>Valid Until</th>
             <th>Active</th>
             <th>Actions</th>
@@ -56,6 +57,13 @@
                     {{ coupon.usage_limit }}
                 {% else %}
                     Unlimited
+                {% endif %}
+            </td>
+            <td>
+                {% if coupon.times_used %}
+                    {{ coupon.times_used }}
+                {% else %}
+                    0
                 {% endif %}
             </td>
             <td>
