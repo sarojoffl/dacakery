@@ -24,7 +24,15 @@
         <p><strong>Phone:</strong> {{ map_location.phone }}</p>
         <div class="mb-3">
           <label class="form-label fw-semibold">Map Preview:</label>
-          <div>{% autoescape off %}{{ map_location.map_iframe }}{% endautoescape %}</div>
+          <iframe
+            src="{{ map_location.map_iframe }}"
+            width="100%"
+            height="400"
+            style="border:0;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
         </div>
         <a href="{% url 'maplocation_edit' map_location.pk %}" class="btn btn-primary">Edit Map Location</a>
       </div>
