@@ -46,7 +46,14 @@
             <!-- Flash Sale Banner -->
             <div class="mb-4 position-relative">
                 <img src="{{ sale.banner_image.url }}" alt="{{ sale.title }}" class="img-fluid w-100 rounded shadow" style="max-height: 350px; object-fit: cover;">
-                <div class="position-absolute top-0 end-0 m-3 bg-danger text-white px-3 py-1 rounded small" id="countdown-{{ forloop.counter }}">
+                <!-- Countdown for desktop -->
+                <div class="position-absolute top-0 end-0 m-3 bg-danger text-white px-3 py-1 rounded small d-none d-md-block" id="countdown-{{ forloop.counter }}">
+                    <!-- Countdown will appear here -->
+                </div>
+            </div>
+            <!-- Countdown for mobile below image -->
+            <div class="d-block d-md-none text-center mt-2">
+                <div class="bg-danger text-white px-3 py-1 rounded small" id="countdown-mobile-{{ forloop.counter }}">
                     <!-- Countdown will appear here -->
                 </div>
             </div>
@@ -107,7 +114,8 @@
     document.addEventListener("DOMContentLoaded", function () {
         {% for sale in flashsales %}
         (function () {
-            const countdownEl = document.getElementById("countdown-{{ forloop.counter }}");
+            const countdownElDesktop = document.getElementById("countdown-{{ forloop.counter }}");
+            const countdownElMobile = document.getElementById("countdown-mobile-{{ forloop.counter }}");
             const endTime = new Date("{{ sale.end_time|date:'Y-m-d H:i:s' }}").getTime();
 
             function updateCountdown() {
@@ -115,8 +123,14 @@
                 const distance = endTime - now;
 
                 if (distance < 0) {
-                    countdownEl.textContent = "Expired";
-                    countdownEl.classList.replace("bg-danger", "bg-secondary");
+                    if (countdownElDesktop) {
+                        countdownElDesktop.textContent = "Expired";
+                        countdownElDesktop.classList.replace("bg-danger", "bg-secondary");
+                    }
+                    if (countdownElMobile) {
+                        countdownElMobile.textContent = "Expired";
+                        countdownElMobile.classList.replace("bg-danger", "bg-secondary");
+                    }
                     return;
                 }
 
@@ -125,7 +139,10 @@
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-                countdownEl.textContent = `⏳ Ends in ${days}d ${hours}h ${minutes}m ${seconds}s`;
+                const countdownText = `⏳ Ends in ${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+                if (countdownElDesktop) countdownElDesktop.textContent = countdownText;
+                if (countdownElMobile) countdownElMobile.textContent = countdownText;
             }
 
             updateCountdown();

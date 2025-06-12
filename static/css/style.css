@@ -4155,6 +4155,7 @@ ol {
     font-weight: 700;
 }
 
+/* Flash Sales Section */
 .flash-sales {
     padding-top: 100px;
     padding-bottom: 100px;
@@ -4236,4 +4237,23 @@ ol {
 .flash-sales .cart_add button[disabled] {
     background-color: #cccccc;
     cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .flash-sales .position-absolute {
+    position: static !important;
+    margin: 0 auto 10px;
+    display: inline-block;
+    background-color: #dc3545;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    text-align: center;
+    max-width: 200px;
+  }
+
+  .flash-sales .mb-4.position-relative {
+    padding-bottom: 2.5rem;
+  }
 }
