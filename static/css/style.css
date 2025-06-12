@@ -383,6 +383,22 @@ ol {
   color: #888888;
 }
 
+.header__top__left ul li .auth-link {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111111;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.header__top__left ul li .auth-link:hover {
+  background-color: #111111;
+  color: #ffffff;
+  text-decoration: none;
+}
+
 .header__logo {
   position: absolute;
   left: 50%;

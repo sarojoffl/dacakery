@@ -77,10 +77,10 @@
                             <div class="header__top__left">
                                 <ul>
                                     {% if user.is_authenticated %}
-                                        <li><a href="{% url 'logout' %}">Logout</a></li>
-                                        <li><a href="{% url 'profile' %}">Profile</a></li>
+                                        <li><a href="{% url 'profile' %}" class="auth-link">Profile</a></li>
+                                        <li><a href="{% url 'logout' %}" class="auth-link">Logout</a></li>
                                     {% else %}
-                                        <li><a href="{% url 'login' %}">Sign in</a></li>
+                                        <li><a href="{% url 'login' %}" class="auth-link">Sign in</a></li>
                                     {% endif %}
                                 </ul>
                             </div>
