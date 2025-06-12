@@ -3,6 +3,134 @@
 {% block title %}Dashboard Home{% endblock %}
 
 {% block content %}
-    <h2>Welcome to the Admin Dashboard</h2>
-    <p>Here you can manage your site.</p>
+<div class="container mt-4">
+    <h2 class="mb-3">🎂 Welcome to the Admin Dashboard</h2>
+    <p class="lead">Manage your bakery site quickly and easily from here.</p>
+
+    <div class="row mt-4">
+        <!-- Quick Stats -->
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Orders</h5>
+                    <p class="card-text display-6">{{ total_orders }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Products</h5>
+                    <p class="card-text display-6">{{ total_products }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Orders</h5>
+                    <p class="card-text display-6">{{ pending_orders }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Messages</h5>
+                    <p class="card-text display-6">{{ total_messages }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="card mt-4">
+        <div class="card-header">
+            🔧 Quick Actions
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                <a href="{% url 'product_list' %}" class="list-group-item list-group-item-action">🧁 Manage Products</a>
+                <a href="{% url 'admin_order_list' %}" class="list-group-item list-group-item-action">📦 View Orders</a>
+                <a href="{% url 'contact_messages_list' %}" class="list-group-item list-group-item-action">✉️ View Contact Messages</a>
+                <a href="{% url 'blog_posts_list' %}" class="list-group-item list-group-item-action">📝 Manage Blog Posts</a>
+                <a href="{% url 'testimonials_list' %}" class="list-group-item list-group-item-action">💬 Manage Testimonials</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Trends Chart -->
+    <div class="card mt-4">
+        <div class="card-header">
+            📈 Sales Trends (Monthly Orders)
+        </div>
+        <div class="card-body">
+            <canvas id="salesChart" height="100"></canvas>
+        </div>
+    </div>
+
+    <!-- Revenue Tracking Chart -->
+    <div class="card mt-4">
+        <div class="card-header">
+            💰 Revenue Tracking (Monthly Income)
+        </div>
+        <div class="card-body">
+            <canvas id="revenueChart" height="100"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Sales Chart
+    const ctxSales = document.getElementById('salesChart').getContext('2d');
+    new Chart(ctxSales, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Orders per Month',
+                data: {{ chart_data|safe }},
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.3,
+                pointBackgroundColor: 'rgb(75, 192, 192)',
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                }
+            }
+        }
+    });
+
+    // Revenue Chart
+    const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctxRevenue, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Revenue (₹)',
+                data: {{ revenue_data|safe }},
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1,
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}

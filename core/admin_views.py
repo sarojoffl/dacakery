@@ -4,6 +4,9 @@ from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import redirect
 from django.contrib.auth import logout
+import json
+from django.db.models.functions import TruncMonth
+from django.db.models import Count, Sum
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
     InstagramImage, Category, Product, Coupon, WishlistItem, Order, NewsletterSubscriber,
@@ -23,7 +26,43 @@ from django.forms import modelformset_factory
 # -- -------- Dashboard Home ---------
 @staff_member_required
 def dashboard_home(request):
-    return render(request, 'dashboard/home.html')
+    sales_data = (
+        Order.objects
+        .annotate(month=TruncMonth('created_at'))
+        .values('month')
+        .annotate(order_count=Count('id'))
+        .order_by('month')
+    )
+
+    revenue_data = (
+        Order.objects
+        .filter(status='paid')
+        .annotate(month=TruncMonth('created_at'))
+        .values('month')
+        .annotate(revenue=Sum('total_amount'))
+        .order_by('month')
+    )
+
+    labels = [entry['month'] for entry in sales_data]
+
+    revenue_map = {entry['month']: float(entry['revenue'] or 0) for entry in revenue_data}  # Convert Decimal to float
+
+    chart_labels = [month.strftime('%b %Y') for month in labels]
+
+    sales = [entry['order_count'] for entry in sales_data]
+
+    revenue = [revenue_map.get(month, 0) for month in labels]
+
+    context = {
+        'total_orders': Order.objects.count(),
+        'pending_orders': Order.objects.filter(status='pending').count(),
+        'total_products': Product.objects.count(),
+        'total_messages': ContactMessage.objects.count(),
+        'chart_labels': json.dumps(chart_labels),  # <-- dump to JSON string
+        'chart_data': json.dumps(sales),           # <-- dump to JSON string
+        'revenue_data': json.dumps(revenue),       # <-- dump to JSON string
+    }
+    return render(request, 'dashboard/home.html', context)
 
 # -- -------- Sliders ---------
 @staff_member_required
