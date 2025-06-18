@@ -19,28 +19,17 @@
     <div class="col-md-6">
       <h5>Customer Info</h5>
       <ul class="list-group list-group-flush">
-        <li class="list-group-item">
-          <strong>Name:</strong> {{ order.first_name }} {{ order.last_name }}
-        </li>
-        <li class="list-group-item">
-          <strong>Email:</strong> {{ order.email }}
-        </li>
-        <li class="list-group-item">
-          <strong>Phone:</strong> {{ order.phone }}
-        </li>
-        <li class="list-group-item">
-          <strong>Address:</strong> {{ order.address }}{% if order.address_line2 %}, {{ order.address_line2 }}{% endif %}, {{ order.city }}, {{ order.province }} {{ order.postal_code }}
-        </li>
+        <li class="list-group-item"><strong>Name:</strong> {{ order.first_name }} {{ order.last_name }}</li>
+        <li class="list-group-item"><strong>Email:</strong> {{ order.email }}</li>
+        <li class="list-group-item"><strong>Phone:</strong> {{ order.phone }}</li>
+        <li class="list-group-item"><strong>Address:</strong> {{ order.address }}{% if order.address_line2 %}, {{ order.address_line2 }}{% endif %}, {{ order.city }}, {{ order.province }} {{ order.postal_code }}</li>
       </ul>
     </div>
 
     <div class="col-md-6">
       <h5>Order Info</h5>
       <ul class="list-group list-group-flush">
-        <li class="list-group-item">
-          <strong>Payment Method:</strong> {{ order.payment_method|capfirst }}
-        </li>
-
+        <li class="list-group-item"><strong>Payment Method:</strong> {{ order.payment_method|capfirst }}</li>
         <li class="list-group-item">
           <strong>Payment Status:</strong>
           {% if order.status == 'paid' %}
@@ -57,32 +46,22 @@
         </li>
 
         {% if order.payment_id %}
-          <li class="list-group-item">
-            <strong>Payment ID:</strong> {{ order.payment_id }}
-          </li>
+          <li class="list-group-item"><strong>Payment ID:</strong> {{ order.payment_id }}</li>
         {% endif %}
 
         {% if order.coupon_code %}
-          <li class="list-group-item">
-            <strong>Coupon Code:</strong> {{ order.coupon_code }}
-          </li>
+          <li class="list-group-item"><strong>Coupon Code:</strong> {{ order.coupon_code }}</li>
         {% endif %}
 
         {% if order.discount_amount and order.discount_amount > 0 %}
-          <li class="list-group-item">
-            <strong>Coupon Discount:</strong> रु {{ order.discount_amount }}
-          </li>
+          <li class="list-group-item"><strong>Coupon Discount:</strong> रु {{ order.discount_amount }}</li>
         {% endif %}
 
         {% if order.flash_discount and order.flash_discount > 0 %}
-          <li class="list-group-item">
-            <strong>Flash Discount:</strong> रु {{ order.flash_discount }}
-          </li>
+          <li class="list-group-item"><strong>Flash Discount:</strong> रु {{ order.flash_discount }}</li>
         {% endif %}
 
-        <li class="list-group-item">
-          <strong>Total Amount:</strong> रु {{ order.total_amount }}
-        </li>
+        <li class="list-group-item"><strong>Total Amount:</strong> रु {{ order.total_amount }}</li>
 
         {% if order.delivery_date %}
           <li class="list-group-item">
@@ -93,15 +72,11 @@
         {% endif %}
 
         {% if order.notes %}
-          <li class="list-group-item">
-            <strong>Notes:</strong> {{ order.notes }}
-          </li>
+          <li class="list-group-item"><strong>Notes:</strong> {{ order.notes }}</li>
         {% endif %}
 
         {% if order.created_at %}
-          <li class="list-group-item">
-            <strong>Ordered At:</strong> {{ order.created_at|date:"Y-m-d H:i" }}
-          </li>
+          <li class="list-group-item"><strong>Ordered At:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</li>
         {% endif %}
       </ul>
     </div>
@@ -153,11 +128,16 @@
     </table>
   </div>
 
-  <a href="{% url 'admin_order_edit' order.id %}" class="btn btn-primary mt-3 me-2">
-    ✏️ Edit Order
-  </a>
-  <a href="{% url 'admin_order_list' %}" class="btn btn-outline-secondary mt-3">
-    &larr; Back to Orders
-  </a>
+  <div class="d-print-none mt-3">
+    <button onclick="window.print()" class="btn btn-outline-dark me-2">
+      🖨️ Print
+    </button>
+    <a href="{% url 'admin_order_edit' order.id %}" class="btn btn-primary me-2">
+      ✏️ Edit Order
+    </a>
+    <a href="{% url 'admin_order_list' %}" class="btn btn-outline-secondary">
+      &larr; Back to Orders
+    </a>
+  </div>
 </div>
 {% endblock %}

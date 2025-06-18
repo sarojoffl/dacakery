@@ -10,6 +10,55 @@
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
     <link href="{% static 'admin/css/styles.css' %}" rel="stylesheet" />
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+
+    <style>
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+
+            #layoutSidenav_content, #layoutSidenav_content * {
+                visibility: visible !important;
+            }
+
+            #layoutSidenav_nav,
+            .sb-topnav,
+            footer {
+                display: none !important;
+            }
+
+            #layoutSidenav_content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100% !important;
+                padding: 0;
+                margin: 0;
+                background: white;
+            }
+
+            .btn,
+            .alert,
+            .print-hide {
+                display: none !important;
+                /* or visibility: hidden !important; */
+            }
+
+            table {
+                width: 100% !important;
+                font-size: 12px;
+                border-collapse: collapse !important;
+                page-break-inside: avoid;
+                word-break: break-word;
+            }
+
+            table tr, table th, table td {
+                page-break-inside: avoid;
+                padding: 6px !important;
+                border: 1px solid #333 !important;
+            }
+        }
+    </style>
 </head>
 <body class="sb-nav-fixed">
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">

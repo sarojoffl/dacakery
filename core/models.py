@@ -95,9 +95,9 @@ class Product(models.Model):
 
     def get_current_price(self):
         active_flash_items = self.flashsaleitem_set.filter(
-            offer__start_time__lte=now(),
-            offer__end_time__gte=now()
-        ).select_related('offer')
+            flash_sale__start_time__lte=now(),
+            flash_sale__end_time__gte=now()
+        ).select_related('flash_sale')
 
         if active_flash_items.exists():
             return active_flash_items.first().discounted_price
@@ -355,13 +355,14 @@ class FlashSale(models.Model):
         return self.title
 
 
+
 class FlashSaleItem(models.Model):
-    offer = models.ForeignKey(FlashSale, on_delete=models.CASCADE, related_name='items')
+    flash_sale = models.ForeignKey(FlashSale, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey('Product', on_delete=models.CASCADE)
     discounted_price = models.DecimalField(max_digits=8, decimal_places=2)
 
     class Meta:
-        unique_together = ('offer', 'product')
+        unique_together = ('flash_sale', 'product')
 
     @property
     def discount_percentage(self):
@@ -374,7 +375,7 @@ class FlashSaleItem(models.Model):
         return Decimal('0')
 
     def __str__(self):
-        return f"{self.product.name} in {self.offer.title} - Rs. {self.discounted_price}"
+        return f"{self.product.name} in {self.flash_sale.title} - Rs. {self.discounted_price}"
     
 
 # -------------------------

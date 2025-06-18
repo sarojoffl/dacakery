@@ -149,7 +149,7 @@ class FlashSaleForm(forms.ModelForm):
 class FlashSaleItemForm(forms.ModelForm):
     class Meta:
         model = FlashSaleItem
-        fields = ['offer', 'product', 'discounted_price']
+        fields = ['flash_sale', 'product', 'discounted_price']
         widgets = {
             'discounted_price': forms.NumberInput(attrs={'step': '0.01', 'min': '0'}),
         }

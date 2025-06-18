@@ -72,6 +72,10 @@ def sliders_list(request):
 
 @staff_member_required
 def add_slider(request):
+    if Slider.objects.count() >= 2:
+        messages.warning(request, "You can only add up to 2 sliders.")
+        return redirect('sliders_list')
+
     if request.method == 'POST':
         form = AdminSliderForm(request.POST, request.FILES)
         if form.is_valid():
@@ -813,7 +817,7 @@ def delete_flashsale(request, pk):
 
 # -------- Flash Sale Items ---------
 def admin_flashsaleitem_list(request):
-    items = FlashSaleItem.objects.select_related('offer', 'product').all()
+    items = FlashSaleItem.objects.select_related('flash_sale', 'product').all()
     context = {'items': items}
     return render(request, 'dashboard/flashsaleitem_list.html', context)
 
