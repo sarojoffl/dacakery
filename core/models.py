@@ -185,7 +185,7 @@ class InstagramImage(models.Model):
 # -------------------------
 class MapLocation(models.Model):
     title = models.CharField(max_length=100)
-    address = models.TextField()
+    address = models.CharField(max_length=255)
     email = models.EmailField()
     phone = models.CharField(max_length=20)
     map_iframe = models.TextField()

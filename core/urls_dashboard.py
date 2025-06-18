@@ -112,6 +112,7 @@ urlpatterns = [
     # Newsletter Subscribers
     path('newsletter-subscribers/', admin_views.newsletter_subscribers_list, name='newsletter_subscribers_list'),
     path('newsletter-subscribers/delete/<int:pk>/', admin_views.delete_newsletter_subscriber, name='delete_newsletter_subscriber'),
+    path('newsletter/export/', admin_views.export_newsletter_subscribers, name='export_newsletter_subscribers'),
 
     # Flash Sales
     path('flashsales/', admin_views.flashsales_list, name='flashsales_list'),
