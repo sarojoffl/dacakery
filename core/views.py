@@ -236,6 +236,9 @@ def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug)
     related_products = Product.objects.filter(category=product.category).exclude(id=product.id)[:6]
 
+    # Fetch product images for the gallery
+    product_images = product.images.all() 
+
     # Get all ProductOptionPrice entries for this product
     option_prices = ProductOptionPrice.objects.filter(product=product).select_related('option')
     option_price_dict = {op.option.id: op.price for op in option_prices}
@@ -256,6 +259,7 @@ def product_detail(request, slug):
 
     return render(request, 'core/product_detail.html', {
         'product': product,
+        'product_images': product_images,
         'related_products': related_products,
         'size_options': size_options,
         'extra_options': extra_options,

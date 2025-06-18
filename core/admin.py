@@ -3,17 +3,24 @@ from .models import (
     Slider, Category, Product, AboutSection, TeamMember, Testimonial,
     InstagramSection, InstagramImage, MapLocation, ContactDetail, ContactMessage,
     WishlistItem, Order, OrderItem, Coupon, BlogPost, BlogCategory, NewsletterSubscriber,
-    FlashSale, UserProfile, ProductOption, ProductOptionPrice, FlashSaleItem
+    FlashSale, UserProfile, ProductOption, ProductOptionPrice, FlashSaleItem, ProductImage
 )
 
 # Register your models here.
 admin.site.register(Slider)
 admin.site.register(Category)
-admin.site.register(Product)
 admin.site.register(AboutSection)
 admin.site.register(TeamMember)
 admin.site.register(Testimonial)
 
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 3  # number of extra image forms
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    inlines = [ProductImageInline]
+    prepopulated_fields = {'slug': ('name',)}
 
 class InstagramImageInline(admin.TabularInline):
     model = InstagramImage

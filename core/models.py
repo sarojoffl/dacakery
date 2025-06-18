@@ -76,7 +76,7 @@ class Product(models.Model):
     in_stock = models.BooleanField(default=True)
     tags = models.CharField(max_length=255, blank=True)
     price = models.DecimalField(max_digits=8, decimal_places=2)
-    image = models.ImageField(upload_to='products/')
+    image = models.ImageField(upload_to='products/', blank=True, null=True)
     slug = models.SlugField(unique=True, blank=True)
 
     def __str__(self):
@@ -102,6 +102,15 @@ class Product(models.Model):
         if active_flash_items.exists():
             return active_flash_items.first().discounted_price
         return self.price
+
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='products/gallery/')
+    alt_text = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return f"Image for {self.product.name}"
 
 
 class ProductOption(models.Model):

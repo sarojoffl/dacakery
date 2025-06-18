@@ -1,7 +1,7 @@
 from django import forms
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
-    InstagramImage, Category, Product, Coupon, TeamMember, MapLocation, ContactDetail,
+    InstagramImage, Category, Product, ProductImage, Coupon, TeamMember, MapLocation, ContactDetail,
     FlashSale, OrganizationDetails, UserProfile, Order,ProductOption, ProductOptionPrice,
     FlashSaleItem
 )
@@ -66,6 +66,11 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = ['category', 'name', 'description', 'in_stock', 'tags', 'price', 'image']
+
+class ProductImageForm(forms.ModelForm):
+    class Meta:
+        model = ProductImage
+        fields = ['image', 'alt_text']
 
 class ProductOptionForm(forms.ModelForm):
     class Meta:

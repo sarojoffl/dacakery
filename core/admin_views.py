@@ -23,14 +23,14 @@ def staff_required(view_func):
 
 from .models import (
     Slider, AboutSection, BlogCategory, BlogPost, Testimonial, InstagramSection,
-    InstagramImage, Category, Product, Coupon, WishlistItem, Order, NewsletterSubscriber,
+    InstagramImage, Category, Product, ProductImage, Coupon, WishlistItem, Order, NewsletterSubscriber,
     TeamMember, MapLocation, ContactDetail, ContactMessage, FlashSale, OrganizationDetails, UserProfile,
     ProductOption, ProductOptionPrice, FlashSaleItem
 )
 
 from .admin_forms import (
     AdminSliderForm, AboutSectionForm, BlogCategoryForm, BlogPostForm, TestimonialForm,
-    InstagramSectionForm, InstagramImageForm, CategoryForm, ProductForm, CouponForm, UserForm, TeamMemberForm,
+    InstagramSectionForm, InstagramImageForm, CategoryForm, ProductForm, ProductImageForm, CouponForm, UserForm, TeamMemberForm,
     MapLocationForm, ContactDetailForm, FlashSaleForm, OrganizationDetailsForm, UserProfileForm, AdminOrderForm,
     ProductOptionForm, ProductOptionPriceForm, FlashSaleItemForm
 )
@@ -399,6 +399,13 @@ def delete_category(request, pk):
     return render(request, 'dashboard/category_confirm_delete.html', {'category': category})
 
 # -- -------- Products ---------
+ProductImageFormSet = modelformset_factory(
+    ProductImage,
+    form=ProductImageForm,
+    extra=2,           # can be more
+    can_delete=True
+)
+
 @staff_required
 def product_list(request):
     products = Product.objects.select_related('category').all()
@@ -409,27 +416,61 @@ def product_list(request):
 def add_product(request):
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
+        formset = ProductImageFormSet(request.POST, request.FILES, queryset=ProductImage.objects.none())
+
+        if form.is_valid() and formset.is_valid():
+            product = form.save()
+
+            for image_form in formset:
+                if image_form.cleaned_data.get('image'):
+                    image = image_form.save(commit=False)
+                    image.product = product
+                    image.save()
+
             messages.success(request, 'Product added successfully.')
             return redirect('product_list')
     else:
         form = ProductForm()
-    return render(request, 'dashboard/product_form.html', {'form': form, 'title': 'Add Product'})
+        formset = ProductImageFormSet(queryset=ProductImage.objects.none())
+
+    return render(request, 'dashboard/product_form.html', {
+        'form': form,
+        'formset': formset,
+        'title': 'Add Product'
+    })
 
 
 @staff_required
 def edit_product(request, pk):
     product = get_object_or_404(Product, pk=pk)
+
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
-        if form.is_valid():
+        formset = ProductImageFormSet(request.POST, request.FILES, queryset=ProductImage.objects.filter(product=product))
+
+        if form.is_valid() and formset.is_valid():
             form.save()
+
+            for image_form in formset:
+                if image_form.cleaned_data.get('DELETE') and image_form.instance.pk:
+                    image_form.instance.delete()
+                elif image_form.cleaned_data.get('image'):
+                    image = image_form.save(commit=False)
+                    image.product = product
+                    image.save()
+
             messages.success(request, 'Product updated successfully.')
             return redirect('product_list')
     else:
         form = ProductForm(instance=product)
-    return render(request, 'dashboard/product_form.html', {'form': form, 'title': 'Edit Product', 'product': product})
+        formset = ProductImageFormSet(queryset=ProductImage.objects.filter(product=product))
+
+    return render(request, 'dashboard/product_form.html', {
+        'form': form,
+        'formset': formset,
+        'title': 'Edit Product',
+        'product': product
+    })
 
 
 @staff_required

@@ -28,6 +28,53 @@
 </section>
 <!-- Hero Section End -->
 
+<!-- Product Section Begin -->
+<section class="product spad">
+    <div class="container">
+        <div class="section-title">
+            <span>Our Cakes</span>
+            <h2>Delicious Treats for Every Occasion</h2>
+        </div>
+        <div class="row">
+            {% for product in products %}
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="product__item">
+                    <div class="product__item__pic set-bg" data-setbg="{{ product.image.url }}">
+                        <div class="product__label">
+                            <span>{{ product.category.name }}</span>
+                        </div>
+                    </div>
+                    <div class="product__item__text">
+                        <h6><a href="{% url 'product_detail' slug=product.slug %}">{{ product.name }}</a></h6>
+                        <div class="product__item__price">
+                            {% with current_price=product.get_current_price %}
+                                {% if current_price != product.price %}
+                                    <span class="fw-bold text-danger">रु {{ current_price }}</span>
+                                    <del class="text-muted small ms-2">रु {{ product.price }}</del>
+                                {% else %}
+                                    <span class="fw-bold text-dark">रु {{ product.price }}</span>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                        <div class="cart_add">
+                            {% if product.in_stock %}
+                            <form action="{% url 'add_to_cart' product.slug %}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit">Add to Cart</button>
+                            </form>
+                            {% else %}
+                            <button disabled>Out of Stock</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<!-- Product Section End -->
+
 <!-- About Section Begin -->
 {% include 'partials/about_section.html' %}
 <!-- About Section End -->
@@ -153,53 +200,6 @@
 </script>
 {% endif %}
 <!-- Flash Sales Section End -->
-
-<!-- Product Section Begin -->
-<section class="product spad">
-    <div class="container">
-        <div class="section-title">
-            <span>Our Cakes</span>
-            <h2>Delicious Treats for Every Occasion</h2>
-        </div>
-        <div class="row">
-            {% for product in products %}
-            <div class="col-lg-3 col-md-6 col-sm-6">
-                <div class="product__item">
-                    <div class="product__item__pic set-bg" data-setbg="{{ product.image.url }}">
-                        <div class="product__label">
-                            <span>{{ product.category.name }}</span>
-                        </div>
-                    </div>
-                    <div class="product__item__text">
-                        <h6><a href="{% url 'product_detail' slug=product.slug %}">{{ product.name }}</a></h6>
-                        <div class="product__item__price">
-                            {% with current_price=product.get_current_price %}
-                                {% if current_price != product.price %}
-                                    <span class="fw-bold text-danger">रु {{ current_price }}</span>
-                                    <del class="text-muted small ms-2">रु {{ product.price }}</del>
-                                {% else %}
-                                    <span class="fw-bold text-dark">रु {{ product.price }}</span>
-                                {% endif %}
-                            {% endwith %}
-                        </div>
-                        <div class="cart_add">
-                            {% if product.in_stock %}
-                            <form action="{% url 'add_to_cart' product.slug %}" method="POST">
-                                {% csrf_token %}
-                                <button type="submit">Add to Cart</button>
-                            </form>
-                            {% else %}
-                            <button disabled>Out of Stock</button>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-<!-- Product Section End -->
 
 <!-- Team Section Begin -->
 {% include 'partials/team_section.html' %}
