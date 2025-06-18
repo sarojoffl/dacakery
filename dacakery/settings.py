@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'core',
     'widget_tweaks',
     'ckeditor',
+    # 'rest_framework',  # 🔒 Disabled DRF
 ]
 
 MIDDLEWARE = [
@@ -166,3 +167,16 @@ MESSAGE_TAGS = {
     messages.WARNING: 'warning',
     messages.ERROR: 'danger',
 }
+
+# from datetime import timedelta
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'rest_framework_simplejwt.authentication.JWTAuthentication',
+#     ),
+# }
+
+# SIMPLE_JWT = {
+#     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+#     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+# }

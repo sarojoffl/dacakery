@@ -1,10 +1,12 @@
-# Python
+# Python bytecode
 __pycache__/
 *.py[cod]
-*.sqlite3
 *.pyc
 
-# Virtual environment
+# SQLite database files
+*.sqlite3
+
+# Virtual environments
 venv/
 env/
 ENV/
@@ -12,15 +14,17 @@ ENV/
 # Django stuff
 *.log
 *.pot
-*.pyc
 *.mo
 media/
 staticfiles/
 
-# Env files
+# Environment variables
 .env
 .env.*
 
-# IDEs
+# IDEs and editors
 .vscode/
 .idea/
+
+# Ignore custom API folder
+api/
