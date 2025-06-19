@@ -1511,46 +1511,40 @@ ol {
   text-overflow: ellipsis;
   display: block;
 }
+
 .shop__option__right {
   text-align: right;
 }
-.shop__option__right .nice-select {
+.shop__option__right select {
   border: none;
   background: #f5f5f5;
   display: inline-block;
   width: 205px;
   height: 46px;
   line-height: 46px;
-  padding-left: 30px;
+  padding-left: 15px;
   border-radius: 0;
   float: none;
   margin-right: 18px;
-}
-.shop__option__right .nice-select .list {
-  margin-top: 0;
-  border-radius: 0;
-  width: 100%;
-}
-.shop__option__right .nice-select:after {
-  border-bottom: 1px solid #888;
-  border-right: 1px solid #888;
-  height: 7px;
-  margin-top: -5px;
-  width: 7px;
-  right: 26px;
-}
-.shop__option__right .nice-select span {
   font-size: 16px;
-  color: #000000;
+  color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+.shop__option__right select option {
+  white-space: normal;
+}
+
 .shop__option__right a {
   display: inline-block;
   font-size: 18px;
   color: #000000;
   margin-left: 8px;
-  -webkit-transition: all, 0.3s;
-  -o-transition: all, 0.3s;
-  transition: all, 0.3s;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
 }
 .shop__option__right a:hover {
   color: #888888;
