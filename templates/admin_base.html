@@ -82,120 +82,119 @@
                 <div class="sb-sidenav-menu">
                     <div class="nav">
 
-                        <div class="sb-sidenav-menu-heading">Core</div>
-                        <a class="nav-link" href="{% url 'dashboard_home' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                            Dashboard
-                        </a>
+                    <div class="sb-sidenav-menu-heading">Core</div>
+                    <a class="nav-link" href="{% url 'dashboard_home' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                        Dashboard
+                    </a>
 
-                        <div class="sb-sidenav-menu-heading">Content Management</div>
-                        <a class="nav-link" href="{% url 'sliders_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-images"></i></div>
-                            Sliders
-                        </a>
-                        <a class="nav-link" href="{% url 'about_section' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-info-circle"></i></div>
-                            About Section
-                        </a>
-                        <a class="nav-link" href="{% url 'blog_categories_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-folder"></i></div>
-                            Blog Categories
-                        </a>
-                        <a class="nav-link" href="{% url 'blog_posts_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-newspaper"></i></div>
-                            Blog Posts
-                        </a>
-                        <a class="nav-link" href="{% url 'testimonials_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-comments"></i></div>
-                            Testimonials
-                        </a>
-                        <a class="nav-link" href="{% url 'instagram_sections_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fab fa-instagram"></i></div>
-                            Instagram Sections
-                        </a>
+                    <div class="sb-sidenav-menu-heading">Content Management</div>
+                    <a class="nav-link" href="{% url 'sliders_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-images"></i></div>
+                        Sliders
+                    </a>
+                    <a class="nav-link" href="{% url 'about_section' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-info-circle"></i></div>
+                        About Section
+                    </a>
+                    <a class="nav-link" href="{% url 'blog_categories_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-folder"></i></div>
+                        Blog Categories
+                    </a>
+                    <a class="nav-link" href="{% url 'blog_posts_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-newspaper"></i></div>
+                        Blog Posts
+                    </a>
+                    <a class="nav-link" href="{% url 'testimonials_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-comments"></i></div>
+                        Testimonials
+                    </a>
+                    <a class="nav-link" href="{% url 'instagram_sections_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fab fa-instagram"></i></div>
+                        Instagram Sections
+                    </a>
 
-                        <a class="nav-link" href="{% url 'flashsales_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-bullhorn"></i></div>
-                            Flash Sales
-                        </a>
+                    <div class="sb-sidenav-menu-heading">Product Management</div>
+                    <a class="nav-link" href="{% url 'category_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
+                        Categories
+                    </a>
+                    <a class="nav-link" href="{% url 'product_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-birthday-cake"></i></div>
+                        Products
+                    </a>
+                    <a class="nav-link" href="{% url 'product_option_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-plus-square"></i></div>
+                        Product Options
+                    </a>
+                    <a class="nav-link" href="{% url 'product_option_price_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-rupee-sign"></i></div>
+                        Product Option Prices
+                    </a>
+                    <a class="nav-link" href="{% url 'flashsales_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-bullhorn"></i></div>
+                        Flash Sales
+                    </a>
+                    <a class="nav-link" href="{% url 'flashsaleitem_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
+                        Flash Sale Items
+                    </a>
+                    <a class="nav-link" href="{% url 'coupons_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-tag"></i></div>
+                        Coupons
+                    </a>
 
-                        <a class="nav-link" href="{% url 'flashsaleitem_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
-                            Flash Sale Items
-                        </a>
+                    <div class="sb-sidenav-menu-heading">Team Management</div>
+                    <a class="nav-link" href="{% url 'team_members_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                        Team Members
+                    </a>
 
-                        <div class="sb-sidenav-menu-heading">Product Management</div>
-                        <a class="nav-link" href="{% url 'category_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
-                            Categories
-                        </a>
-                        <a class="nav-link" href="{% url 'product_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-birthday-cake"></i></div>
-                            Products
-                        </a>
-                        <a class="nav-link" href="{% url 'product_option_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-plus-square"></i></div>
-                            Product Options
-                        </a>
-                        <a class="nav-link" href="{% url 'product_option_price_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-rupee-sign"></i></div>
-                            Product Option Prices
-                        </a>
-                        <a class="nav-link" href="{% url 'coupons_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tag"></i></div>
-                            Coupons
-                        </a>
+                    <div class="sb-sidenav-menu-heading">User & Order Management</div>
+                    <a class="nav-link" href="{% url 'users_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-user"></i></div>
+                        Users
+                    </a>
+                    <a class="nav-link" href="{% url 'userprofiles_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-user-circle"></i></div>
+                        User Profiles
+                    </a>
+                    <a class="nav-link" href="{% url 'wishlist_items_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-heart"></i></div>
+                        Wishlist Items
+                    </a>
+                    <a class="nav-link" href="{% url 'admin_order_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
+                        Orders
+                    </a>
 
-                        <div class="sb-sidenav-menu-heading">User Management</div>
-                        <a class="nav-link" href="{% url 'users_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-user"></i></div>
-                            Users
-                        </a>
-                        <a class="nav-link" href="{% url 'userprofiles_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-user-circle"></i></div>
-                            User Profiles
-                        </a>
-                        <a class="nav-link" href="{% url 'wishlist_items_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-heart"></i></div>
-                            Wishlist Items
-                        </a>
-                        <a class="nav-link" href="{% url 'admin_order_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
-                            Orders
-                        </a>
+                    <div class="sb-sidenav-menu-heading">Contact & Location</div>
+                    <a class="nav-link" href="{% url 'contactdetail_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-address-book"></i></div>
+                        Contact Details
+                    </a>
+                    <a class="nav-link" href="{% url 'contact_messages_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-envelope"></i></div>
+                        Contact Messages
+                    </a>
+                    <a class="nav-link" href="{% url 'maplocation_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        Map Locations
+                    </a>
 
-                        <div class="sb-sidenav-menu-heading">Contact & Location</div>
-                        <a class="nav-link" href="{% url 'contactdetail_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-address-book"></i></div>
-                            Contact Details
-                        </a>
-                        <a class="nav-link" href="{% url 'contact_messages_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-envelope"></i></div>
-                            Contact Messages
-                        </a>
-                        <a class="nav-link" href="{% url 'maplocation_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-map-marker-alt"></i></div>
-                            Map Locations
-                        </a>
+                    <div class="sb-sidenav-menu-heading">Organization Details</div>
+                    <a class="nav-link" href="{% url 'organization_details_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-building"></i></div>
+                        Organization Details
+                    </a>
 
-                        <a class="nav-link" href="{% url 'organization_details_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-building"></i></div>
-                            Organization Details
-                        </a>
+                    <div class="sb-sidenav-menu-heading">Marketing</div>
+                    <a class="nav-link" href="{% url 'newsletter_subscribers_list' %}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-envelope-open-text"></i></div>
+                        Newsletter Subscribers
+                    </a>
 
-                        <div class="sb-sidenav-menu-heading">Marketing</div>
-                        <a class="nav-link" href="{% url 'newsletter_subscribers_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-envelope-open-text"></i></div>
-                            Newsletter Subscribers
-                        </a>
-
-                        <div class="sb-sidenav-menu-heading">Team</div>
-                        <a class="nav-link" href="{% url 'team_members_list' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
-                            Team Members
-                        </a>
-
-                    </div>
+                </div>
                 </div>
                 <div class="sb-sidenav-footer">
                     <div class="small">Logged in as:</div>

@@ -9,10 +9,14 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>{% block title %}Register - Da Cakery{% endblock %}</title>
 
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
+
+    <!-- Bootstrap & Bootstrap Icons -->
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
         body {
@@ -108,6 +112,19 @@
             margin-bottom: 20px;
             padding: 12px 20px;
         }
+
+        .form-group {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 38px;
+            cursor: pointer;
+            color: #f08632;
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 
@@ -133,14 +150,16 @@
                 <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required />
             </div>
 
-            <div class="mb-4">
+            <div class="mb-4 form-group">
                 <label for="password1" class="form-label">Password</label>
                 <input type="password" class="form-control" id="password1" name="password1" placeholder="Enter a password" required />
+                <i class="bi bi-eye-fill toggle-password" data-target="password1"></i>
             </div>
 
-            <div class="mb-4">
+            <div class="mb-4 form-group">
                 <label for="password2" class="form-label">Confirm Password</label>
                 <input type="password" class="form-control" id="password2" name="password2" placeholder="Confirm your password" required />
+                <i class="bi bi-eye-fill toggle-password" data-target="password2"></i>
             </div>
 
             <button type="submit" class="btn btn-login">Register</button>
@@ -150,5 +169,18 @@
             Already have an account? <a href="{% url 'login' %}">Login</a>
         </p>
     </div>
+
+    <script>
+        document.querySelectorAll(".toggle-password").forEach((icon) => {
+            icon.addEventListener("click", function () {
+                const targetId = this.getAttribute("data-target");
+                const input = document.getElementById(targetId);
+                const type = input.getAttribute("type") === "password" ? "text" : "password";
+                input.setAttribute("type", type);
+                this.classList.toggle("bi-eye-fill");
+                this.classList.toggle("bi-eye-slash-fill");
+            });
+        });
+    </script>
 </body>
 </html>

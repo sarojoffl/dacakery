@@ -627,10 +627,16 @@ def edit_user(request, pk):
 @staff_required
 def delete_user(request, pk):
     user = get_object_or_404(User, pk=pk)
+    
+    if user.is_superuser:
+        messages.error(request, "You cannot delete a superuser.")
+        return redirect('users_list')
+    
     if request.method == 'POST':
         user.delete()
         messages.success(request, 'User deleted successfully.')
         return redirect('users_list')
+    
     return render(request, 'dashboard/user_confirm_delete.html', {'user': user})
 
 # -- -------- User Profiles ---------
