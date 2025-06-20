@@ -31,8 +31,12 @@
       <!-- Left: Images -->
       <div class="col-lg-6">
         <div class="product__details__img">
-          <div class="product__details__big__img mb-3">
-            <img class="big_img w-100 rounded shadow-sm" src="{{ product.image.url }}" alt="{{ product.name }}">
+          <div class="product__details__big__img mb-3" style="height: 400px; max-width: 500px; overflow: hidden;">
+            <img id="zoom-image"
+                 class="big_img w-100 h-100 rounded shadow-sm object-fit-contain"
+                 src="{{ product.image.url }}"
+                 data-zoom-image="{{ product.image.url }}"
+                 alt="{{ product.name }}">
           </div>
           <div class="product__details__thumb d-flex flex-wrap gap-2">
             <div class="pt__item active border rounded overflow-hidden" style="width: 80px;">
@@ -220,8 +224,21 @@
 
 {% block extra_scripts %}
   {{ block.super }}
+  <!-- jQuery + ElevateZoom -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/3.0.8/jquery.elevatezoom.min.js"></script>
+
   <script>
     document.addEventListener('DOMContentLoaded', function () {
+      // Initialize Zoom
+      $('#zoom-image').elevateZoom({
+        zoomType: "lens",
+        lensShape: "round",
+        lensSize: 200,
+        scrollZoom: true
+      });
+
+      // Dynamic Price
       const basePrice = parseFloat(document.getElementById('base-price').value);
       const priceDisplay = document.getElementById('dynamic-price');
       const extraCheckboxes = document.querySelectorAll('input[type="checkbox"][data-price]');
@@ -248,7 +265,7 @@
       sizeRadios.forEach(radio => radio.addEventListener('change', updatePrice));
       extraCheckboxes.forEach(cb => cb.addEventListener('change', updatePrice));
 
-      updatePrice();  // Run on page load
+      updatePrice();
     });
   </script>
 {% endblock %}
