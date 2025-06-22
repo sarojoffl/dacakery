@@ -650,18 +650,25 @@ def checkout(request):
 
         # Account creation logic if user opts in
         create_account = request.POST.get('create_account')
+        account_username = request.POST.get('account_username')
         account_password = request.POST.get('account_password')
 
         if create_account and not user:
-            if User.objects.filter(username=email).exists():
-                messages.error(request, "User with this email already exists. Please log in.")
+            # Validate username
+            if not account_username or not account_password:
+                messages.error(request, "Please enter both username and password to create an account.")
                 return redirect('checkout')
-            if not account_password:
-                messages.error(request, "Please enter a password to create an account.")
+
+            if User.objects.filter(username=account_username).exists():
+                messages.error(request, "Username already exists. Please choose another one.")
+                return redirect('checkout')
+
+            if User.objects.filter(email=email).exists():
+                messages.error(request, "An account with this email already exists. Please log in instead.")
                 return redirect('checkout')
 
             user = User.objects.create(
-                username=email,
+                username=account_username,
                 email=email,
                 first_name=first_name,
                 last_name=last_name,

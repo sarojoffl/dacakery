@@ -112,9 +112,13 @@
                                 </label>
                                 <p>If you're a returning customer, please log in at the top of the page.</p>
                             </div>
+                            <div class="checkout__input" id="account_username_field" style="display: none;">
+                                <p>Username<span>*</span></p>
+                                <input type="text" name="account_username" placeholder="Choose a username">
+                            </div>
                             <div class="checkout__input" id="account_password_field" style="display: none;">
                                 <p>Account Password<span>*</span></p>
-                                <input type="password" name="account_password">
+                                <input type="password" name="account_password" placeholder="Create a password">
                             </div>
                         {% endif %}
 
@@ -178,6 +182,7 @@
     const accCheckbox = document.getElementById('acc');
     if (accCheckbox) {
         accCheckbox.addEventListener('change', function () {
+            document.getElementById('account_username_field').style.display = this.checked ? 'block' : 'none';
             document.getElementById('account_password_field').style.display = this.checked ? 'block' : 'none';
         });
     }
