@@ -25,6 +25,3 @@ staticfiles/
 # IDEs and editors
 .vscode/
 .idea/
-
-# Ignore custom API folder
-api/
