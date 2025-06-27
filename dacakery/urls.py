@@ -7,7 +7,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
     path('dashboard/', include('core.urls_dashboard')),
-    # path('api/', include('api.urls_api')),  # 🔒 Temporarily disabled API routes
+    path('api/', include('api.urls_api')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
 ]
 
