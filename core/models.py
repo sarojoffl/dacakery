@@ -76,7 +76,7 @@ class Product(models.Model):
     in_stock = models.BooleanField(default=True)
     tags = models.CharField(max_length=255, blank=True)
     price = models.DecimalField(max_digits=8, decimal_places=2)
-    image = models.ImageField(upload_to='products/', blank=True, null=True)
+    image = models.ImageField(upload_to='products/')
     slug = models.SlugField(unique=True, blank=True)
 
     def __str__(self):
