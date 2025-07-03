@@ -11,6 +11,7 @@ from ckeditor.fields import RichTextField
 # -------------------------
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    phone_number = models.CharField(max_length=20, blank=True)
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     bio = models.TextField(blank=True)
     facebook = models.URLField(blank=True)

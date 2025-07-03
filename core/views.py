@@ -105,10 +105,12 @@ def edit_profile(request):
         user.save()
 
         # Update UserProfile fields
+        profile.phone_number = request.POST.get('phone_number')
         profile.bio = request.POST.get('bio')
         profile.facebook = request.POST.get('facebook')
         profile.instagram = request.POST.get('instagram')
         profile.twitter = request.POST.get('twitter')
+        profile.linkedin = request.POST.get('linkedin')
 
         # Update profile picture if uploaded
         if 'profile_picture' in request.FILES:

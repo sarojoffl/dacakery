@@ -62,10 +62,14 @@
           </ul>
         </div>
 
-        <!-- Right Column: Social Links & Bio -->
+        <!-- Right Column: Phone, Social Links & Bio -->
         <div class="col-md-6">
           <h4 class="mb-4">Social Links & Bio</h4>
           <ul class="list-group list-group-flush mb-4">
+            <li class="list-group-item">
+              <label for="id_phone_number" class="form-label fw-semibold">Phone Number</label>
+              <input type="text" name="phone_number" id="id_phone_number" value="{{ profile.phone_number|default_if_none:'' }}" class="form-control" placeholder="+1 234 567 890">
+            </li>
             <li class="list-group-item">
               <label for="id_facebook" class="form-label fw-semibold">Facebook</label>
               <input type="url" name="facebook" id="id_facebook" value="{{ profile.facebook|default_if_none:'' }}" class="form-control" placeholder="https://facebook.com/yourprofile">
